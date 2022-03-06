@@ -9,25 +9,25 @@ struct owning_fn
     template <class Range>
     struct view
     {
-        Range range;
+        std::shared_ptr<Range> range;
 
         using iterator = iterator_t<Range>;
 
         constexpr iterator begin() const
         {
-            return std::begin(range);
+            return std::begin(*range);
         }
 
         constexpr iterator end() const
         {
-            return std::end(range);
+            return std::end(*range);
         }
     };
 
     template <class Range>
     constexpr auto operator()(Range range) const
     {
-        return view_interface{ view<Range>{ std::move(range) } };
+        return view_interface{ view<Range>{ std::make_shared<Range>(std::move(range)) } };
     }
 };
 

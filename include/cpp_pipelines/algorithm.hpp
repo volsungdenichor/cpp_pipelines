@@ -10,8 +10,8 @@
 
 namespace cpp_pipelines::algo
 {
-#define CPP_PIPELINES_CHECK_CONSTRAINTS(func, var, constraint) \
-    static_assert(constraint<decltype(var)>::value, func ": '" #var "' - " #constraint " required")
+#define CPP_PIPELINES_CHECK_CONSTRAINTS(var, constraint) \
+    static_assert(constraint<decltype(var)>::value, "'" #var "' - " #constraint " required")
 
 struct return_found
 {
@@ -102,29 +102,10 @@ using default_return_policy = return_found;
 
 namespace detail
 {
-template <class F, class G>
-struct combine_fn
-{
-    F f;
-    G g;
-
-    template <class T>
-    constexpr decltype(auto) operator()(T&& item) const
-    {
-        return invoke(g, invoke(f, std::forward<T>(item)));
-    }
-};
-
-template <class F, class G>
-constexpr auto combine(F f, G g)
-{
-    return combine_fn<F, G>{ std::move(f), std::move(g) };
-}
-
 template <class T>
-constexpr auto equal_to(T value)
+constexpr auto equal_to(T&& value)
 {
-    return std::bind(std::equal_to{}, std::placeholders::_1, std::move(value));
+    return std::bind(std::equal_to{}, std::placeholders::_1, std::forward<T>(value));
 }
 
 template <class Func, class Proj1, class Proj2>
@@ -251,44 +232,22 @@ Output partial_sum(Iter b, Iter e, Output output, BinaryFunc func, Proj proj)
     return output;
 }
 
-template <class Iter, class Output, class Func, class UnaryPred>
-Output transform_if(Iter b, Iter e, Output output, Func func, UnaryPred pred)
-{
-    for (; b != e; ++b)
-    {
-        if (pred(*b))
-        {
-            yield(output, func(*b));
-        }
-    }
-    return output;
-}
-
-template <class Iter, class Output, class UnaryPred>
-Output copy_while(Iter b, Iter e, Output output, UnaryPred pred)
-{
-    for (; b != e && pred(*b); ++b)
-    {
-        yield(output, *b);
-    }
-    return output;
-}
-
 template <class Iter1, class Iter2, class Func>
 Iter1 overwrite(Iter1 src_b, Iter1 src_e, Iter2 dst_b, Iter2 dst_e, Func func)
 {
     for (; src_b != src_e && dst_b != dst_e; ++src_b, ++dst_b)
     {
-        *dst_b = std::invoke(func, *src_b);
+        *dst_b = invoke(func, *src_b);
     }
     return src_b;
 }
 
 }  // namespace detail
+
 template <class Range, class T, class BinaryFunc = std::plus<>, class Proj = identity_fn>
 auto accumulate(Range&& range, T init, BinaryFunc func = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("accumulate", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::accumulate(std::begin(range), std::end(range), init, [&](T total, auto&& item) {
         return invoke(func, std::move(total), invoke(proj, std::forward<decltype(item)>(item)));
@@ -298,7 +257,7 @@ auto accumulate(Range&& range, T init, BinaryFunc func = {}, Proj proj = {})
 template <class Range, class OutputIter, class BinaryFunc = std::minus<>, class Proj = identity_fn>
 auto adjacent_difference(Range&& range, OutputIter output, BinaryFunc func = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("adjacent_difference", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return detail::adjacent_difference(std::begin(range), std::end(range), output, std::ref(func), std::ref(proj));
 }
@@ -306,23 +265,23 @@ auto adjacent_difference(Range&& range, OutputIter output, BinaryFunc func = {},
 template <class Range, class UnaryPred, class Proj = identity_fn>
 auto all_of(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("all_of", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::all_of(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)));
+    return std::all_of(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range, class UnaryPred, class Proj = identity_fn>
 auto any_of(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("any_of", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::any_of(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)));
+    return std::any_of(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range, class OutputIter>
 auto copy(Range&& range, OutputIter output)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::copy(std::begin(range), std::end(range), output);
 }
@@ -330,15 +289,15 @@ auto copy(Range&& range, OutputIter output)
 template <class Range, class OutputIter, class UnaryPred, class Proj = identity_fn>
 auto copy_if(Range&& range, OutputIter output, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::copy_if(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), std::ref(pred)));
+    return std::copy_if(std::begin(range), std::end(range), output, fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range, class Size, class OutputIter>
 auto copy_n(Range&& range, Size size, OutputIter output)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy_n", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::copy_n(std::begin(range), size, output);
 }
@@ -346,24 +305,24 @@ auto copy_n(Range&& range, Size size, OutputIter output)
 template <class Range, class T, class Proj = identity_fn>
 auto count(Range&& range, const T& value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("count", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::count_if(std::begin(range), std::end(range), detail::combine(std::ref(proj), detail::equal_to(std::ref(value))));
+    return std::count_if(std::begin(range), std::end(range), fn(std::ref(proj), detail::equal_to(std::ref(value))));
 }
 
 template <class Range, class UnaryPred, class Proj = identity_fn>
 auto count_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("count_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::count_if(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)));
+    return std::count_if(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range1, class Range2, class BinaryPred = std::equal_to<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
 auto equal(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("equal", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("equal", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::equal(
         std::begin(range1),
@@ -376,7 +335,7 @@ auto equal(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 =
 template <class Range, class T, class Compare = std::less<>, class Proj = identity_fn>
 auto equal_range(Range&& range, const T& value, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("equal_range", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::equal_range(std::begin(range), std::end(range), value, std::ref(compare), std::ref(proj));
 }
@@ -390,7 +349,7 @@ auto exclusive_scan(Range&& range, Output output, T init, BinaryFunc func, Proj 
 template <class Range, class T>
 void fill(Range&& range, const T& value)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("fill", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     std::fill(std::begin(range), std::end(range), value);
 }
@@ -398,30 +357,30 @@ void fill(Range&& range, const T& value)
 template <class Policy = default_return_policy, class Range, class T, class Proj = identity_fn>
 decltype(auto) find(Range&& range, const T& value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if(b, e, detail::combine(std::ref(proj), detail::equal_to(std::ref(value))));
+        return std::find_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value))));
     });
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) find_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if(b, e, detail::combine(std::ref(proj), std::ref(pred)));
+        return std::find_if(b, e, fn(std::ref(proj), std::ref(pred)));
     });
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) find_if_not(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_if_not", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if_not(b, e, detail::combine(std::ref(proj), std::ref(pred)));
+        return std::find_if_not(b, e, fn(std::ref(proj), std::ref(pred)));
     });
 }
 
@@ -434,8 +393,8 @@ template <
     class Proj2 = identity_fn>
 decltype(auto) find_end(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_end", range1, is_forward_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_end", range2, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
         return std::find_end(
@@ -456,8 +415,8 @@ template <
     class Proj2 = identity_fn>
 decltype(auto) find_first_of(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_first_of", range1, is_forward_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("find_first_of", range2, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
         return std::find_first_of(
@@ -472,15 +431,15 @@ decltype(auto) find_first_of(Range1&& range1, Range2&& range2, BinaryPred pred =
 template <class Range, class UnaryFunc, class Proj = identity_fn>
 auto for_each(Range&& range, UnaryFunc func, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("for_each", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::for_each(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(func)));
+    return std::for_each(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(func)));
 }
 
 template <class Range, class Generator>
 void generate(Range&& range, Generator generator)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("generate", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     std::generate(std::begin(range), std::end(range), std::move(generator));
 }
@@ -494,8 +453,8 @@ void generate_n(OutputIter output, Size size, Generator generator)
 template <class Range1, class Range2, class Compare = std::less<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
 auto includes(Range1&& range1, Range2&& range2, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("includes", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("includes", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::includes(
         std::begin(range1),
@@ -528,8 +487,8 @@ auto inner_product(
     Proj1 proj1 = {},
     Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("inner_product", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("inner_product", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::inner_product(
         std::begin(range1),
@@ -543,7 +502,7 @@ auto inner_product(
 template <class Range, class T>
 void iota(Range&& range, T value)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("iota", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     std::iota(std::begin(range), std::end(range), std::move(value));
 }
@@ -551,7 +510,7 @@ void iota(Range&& range, T value)
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 auto is_heap(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_heap", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     return std::is_heap(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -559,7 +518,7 @@ auto is_heap(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Policy = default_return_policy, class Range, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) is_heap_until(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_heap_until", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::is_heap_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -569,16 +528,16 @@ decltype(auto) is_heap_until(Range&& range, Compare compare = {}, Proj proj = {}
 template <class Range, class UnaryPred, class Proj = identity_fn>
 auto is_partitioned(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_partitioned", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::is_partitioned(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)));
+    return std::is_partitioned(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range1, class Range2, class BinaryPred = std::equal_to<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
 auto is_permutation(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_permutation", range1, is_forward_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_permutation", range2, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
     return std::is_permutation(
         std::begin(range1),
@@ -590,7 +549,7 @@ auto is_permutation(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 auto is_sorted(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_sorted", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return std::is_sorted(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -598,7 +557,7 @@ auto is_sorted(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Policy = default_return_policy, class Range, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) is_sorted_until(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("is_sorted_until", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::is_sorted_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -608,8 +567,8 @@ decltype(auto) is_sorted_until(Range&& range, Compare compare = {}, Proj proj = 
 template <class Range1, class Range2, class Compare = std::less<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
 auto lexicographical_compare(Range1&& range1, Range2&& range2, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("lexicographical_compare", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("lexicographical_compare", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::lexicographical_compare(
         std::begin(range1),
@@ -622,7 +581,7 @@ auto lexicographical_compare(Range1&& range1, Range2&& range2, Compare compare =
 template <class Policy = default_return_policy, class Range, class T, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) lower_bound(Range&& range, const T& value, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("lower_bound", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return detail::lower_bound(b, e, value, std::ref(compare), std::ref(proj));
@@ -632,7 +591,7 @@ decltype(auto) lower_bound(Range&& range, const T& value, Compare compare = {}, 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void make_heap(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("make_heap", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::make_heap(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -640,7 +599,7 @@ void make_heap(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Policy = default_return_policy, class Range, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) max_element(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("max_element", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::max_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -656,8 +615,8 @@ template <
     class Proj2 = identity_fn>
 auto merge(Range1&& range1, Range2&& range2, OutputIter output, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("merge", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("merge", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::merge(
         std::begin(range1),
@@ -671,7 +630,7 @@ auto merge(Range1&& range1, Range2&& range2, OutputIter output, Compare compare 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void inplace_merge(Range&& range, iterator_t<Range> middle, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("inplace_merge", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     std::inplace_merge(
         std::begin(range), middle, std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -680,7 +639,7 @@ void inplace_merge(Range&& range, iterator_t<Range> middle, Compare compare = {}
 template <class Policy = default_return_policy, class Range, class Compare = std::less<>, class Proj = identity_fn>
 auto minmax_element(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("minmax_element", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     static const auto policy = Policy{};
     auto [b, e] = make_range(range);
@@ -691,7 +650,7 @@ auto minmax_element(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Policy = default_return_policy, class Range, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) min_element(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("min_element", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::min_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -707,8 +666,8 @@ template <
     class Proj2 = identity_fn>
 decltype(auto) mismatch(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("mismatch", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("mismatch", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     static const auto policy = Policy{};
     auto [b1, e1] = make_range(range1);
@@ -720,7 +679,7 @@ decltype(auto) mismatch(Range1&& range1, Range2&& range2, BinaryPred pred = {}, 
 template <class Range, class OutputIter>
 auto move(Range&& range, OutputIter output)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("move", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::move(std::begin(range), std::end(range), output);
 }
@@ -728,7 +687,7 @@ auto move(Range&& range, OutputIter output)
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 auto next_permutation(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("next_permuatation", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     return std::next_permutation(
         std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -737,15 +696,15 @@ auto next_permutation(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Range, class UnaryPred, class Proj = identity_fn>
 auto none_of(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("none_of", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::none_of(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)));
+    return std::none_of(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void nth_element(Range&& range, iterator_t<Range> middle, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("nth_element", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::nth_element(std::begin(range), middle, std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -753,7 +712,7 @@ void nth_element(Range&& range, iterator_t<Range> middle, Compare compare = {}, 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void partial_sort(Range&& range, iterator_t<Range> middle, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partial_sort", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::partial_sort(
         std::begin(range), middle, std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -767,8 +726,8 @@ template <
     class Proj2 = identity_fn>
 decltype(auto) partial_sort_copy(Range1&& range1, Range2&& range2, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partial_sort_copy", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partial_sort_copy", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range2), std::end(range2), [&](auto b, auto e) {
         return std::partial_sort_copy(
@@ -783,7 +742,7 @@ decltype(auto) partial_sort_copy(Range1&& range1, Range2&& range2, Compare compa
 template <class Range, class OutputIter, class BinaryFunc = std::plus<>, class Proj = identity_fn>
 auto partial_sum(Range&& range, OutputIter output, BinaryFunc func = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partial_sum", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return detail::partial_sum(std::begin(range), std::end(range), output, std::ref(func), std::ref(proj));
 }
@@ -791,36 +750,36 @@ auto partial_sum(Range&& range, OutputIter output, BinaryFunc func = {}, Proj pr
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) partition(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partition", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::partition(b, e, detail::combine(std::ref(proj), std::ref(pred)));
+        return std::partition(b, e, fn(std::ref(proj), std::ref(pred)));
     });
 }
 
 template <class Range, class OutputIter1, class OutputIter2, class UnaryPred, class Proj = identity_fn>
 auto partition_copy(Range&& range, OutputIter1 result_true, OutputIter2 result_false, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("partition_copy", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::partition_copy(
-        std::begin(range), std::end(range), result_true, result_false, detail::combine(std::ref(proj), std::ref(pred)));
+        std::begin(range), std::end(range), result_true, result_false, fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) stable_partition(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("stable_partition", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::stable_partition(b, e, detail::combine(std::ref(proj), std::ref(pred)));
+        return std::stable_partition(b, e, fn(std::ref(proj), std::ref(pred)));
     });
 }
 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 auto prev_permutation(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("prev_permutation", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     return std::prev_permutation(
         std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
@@ -829,7 +788,7 @@ auto prev_permutation(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void push_heap(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("push_heap", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::push_heap(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -843,76 +802,76 @@ auto reduce(Range&& range, T init, BinaryFunc func = {}, Proj proj = {})
 template <class Policy = default_return_policy, class Range, class T, class Proj = identity_fn>
 decltype(auto) remove(Range&& range, const T& value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("remove", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::remove_if(b, e, detail::combine(std::ref(proj), detail::equal_to(std::ref(value))));
+        return std::remove_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value))));
     });
 }
 
 template <class Policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) remove_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("remove_if", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::remove_if(b, e, detail::combine(std::ref(proj), std::ref(pred)));
+        return std::remove_if(b, e, fn(std::ref(proj), std::ref(pred)));
     });
 }
 
 template <class Range, class OutputIter, class T, class Proj = identity_fn>
 auto remove_copy(Range&& range, OutputIter output, const T& value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("remove_copy", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::remove_copy_if(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), detail::equal_to(std::ref(value))));
+    return std::remove_copy_if(std::begin(range), std::end(range), output, fn(std::ref(proj), detail::equal_to(std::ref(value))));
 }
 
 template <class Range, class OutputIter, class UnaryPred, class Proj = identity_fn>
 auto remove_copy_if(Range&& range, OutputIter output, UnaryPred pred, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("remove_copy_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::remove_copy_if(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), std::ref(pred)));
+    return std::remove_copy_if(std::begin(range), std::end(range), output, fn(std::ref(proj), std::ref(pred)));
 }
 
 template <class Range, class T1, class T2, class Proj = identity_fn>
 void raplace(Range&& range, const T1& old_value, const T2& new_value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("replace", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    std::replace_if(std::begin(range), std::end(range), detail::combine(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
+    std::replace_if(std::begin(range), std::end(range), fn(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
 }
 
 template <class Range, class UnaryPred, class T, class Proj = identity_fn>
 void raplace_if(Range&& range, UnaryPred pred, const T& new_value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("replace_if", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    std::replace_if(std::begin(range), std::end(range), detail::combine(std::ref(proj), std::ref(pred)), new_value);
+    std::replace_if(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)), new_value);
 }
 
 template <class Range, class OutputIter, class T1, class T2, class Proj = identity_fn>
 auto replace_copy(Range&& range, OutputIter output, const T1& old_value, const T2& new_value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("replace_copy", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
     return std::replace_copy_if(
-        std::begin(range), std::end(range), output, detail::combine(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
+        std::begin(range), std::end(range), output, fn(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
 }
 
 template <class Range, class OutputIter, class UnaryPred, class T, class Proj = identity_fn>
 auto replace_copy_if(Range&& range, OutputIter output, UnaryPred pred, const T& new_value, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("replace_copy_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::replace_copy_if(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), std::ref(pred)), new_value);
+    return std::replace_copy_if(std::begin(range), std::end(range), output, fn(std::ref(proj), std::ref(pred)), new_value);
 }
 
 template <class Range>
 void reverse(Range&& range)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("reverse", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     std::reverse(std::begin(range), std::end(range));
 }
@@ -920,7 +879,7 @@ void reverse(Range&& range)
 template <class Range, class OutputIter>
 auto reverse_copy(Range&& range, OutputIter output)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("reverse_copy", range, is_bidirectional_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
     return std::reverse_copy(std::begin(range), std::end(range), output);
 }
@@ -928,7 +887,7 @@ auto reverse_copy(Range&& range, OutputIter output)
 template <class Policy = default_return_policy, class Range>
 decltype(auto) rotate(Range&& range, iterator_t<Range> middle)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("forward", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(
         std::begin(range), std::end(range), [&](auto b, auto e) { return std::rotate(b, middle, e); });
@@ -937,7 +896,7 @@ decltype(auto) rotate(Range&& range, iterator_t<Range> middle)
 template <class Range, class OutputIter>
 auto rotate_copy(Range&& range, iterator_t<Range> middle, OutputIter output)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("forward_copy", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return std::rotate_copy(std::begin(range), middle, std::end(range), output);
 }
@@ -952,8 +911,8 @@ template <
     class = std::enable_if_t<is_forward_range<Range2>::value>>
 decltype(auto) search(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("search", range1, is_forward_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("search", range2, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
         return std::search(
@@ -968,7 +927,7 @@ decltype(auto) search(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Pr
 template <class Range, class BinaryPred = std::equal_to<>>
 auto default_searcher(Range&& range, BinaryPred pred = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("default_searcher", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return std::default_searcher{ std::begin(range), std::end(range), std::move(pred) };
 }
@@ -976,7 +935,7 @@ auto default_searcher(Range&& range, BinaryPred pred = {})
 template <class Range, class Hash = std::hash<range_value_t<Range>>, class BinaryPred = std::equal_to<>>
 auto boyer_moore_searcher(Range&& range, Hash hash = {}, BinaryPred pred = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("boyer_moore_searcher", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     return std::boyer_moore_searcher{ std::begin(range), std::end(range), std::move(hash), std::move(pred) };
 }
@@ -984,7 +943,7 @@ auto boyer_moore_searcher(Range&& range, Hash hash = {}, BinaryPred pred = {})
 template <class Range, class Hash = std::hash<range_value_t<Range>>, class BinaryPred = std::equal_to<>>
 auto boyer_moore_horspool_searcher(Range&& range, Hash hash = {}, BinaryPred pred = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("boyer_moore_horspool_searcher", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     return std::boyer_moore_horspool_searcher{ std::begin(range), std::end(range), std::move(hash), std::move(pred) };
 }
@@ -996,7 +955,7 @@ template <
     class = decltype(std::declval<Searcher>()(std::declval<iterator_t<Range>>(), std::declval<iterator_t<Range>>()))>
 decltype(auto) search(Range&& range, const Searcher& searcher)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("search", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(
         std::begin(range), std::end(range), [&](auto b, auto e) { return std::search(b, e, searcher); });
@@ -1011,7 +970,7 @@ template <
     class Proj = identity_fn>
 decltype(auto) search_n(Range&& range, Size size, const T& value, BinaryPred pred = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("search_n", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::search_n(b, e, size, value, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
@@ -1028,8 +987,8 @@ template <
 auto set_difference(
     Range1&& range1, Range2&& range2, OutputIter output, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_difference", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_difference", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::set_difference(
         std::begin(range1),
@@ -1050,8 +1009,8 @@ template <
 auto set_intersection(
     Range1&& range1, Range2&& range2, OutputIter output, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_intersection", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_intersection", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::set_intersection(
         std::begin(range1),
@@ -1072,8 +1031,8 @@ template <
 auto set_symmetric_difference(
     Range1&& range1, Range2&& range2, OutputIter output, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_symmetric_difference", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_symmetric_difference", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::set_symmetric_difference(
         std::begin(range1),
@@ -1093,8 +1052,8 @@ template <
     class Proj2 = identity_fn>
 auto set_union(Range1&& range1, Range2&& range2, OutputIter output, Compare compare = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_union", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("set_union", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::set_union(
         std::begin(range1),
@@ -1108,7 +1067,7 @@ auto set_union(Range1&& range1, Range2&& range2, OutputIter output, Compare comp
 template <class Range, class RandomNumberGenerator>
 void shuffle(Range&& range, RandomNumberGenerator generator)
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("shuffle", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::shuffle(std::begin(range), std::end(range), std::move(generator));
 }
@@ -1116,7 +1075,7 @@ void shuffle(Range&& range, RandomNumberGenerator generator)
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void sort(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("sort", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::sort(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -1124,7 +1083,7 @@ void sort(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
 void stable_sort(Range&& range, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("stable_sort", range, is_random_access_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
     std::stable_sort(std::begin(range), std::end(range), detail::invoke_binary{ std::ref(compare), std::ref(proj) });
 }
@@ -1132,9 +1091,9 @@ void stable_sort(Range&& range, Compare compare = {}, Proj proj = {})
 template <class Range, class OutputIter, class UnaryFunc, class Proj = identity_fn>
 auto transform(Range&& range, OutputIter output, UnaryFunc func, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("transform", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::transform(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), std::ref(func)));
+    return std::transform(std::begin(range), std::end(range), output, fn(std::ref(proj), std::ref(func)));
 }
 
 template <
@@ -1147,8 +1106,8 @@ template <
     class = std::enable_if_t<is_output_iterator<OutputIter>::value>>
 auto transform(Range1&& range1, Range2&& range2, OutputIter output, BinaryFunc func, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("transform", range1, is_input_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("transform", range2, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
     return std::transform(
         std::begin(range1),
@@ -1161,25 +1120,25 @@ auto transform(Range1&& range1, Range2&& range2, OutputIter output, BinaryFunc f
 template <class Range, class Output, class T, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_exclusive_scan(Range&& range, Output output, T init, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_exclusive_scan(std::begin(range), std::end(range), output, init, func, detail::combine(std::ref(proj), std::ref(op)));
+    return std::transform_exclusive_scan(std::begin(range), std::end(range), output, init, func, fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Range, class Output, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_inclusive_scan(Range&& range, Output output, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_inclusive_scan(std::begin(range), std::end(range), output, std::ref(func), detail::combine(std::ref(proj), std::ref(op)));
+    return std::transform_inclusive_scan(std::begin(range), std::end(range), output, std::ref(func), fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Range, class T, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_reduce(Range&& range, T init, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_reduce(std::begin(range), std::end(range), std::move(init), std::ref(func), detail::combine(std::ref(proj), std::ref(op)));
+    return std::transform_reduce(std::begin(range), std::end(range), std::move(init), std::ref(func), fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Policy = default_return_policy, class Range, class BinaryPred = std::equal_to<>, class Proj = identity_fn>
 decltype(auto) unique(Range&& range, BinaryPred pred = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("unique", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return std::unique(b, e, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
@@ -1189,7 +1148,7 @@ decltype(auto) unique(Range&& range, BinaryPred pred = {}, Proj proj = {})
 template <class Range, class OutputIter, class BinaryPred = std::equal_to<>, class Proj = identity_fn>
 auto unique_copy(Range&& range, OutputIter output, BinaryPred pred = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("unique_copy", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return std::unique_copy(
         std::begin(range), std::end(range), output, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
@@ -1198,72 +1157,19 @@ auto unique_copy(Range&& range, OutputIter output, BinaryPred pred = {}, Proj pr
 template <class Policy = default_return_policy, class Range, class T, class Compare = std::less<>, class Proj = identity_fn>
 decltype(auto) upper_bound(Range&& range, const T& value, Compare compare = {}, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("upper_bound", range, is_forward_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
     return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
         return detail::upper_bound(b, e, value, std::ref(compare), std::ref(proj));
     });
 }
 
-template <class Range, class Output, class Func, class UnaryPred, class Proj = identity_fn>
-auto transform_if(Range&& range, Output output, Func func, UnaryPred pred, Proj proj = {})
+template <class Range, class Dest, class Proj = identity_fn>
+auto overwrite(Range&& range, Dest&& dest, Proj proj = {})
 {
-    CPP_PIPELINES_CHECK_CONSTRAINTS("transform_if", range, is_input_range);
+    CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return detail::transform_if(std::begin(range), std::end(range), output, std::ref(func), detail::combine(std::ref(proj), std::ref(pred)));
-}
-
-template <class Range, class Output, class UnaryPred, class Proj = identity_fn>
-auto copy_while(Range&& range, Output output, UnaryPred pred, Proj proj = {})
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy_while", range, is_input_range);
-
-    return detail::copy_while(std::begin(range), std::end(range), output, detail::combine(std::ref(proj), std::ref(pred)));
-}
-
-template <class Range, class Output, class UnaryPred, class Proj = identity_fn>
-auto copy_until(Range&& range, Output output, UnaryPred pred, Proj proj = {})
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy_until", range, is_input_range);
-
-    return detail::copy_while(std::begin(range), std::end(range), output, std::not_fn(detail::combine(std::ref(proj), std::ref(pred))));
-}
-
-template <class Range, class Dest>
-auto overwrite(Range&& range, Dest&& dest)
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("overwrite", range, is_input_range);
-
-    return detail::overwrite(std::begin(range), std::end(range), std::begin(dest), std::end(dest), identity_fn{});
-}
-
-template <class Range, class Dest, class UnaryFunc, class Proj = identity_fn>
-auto transform_overwrite(Range&& range, Dest&& dest, UnaryFunc func, Proj proj = {})
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("copy_transform_overwrite", range, is_input_range);
-
-    return detail::overwrite(std::begin(range), std::end(range), std::begin(dest), std::end(dest), detail::combine(std::ref(proj), std::ref(func)));
-}
-
-template <class Range, class BinaryPred = std::equal_to<>, class Proj = identity_fn>
-bool all_equal(Range&& range, BinaryPred&& pred = {}, Proj proj = {})
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("all_equal", range, is_forward_range);
-
-    auto b = std::begin(range);
-    auto e = std::end(range);
-    return b == e || std::all_of(std::next(b), e, [&](auto&& item) { return invoke(pred, invoke(proj, std::forward<decltype(item)>(item)), invoke(proj, *b)); });
-}
-
-template <class Range1, class Range2, class BinaryPred = std::equal_to<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
-bool starts_with(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
-{
-    CPP_PIPELINES_CHECK_CONSTRAINTS("starts_with", range1, is_forward_range);
-    CPP_PIPELINES_CHECK_CONSTRAINTS("starts_with", range2, is_forward_range);
-
-    auto r1 = make_range(range1);
-    auto r2 = make_range(range2);
-    return search<return_found>(r1, r2, std::ref(pred), std::ref(proj1), std::ref(proj2)) == std::begin(r1);
+    return detail::overwrite(std::begin(range), std::end(range), std::begin(dest), std::end(dest), std::ref(proj));
 }
 
 #undef CPP_PIPELINES_CHECK_CONSTRAINTS

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cpp_pipelines/pipeline.hpp>
 #include <optional>
 
@@ -7,18 +8,61 @@ namespace cpp_pipelines::opt
 namespace customization
 {
 template <class T>
-struct optional_traits
+struct optional_traits;
+
+template <class T>
+struct optional_traits<std::optional<T>>
 {
-    template <class Opt>
-    constexpr bool has_value(Opt&& opt) const
+    using type = std::optional<T>;
+
+    constexpr bool has_value(const type& opt) const
     {
         return static_cast<bool>(opt);
     }
 
-    template <class Opt>
-    constexpr decltype(auto) get_value(Opt&& opt) const
+    constexpr T& get_value(type& opt) const
     {
-        return *std::forward<Opt>(opt);
+        return *opt;
+    }
+
+    constexpr const T& get_value(const type& opt) const
+    {
+        return *opt;
+    }
+
+    constexpr T&& get_value(type&& opt) const
+    {
+        return *std::move(opt);
+    }
+};
+
+template <class T>
+struct optional_traits<std::optional<std::reference_wrapper<T>>>
+{
+    using type = std::optional<std::reference_wrapper<T>>;
+
+    constexpr bool has_value(const type& opt) const
+    {
+        return static_cast<bool>(opt);
+    }
+
+    constexpr T& get_value(const type& opt) const
+    {
+        return opt->get();
+    }
+};
+
+template <class T>
+struct optional_traits<T*>
+{
+    constexpr bool has_value(T* opt) const
+    {
+        return static_cast<bool>(opt);
+    }
+
+    constexpr T& get_value(T* opt) const
+    {
+        return *opt;
     }
 };
 

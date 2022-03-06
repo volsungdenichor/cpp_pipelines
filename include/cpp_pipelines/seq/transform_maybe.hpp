@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
@@ -37,7 +38,7 @@ struct transform_maybe_fn
 
             constexpr decltype(auto) deref() const
             {
-                return *current;  //TODO
+                return opt::get_value(current);
             }
 
             constexpr void inc()
@@ -55,7 +56,7 @@ struct transform_maybe_fn
             {
                 while (it != std::end(parent->range))
                 {
-                    if (current = invoke(parent->func, *it); static_cast<bool>(current))
+                    if (current = invoke(parent->func, *it); opt::has_value(current))
                     {
                         return;
                     }

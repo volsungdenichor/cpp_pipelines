@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/seq/cache_latest.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/join.hpp>

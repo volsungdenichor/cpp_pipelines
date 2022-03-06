@@ -29,6 +29,12 @@ struct view_interface
         return impl.end();
     }
 
+    template <class Container, class = std::enable_if_t<std::is_constructible_v<Container, iterator, iterator>>>
+    constexpr operator Container() const
+    {
+        return { begin(), end() };
+    }
+
     constexpr bool empty() const
     {
         return begin() == end();

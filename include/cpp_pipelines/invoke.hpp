@@ -21,7 +21,7 @@ struct invoke_fn
     template <class Func, class... Args>
     constexpr decltype(auto) operator()(Func&& func, Args&&... args) const
     {
-        return std::invoke(std::forward<Func>(func), unwrap(std::forward<Args>(args)...));
+        return std::invoke(std::forward<Func>(func), unwrap(std::forward<Args>(args))...);
     }
 
     template <class Func, class Arg>

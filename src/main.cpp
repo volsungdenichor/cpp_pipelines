@@ -3,6 +3,7 @@
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/opt.hpp>
+#include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <forward_list>
@@ -11,17 +12,6 @@
 #include <optional>
 #include <sstream>
 #include <variant>
-
-struct str_fn
-{
-    template <class... Args>
-    std::string operator()(const Args&... args) const
-    {
-        std::ostringstream ss;
-        (ss << ... << args);
-        return std::move(ss).str();
-    }
-};
 
 template <class T>
 struct parse_fn
@@ -36,8 +26,6 @@ struct parse_fn
                    : std::nullopt;
     }
 };
-
-static constexpr inline auto str = str_fn{};
 
 template <class T>
 static constexpr inline auto parse = parse_fn<T>{};
@@ -55,19 +43,6 @@ void print(const T& item)
     std::cout << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
 }
 
-struct cout
-{
-    std::string_view prefix = "";
-    std::string_view suffix = "";
-
-    template <class T>
-    std::monostate operator()(const T& item) const
-    {
-        std::cout << prefix << item << suffix << std::endl;
-        return {};
-    }
-};
-
 struct decorate_string
 {
     std::string_view prefix = "";
@@ -76,9 +51,26 @@ struct decorate_string
     template <class T>
     std::string operator()(const T& item) const
     {
-        return str(prefix, item, suffix);
+        return cpp_pipelines::str(prefix, item, suffix);
     }
 };
+
+template <class Func>
+struct transform_string_fn
+{
+    Func func;
+    std::string operator()(std::string text) const
+    {
+        std::transform(std::begin(text), std::end(text), std::begin(text), func);
+        return text;
+    }
+};
+
+template <class Func>
+transform_string_fn(Func) -> transform_string_fn<Func>;
+
+static constexpr inline auto uppercase = transform_string_fn{ [](char ch) { return std::toupper(ch); } };
+static constexpr inline auto lowercase = transform_string_fn{ [](char ch) { return std::tolower(ch); } };
 
 struct Person
 {
@@ -91,17 +83,6 @@ struct Person
     }
 };
 
-#define ITER(cat)                                   \
-    std::ostream& operator<<(std::ostream& os, cat) \
-    {                                               \
-        return os << #cat;                          \
-    }
-
-ITER(std::input_iterator_tag)
-ITER(std::forward_iterator_tag)
-ITER(std::bidirectional_iterator_tag)
-ITER(std::random_access_iterator_tag)
-
 void run()
 {
     using namespace std::string_literals;
@@ -110,16 +91,28 @@ void run()
     std::vector<Person> persons{
         Person{ "Adam", 10 },
         Person{ "Bartek", 13 },
+        Person{ "Celina", 24 },
+        Person{ "Daria", -1 },
+        Person{ "Ewa", 64 },
     };
 
-    int main()
+    algo::copy(
+        persons
+        >>= seq::filter(fn(&Person::age, [](const auto& x) { return x > 0; }))
+        >>= seq::transform(fn(str, lowercase, decorate_string{ ">> ", " <<" })),
+        ostream_iterator{ std::cout, "\n" });
+
+    std::cout << std::endl;
+}
+
+int main()
+{
+    try
     {
-        try
-        {
-            run();
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
+        run();
     }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
