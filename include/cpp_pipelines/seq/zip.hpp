@@ -7,19 +7,24 @@ namespace cpp_pipelines::seq
 {
 struct zip_fn
 {
+    template <class... Ranges>
     struct as_tuple_fn
     {
-        template <class... Args>
-        constexpr auto operator()(Args&&... args) const
+        constexpr as_tuple_fn(Ranges...)
         {
-            return std::tuple<decltype(to_return_type(std::forward<Args>(args)))...>{ to_return_type(std::forward<Args>(args))... };
+        }
+
+        template <class... Args>
+        constexpr std::tuple<range_reference_t<Ranges>...> operator()(Args&&... args) const
+        {
+            return { std::forward<Args>(args)... };
         }
     };
 
     template <class... Ranges>
     constexpr inline auto operator()(Ranges&&... ranges) const
     {
-        return transform_zip(as_tuple_fn{}, std::forward<Ranges>(ranges)...);
+        return transform_zip(as_tuple_fn{ std::forward<Ranges>(ranges)... }, std::forward<Ranges>(ranges)...);
     }
 };
 

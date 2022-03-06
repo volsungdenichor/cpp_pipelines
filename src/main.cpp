@@ -4,6 +4,7 @@
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
+#include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <forward_list>
@@ -59,10 +60,16 @@ template <class Func>
 struct transform_string_fn
 {
     Func func;
+
     std::string operator()(std::string text) const
     {
         std::transform(std::begin(text), std::end(text), std::begin(text), func);
         return text;
+    }
+
+    char operator()(char ch) const
+    {
+        return func(ch);
     }
 };
 
@@ -83,10 +90,23 @@ struct Person
     }
 };
 
+struct front_fn
+{
+    template <class Range>
+    constexpr auto operator()(Range&& range) const
+    {
+        return *std::begin(range);
+    }
+};
+
+static constexpr inline auto front = front_fn{};
+
 void run()
 {
     using namespace std::string_literals;
     using namespace cpp_pipelines;
+    namespace p = cpp_pipelines::predicates;
+    using p::__;
 
     std::vector<Person> persons{
         Person{ "Adam", 10 },
@@ -96,21 +116,16 @@ void run()
         Person{ "Ewa", 64 },
     };
 
-    std::vector<std::string> other{
-        "alpha",
-        "beta",
-        "gamma",
-        "delta",
-        "epsilon",
-        "zeta",
-        "eta",
-        "theta"
+    std::vector<std::string> txt = {
+        "A",
+        "B",
+        "C",
+        "D",
     };
 
-    auto x = *std::begin(seq::zip(persons, other));
-    print(x);
-
-    std::cout << std::endl;
+    algorithm::copy(
+        seq::zip(persons, txt) >>= seq::enumerate(),
+        ostream_iterator{ std::cout, "\n" });
 }
 
 int main()

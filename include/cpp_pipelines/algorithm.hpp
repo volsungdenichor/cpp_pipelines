@@ -8,7 +8,7 @@
 #include <functional>
 #include <numeric>
 
-namespace cpp_pipelines::algo
+namespace cpp_pipelines::algorithm
 {
 #define CPP_PIPELINES_CHECK_CONSTRAINTS(var, constraint) \
     static_assert(constraint<decltype(var)>::value, "'" #var "' - " #constraint " required")
@@ -1174,4 +1174,4 @@ auto overwrite(Range&& range, Dest&& dest, Proj proj = {})
 
 #undef CPP_PIPELINES_CHECK_CONSTRAINTS
 
-}  // namespace cpp_pipelines::algo
+}  // namespace cpp_pipelines::algorithm

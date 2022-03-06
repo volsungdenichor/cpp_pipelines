@@ -29,6 +29,7 @@ struct filter_fn
                 : parent{ parent }
                 , it{ it }
             {
+                update();
             }
 
             constexpr void update()

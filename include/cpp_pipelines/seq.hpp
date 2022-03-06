@@ -1,10 +1,16 @@
 #pragma once
 
 #include <cpp_pipelines/seq/cache_latest.hpp>
+#include <cpp_pipelines/seq/drop.hpp>
+#include <cpp_pipelines/seq/drop_while.hpp>
 #include <cpp_pipelines/seq/enumerate.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/join.hpp>
+#include <cpp_pipelines/seq/reverse.hpp>
+#include <cpp_pipelines/seq/slice.hpp>
+#include <cpp_pipelines/seq/take.hpp>
+#include <cpp_pipelines/seq/take_while.hpp>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/transform_join.hpp>
 #include <cpp_pipelines/seq/transform_maybe.hpp>
