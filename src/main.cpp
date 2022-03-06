@@ -124,7 +124,11 @@ void run()
     };
 
     algorithm::copy(
-        seq::zip(persons, txt) >>= seq::enumerate(),
+        seq::zip(
+            persons
+            >>= seq::reverse()
+            >>= seq::enumerate(),
+            txt >>= seq::enumerate()),
         ostream_iterator{ std::cout, "\n" });
 }
 

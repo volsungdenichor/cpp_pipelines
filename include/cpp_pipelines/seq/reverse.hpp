@@ -8,24 +8,24 @@ namespace cpp_pipelines::seq
 {
 struct reverse_fn
 {
-    template <class Iter>
-    constexpr auto make_reverse(Iter iter) const
-    {
-        return std::make_reverse_iterator(iter);
-    }
-
-    template <class Iter>
-    constexpr auto make_reverse(std::reverse_iterator<Iter> iter) const
-    {
-        return iter.base();
-    }
-
     struct impl
     {
+        template <class Iter>
+        constexpr auto make_iterator(Iter iter) const
+        {
+            return std::make_reverse_iterator(iter);
+        }
+
+        template <class Iter>
+        constexpr auto make_iterator(std::reverse_iterator<Iter> iter) const
+        {
+            return iter.base();
+        }
+
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return subrange{ make_reverse_iterator(std::end(range)), make_reverse_iterator(std::begin(range)) };
+            return subrange{ make_iterator(std::end(range)), make_iterator(std::begin(range)) };
         }
     };
 
