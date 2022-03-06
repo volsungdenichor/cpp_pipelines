@@ -44,7 +44,7 @@ struct cache_latest_fn
                 return *cache;
             }
 
-            void inc()
+            constexpr void inc()
             {
                 ++it;
                 cache = cache_type{};

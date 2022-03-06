@@ -96,11 +96,19 @@ void run()
         Person{ "Ewa", 64 },
     };
 
-    algo::copy(
-        persons
-        >>= seq::filter(fn(&Person::age, [](const auto& x) { return x > 0; }))
-        >>= seq::transform(fn(str, lowercase, decorate_string{ ">> ", " <<" })),
-        ostream_iterator{ std::cout, "\n" });
+    std::vector<std::string> other{
+        "alpha",
+        "beta",
+        "gamma",
+        "delta",
+        "epsilon",
+        "zeta",
+        "eta",
+        "theta"
+    };
+
+    auto x = *std::begin(seq::zip(persons, other));
+    print(x);
 
     std::cout << std::endl;
 }

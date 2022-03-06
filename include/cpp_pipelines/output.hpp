@@ -100,24 +100,11 @@ struct str_fn
     }
 };
 
-struct print_fn
-{
-    std::string_view delimiter = {};
-
-    template <class... Args>
-    std::ostream& operator()(const Args&... args) const
-    {
-        return write_fn{}(std::cout, args...) << delimiter;
-    }
-};
-
 }  // namespace detail
 
 static constexpr inline auto delimit = detail::delimit_fn{};
 static constexpr inline auto write = detail::write_fn{};
 static constexpr inline auto str = detail::str_fn{};
-static constexpr inline auto print = detail::print_fn{};
-static constexpr inline auto println = detail::print_fn{ "\n" };
 
 struct cout
 {
