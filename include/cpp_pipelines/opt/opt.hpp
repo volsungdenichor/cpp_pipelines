@@ -83,6 +83,8 @@ struct to_optional_fn
     }
 };
 
+static constexpr inline auto to_optional = to_optional_fn{};
+
 template <class Opt>
 constexpr bool has_value(Opt&& opt)
 {

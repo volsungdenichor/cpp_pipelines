@@ -64,7 +64,7 @@ struct view_interface
         {
             return *std::next(begin(), index);
         }
-        throw std::out_of_range{};
+        throw std::out_of_range{ "index out of range" };
     }
 
     constexpr explicit operator bool() const

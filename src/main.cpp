@@ -116,20 +116,8 @@ void run()
         Person{ "Ewa", 64 },
     };
 
-    std::vector<std::string> txt = {
-        "A",
-        "B",
-        "C",
-        "D",
-    };
-
-    algorithm::copy(
-        seq::zip(
-            persons
-            >>= seq::reverse()
-            >>= seq::enumerate(),
-            txt >>= seq::enumerate()),
-        ostream_iterator{ std::cout, "\n" });
+    auto&& res = persons >>= seq::maybe_at(1) >>= opt::transform(&Person::age) >>= opt::and_then(square_root);
+    print(res);
 }
 
 int main()

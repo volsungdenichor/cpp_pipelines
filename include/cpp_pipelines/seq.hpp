@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cpp_pipelines/seq/access.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>
+#include <cpp_pipelines/seq/concat.hpp>
+#include <cpp_pipelines/seq/distance.hpp>
 #include <cpp_pipelines/seq/drop.hpp>
 #include <cpp_pipelines/seq/drop_while.hpp>
 #include <cpp_pipelines/seq/enumerate.hpp>
