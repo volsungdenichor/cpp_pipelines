@@ -26,7 +26,7 @@ struct cache_latest_fn
                 std::optional<reference>>;
 
             inner_iterator it;
-            mutable cache_type cache;
+            mutable cache_type cache = {};
 
             constexpr reference deref() const
             {
@@ -47,12 +47,44 @@ struct cache_latest_fn
             constexpr void inc()
             {
                 ++it;
-                cache = cache_type{};
+                invalidate();
             }
 
             constexpr bool is_equal(const iter& other) const
             {
                 return it == other.it;
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_bidirectional_iterator<It>::value>>
+            constexpr void dec()
+            {
+                --it;
+                invalidate();
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr void advance(iter_difference_t<It> offset)
+            {
+                it += offset;
+                invalidate();
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr bool is_less(const iter& other) const
+            {
+                return it < other.it;
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr iter_difference_t<It> distance_to(const iter& other) const
+            {
+                return other.it - it;
+            }
+
+        private:
+            void invalidate()
+            {
+                cache = cache_type{};
             }
         };
 

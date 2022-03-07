@@ -22,6 +22,7 @@ struct filter_fn
         struct iter
         {
             using inner_iterator = iterator_t<Range>;
+            using reference = iter_reference_t<inner_iterator>;
             const view* parent;
             inner_iterator it;
 
@@ -32,15 +33,7 @@ struct filter_fn
                 update();
             }
 
-            constexpr void update()
-            {
-                while (it != std::end(parent->range) && !invoke(parent->pred, *it))
-                {
-                    ++it;
-                }
-            }
-
-            constexpr range_reference_t<Range> deref() const
+            constexpr reference deref() const
             {
                 return *it;
             }
@@ -51,9 +44,34 @@ struct filter_fn
                 update();
             }
 
+            template <class It = inner_iterator, class = std::enable_if_t<is_bidirectional_iterator<It>::value>>
+            constexpr void dec()
+            {
+                --it;
+                while (!invoke(parent->pred, *it))
+                {
+                    --it;
+                }
+            }
+
             constexpr bool is_equal(const iter& other) const
             {
                 return it == other.it;
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr bool is_less(const iter& other) const
+            {
+                return it < other.it;
+            }
+
+        private:
+            constexpr void update()
+            {
+                while (it != std::end(parent->range) && !invoke(parent->pred, *it))
+                {
+                    ++it;
+                }
             }
         };
 

@@ -117,12 +117,8 @@ void run()
     };
 
     algorithm::copy(
-        seq::zip(
-            persons >>= seq::transform(&Person::age),
-            persons >>= seq::reverse >>= seq::transform(&Person::name)),
+        persons,
         ostream_iterator{ std::cout, "\n" });
-
-    std::cout << std::endl;
 }
 
 int main()

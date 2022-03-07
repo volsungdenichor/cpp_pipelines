@@ -45,6 +45,24 @@ struct transform_fn
             {
                 return it == other.it;
             }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_bidirectional_iterator<It>::value>>
+            constexpr void dec()
+            {
+                --it;
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr void advance(iter_difference_t<It> offset)
+            {
+                it += offset;
+            }
+
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
+            constexpr iter_difference_t<It> distance_to(const iter& other) const
+            {
+                return other.it - it;
+            }
         };
 
         using iterator = iterator_interface<iter>;
