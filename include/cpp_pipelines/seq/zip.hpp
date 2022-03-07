@@ -14,10 +14,9 @@ struct zip_fn
         {
         }
 
-        template <class... Args>
-        constexpr std::tuple<range_reference_t<Ranges>...> operator()(Args&&... args) const
+        constexpr std::tuple<range_reference_t<Ranges>...> operator()(range_reference_t<Ranges>... args) const
         {
-            return { std::forward<Args>(args)... };
+            return { args... };
         }
     };
 
