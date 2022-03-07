@@ -116,8 +116,14 @@ void run()
         Person{ "Ewa", 64 },
     };
 
-    auto&& res = persons >>= seq::maybe_at(1) >>= opt::transform(&Person::age) >>= opt::and_then(square_root);
-    print(res);
+    algorithm::copy(
+        persons
+        >>= seq::slice(1, 2)
+        >>= seq::transform(&Person::name)
+        >>= seq::enumerate,
+        ostream_iterator{ std::cout, "\n" });
+
+    std::cout << std::endl;
 }
 
 int main()

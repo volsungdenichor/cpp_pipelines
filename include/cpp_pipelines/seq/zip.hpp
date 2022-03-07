@@ -29,4 +29,5 @@ struct zip_fn
 };
 
 static constexpr inline auto zip = zip_fn{};
+
 }  // namespace cpp_pipelines::seq

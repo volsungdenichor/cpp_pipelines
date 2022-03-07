@@ -67,7 +67,7 @@ struct maybe_at_fn
 static constexpr inline auto at = at_fn{};
 static constexpr inline auto maybe_at = maybe_at_fn{};
 
-static constexpr inline auto back = reverse() >>= front;
-static constexpr inline auto maybe_back = reverse() >>= maybe_front;
+static constexpr inline auto back = reverse >>= front;
+static constexpr inline auto maybe_back = reverse >>= maybe_front;
 
 }  // namespace cpp_pipelines::seq

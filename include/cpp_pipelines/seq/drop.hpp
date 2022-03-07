@@ -25,7 +25,8 @@ struct drop_fn
     {
         return make_pipeline(impl{ n });
     }
-};  // namespace cpp_pipelines::seq
+};
 
 static constexpr inline auto drop = drop_fn{};
+
 }  // namespace cpp_pipelines::seq

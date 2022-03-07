@@ -65,4 +65,5 @@ struct concat_fn
 };
 
 static constexpr inline auto concat = concat_fn{};
+
 }  // namespace cpp_pipelines::seq

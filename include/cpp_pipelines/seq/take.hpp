@@ -25,7 +25,8 @@ struct take_fn
     {
         return make_pipeline(impl{ n });
     }
-};  // namespace cpp_pipelines::seq
+};
 
 static constexpr inline auto take = take_fn{};
+
 }  // namespace cpp_pipelines::seq

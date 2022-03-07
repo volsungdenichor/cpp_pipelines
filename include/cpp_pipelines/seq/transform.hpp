@@ -80,4 +80,5 @@ struct transform_fn
 };
 
 static constexpr inline auto transform = transform_fn{};
+
 }  // namespace cpp_pipelines::seq

@@ -69,21 +69,13 @@ struct cache_latest_fn
         }
     };
 
-    struct impl
+    template <class Range>
+    constexpr auto operator()(Range&& range) const
     {
-        template <class Range>
-        constexpr auto operator()(Range&& range) const
-        {
-            return view_interface{ view{ all(std::forward<Range>(range)) } };
-        }
-    };
-
-    constexpr auto
-    operator()() const
-    {
-        return make_pipeline(impl{});
+        return view_interface{ view{ all(std::forward<Range>(range)) } };
     }
 };
 
-static constexpr inline auto cache_latest = cache_latest_fn{};
+static constexpr inline auto cache_latest = make_pipeline(cache_latest_fn{});
+
 }  // namespace cpp_pipelines::seq

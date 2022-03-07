@@ -5,14 +5,6 @@
 
 namespace cpp_pipelines::seq
 {
-struct join_fn
-{
-    constexpr auto operator()() const
-    {
-        return transform_join(identity);
-    }
-};
-
-static constexpr inline auto join = join_fn{};
+static constexpr inline auto join = transform_join(identity);
 
 }  // namespace cpp_pipelines::seq

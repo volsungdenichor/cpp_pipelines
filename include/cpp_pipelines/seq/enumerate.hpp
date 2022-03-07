@@ -10,15 +10,12 @@ struct enumerate_fn
     template <class Range>
     struct view
     {
-        std::ptrdiff_t start;
         Range range;
 
-        constexpr view(std::ptrdiff_t start, Range range)
-            : start{ start }
-            , range{ std::move(range) }
+        constexpr view(Range range)
+            : range{ std::move(range) }
         {
         }
-
         struct iter
         {
             using inner_iterator = iterator_t<Range>;
@@ -52,7 +49,7 @@ struct enumerate_fn
 
         constexpr iterator begin() const
         {
-            return { iter{ start, std::begin(range) } };
+            return { iter{ 0, std::begin(range) } };
         }
 
         constexpr iterator end() const
@@ -61,22 +58,13 @@ struct enumerate_fn
         }
     };
 
-    struct impl
+    template <class Range>
+    constexpr auto operator()(Range&& range) const
     {
-        std::ptrdiff_t start;
-
-        template <class Range>
-        constexpr auto operator()(Range&& range) const
-        {
-            return view_interface{ view{ start, all(std::forward<Range>(range)) } };
-        }
-    };
-
-    constexpr auto operator()(std::ptrdiff_t start = 0) const
-    {
-        return make_pipeline(impl{ start });
+        return view_interface{ view{ all(std::forward<Range>(range)) } };
     }
 };
 
-static constexpr inline auto enumerate = enumerate_fn{};
+static constexpr inline auto enumerate = make_pipeline(enumerate_fn{});
+
 }  // namespace cpp_pipelines::seq

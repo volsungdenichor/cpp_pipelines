@@ -90,4 +90,5 @@ struct filter_fn
 };
 
 static constexpr inline auto filter = filter_fn{};
+
 }  // namespace cpp_pipelines::seq
