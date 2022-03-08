@@ -117,7 +117,9 @@ void run()
     };
 
     algorithm::copy(
-        persons,
+        persons
+        >>= seq::pairwise_transform([](const auto& a, const auto& b) { return a.name + " " + b.name; })
+        >>= seq::enumerate,
         ostream_iterator{ std::cout, "\n" });
 }
 
