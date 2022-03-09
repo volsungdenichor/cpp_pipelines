@@ -63,8 +63,7 @@ struct transform_string_fn
 
     std::string operator()(std::string text) const
     {
-        std::transform(std::begin(text), std::end(text), std::begin(text), func);
-        return text;
+        return text >>= cpp_pipelines::seq::transform(std::ref(*this));
     }
 
     char operator()(char ch) const
@@ -90,17 +89,6 @@ struct Person
     }
 };
 
-struct front_fn
-{
-    template <class Range>
-    constexpr auto operator()(Range&& range) const
-    {
-        return *std::begin(range);
-    }
-};
-
-static constexpr inline auto front = front_fn{};
-
 void run()
 {
     using namespace std::string_literals;
@@ -116,8 +104,14 @@ void run()
         Person{ "Ewa", 64 },
     };
 
+    const auto pipe = seq::transform(&Person::name)
+        >>= seq::transform(uppercase)
+        >>= seq::enumerate
+        >>= seq::reverse
+        >>= seq::to<std::vector>;
+
     algorithm::copy(
-        persons >>= seq::adjacent<4> >>= seq::enumerate,
+        persons >>= pipe,
         ostream_iterator{ std::cout, "\n" });
 }
 

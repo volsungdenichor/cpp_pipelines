@@ -44,7 +44,7 @@ struct enumerate_fn
                 return it == other.it;
             }
 
-            template <class It = inner_iterator, class = std::enable_if_t<is_bidirectional_iterator<It>::value>>
+            template <class It = inner_iterator, class = std::enable_if_t<is_random_access_iterator<It>::value>>
             constexpr void dec()
             {
                 --index;
@@ -80,7 +80,14 @@ struct enumerate_fn
 
         constexpr iterator end() const
         {
-            return { iter{ -1, std::end(range) } };
+            if constexpr (is_random_access_iterator<typename iter::inner_iterator>::value)
+            {
+                return { iter{ std::distance(std::begin(range), std::end(range)), std::end(range) } };
+            }
+            else
+            {
+                return { iter{ 0, std::end(range) } };
+            }
         }
     };
 

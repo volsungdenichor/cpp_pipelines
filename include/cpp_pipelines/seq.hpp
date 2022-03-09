@@ -17,6 +17,7 @@
 #include <cpp_pipelines/seq/slice.hpp>
 #include <cpp_pipelines/seq/take.hpp>
 #include <cpp_pipelines/seq/take_while.hpp>
+#include <cpp_pipelines/seq/to.hpp>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/transform_join.hpp>
 #include <cpp_pipelines/seq/transform_maybe.hpp>
