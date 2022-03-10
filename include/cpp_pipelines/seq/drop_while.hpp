@@ -8,6 +8,64 @@ namespace cpp_pipelines::seq
 {
 struct drop_while_fn
 {
+    template <class Range, class Pred>
+    struct view
+    {
+        Range range;
+        Pred pred;
+
+        constexpr view(Range range, Pred pred)
+            : range{ std::move(range) }
+            , pred{ std::move(pred) }
+        {
+        }
+
+        struct iter
+        {
+            using inner_iterator = iterator_t<Range>;
+            const view* parent;
+            mutable inner_iterator it;
+            mutable bool dirty;
+
+            constexpr iter(const view* parent, inner_iterator it)
+                : parent{ parent }
+                , it{ it }
+                , dirty{ true }
+            {
+            }
+
+            constexpr range_reference_t<Range> deref() const
+            {
+                return *it;
+            }
+
+            constexpr void inc()
+            {
+                ++it;
+            }
+
+            constexpr bool is_equal(const iter& other) const
+            {
+                if (dirty)
+                {
+                    it = advance_while(it, parent->pred, std::end(parent->range));
+                    dirty = false;
+                }
+                return it == other.it;
+            }
+        };
+
+        constexpr auto begin() const
+        {
+            return iterator_interface{ iter{ this, std::begin(range) } };
+        }
+
+        constexpr auto end() const
+        {
+            return iterator_interface{ iter{ this, std::end(range) } };
+        }
+    };
+
     template <class Pred>
     struct impl
     {
@@ -16,9 +74,7 @@ struct drop_while_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            auto b = std::begin(range);
-            auto e = std::end(range);
-            return subrange{ advance_while(b, pred, e), e };
+            return view_interface{ view{ all(std::forward<Range>(range)), pred } };
         }
     };
 

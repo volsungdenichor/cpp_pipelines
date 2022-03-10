@@ -71,22 +71,20 @@ struct enumerate_fn
             }
         };
 
-        using iterator = iterator_interface<iter>;
-
-        constexpr iterator begin() const
+        constexpr auto begin() const
         {
-            return { iter{ 0, std::begin(range) } };
+            return iterator_interface{ iter{ 0, std::begin(range) } };
         }
 
-        constexpr iterator end() const
+        constexpr auto end() const
         {
             if constexpr (is_random_access_iterator<typename iter::inner_iterator>::value)
             {
-                return { iter{ std::distance(std::begin(range), std::end(range)), std::end(range) } };
+                return iterator_interface{ iter{ std::distance(std::begin(range), std::end(range)), std::end(range) } };
             }
             else
             {
-                return { iter{ 0, std::end(range) } };
+                return iterator_interface{ iter{ 0, std::end(range) } };
             }
         }
     };

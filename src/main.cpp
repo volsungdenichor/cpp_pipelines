@@ -89,6 +89,12 @@ struct Person
     }
 };
 
+auto linspace(float start, float stop, int n)
+{
+    using namespace cpp_pipelines;
+    return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
+}
+
 void run()
 {
     using namespace std::string_literals;
@@ -104,11 +110,8 @@ void run()
         Person{ "Ewa", 64 },
     };
 
-    const auto pipe = seq::transform(&Person::name)
-        >>= seq::transform(uppercase)
-        >>= seq::enumerate
-        >>= seq::reverse
-        >>= seq::to<std::vector>;
+    const auto pipe = fn()
+        >>= seq::slice(1, 3);
 
     algorithm::copy(
         persons >>= pipe,

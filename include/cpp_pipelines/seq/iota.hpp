@@ -31,14 +31,12 @@ struct iota_fn
             }
         };
 
-        using iterator = iterator_interface<iter>;
-
-        constexpr iterator begin() const
+        constexpr auto begin() const
         {
             return iterator_interface{ iter{ lo } };
         }
 
-        constexpr iterator end() const
+        constexpr auto end() const
         {
             return iterator_interface{ iter{ up } };
         }

@@ -8,6 +8,58 @@ namespace cpp_pipelines::seq
 {
 struct take_while_fn
 {
+    template <class Range, class Pred>
+    struct view
+    {
+        Range range;
+        Pred pred;
+
+        constexpr view(Range range, Pred pred)
+            : range{ std::move(range) }
+            , pred{ std::move(pred) }
+        {
+        }
+
+        struct iter
+        {
+            using inner_iterator = iterator_t<Range>;
+            const view* parent;
+            inner_iterator it;
+
+            constexpr iter(const view* parent, inner_iterator it)
+                : parent{ parent }
+                , it{ it }
+            {
+            }
+
+            constexpr range_reference_t<Range> deref() const
+            {
+                return *it;
+            }
+
+            constexpr void inc()
+            {
+                ++it;
+            }
+
+            constexpr bool is_equal(const iter& other) const
+            {
+                return it == other.it || (it != std::end(parent->range) && invoke(parent->pred, *it));
+            }
+        };
+
+        constexpr auto
+        begin() const
+        {
+            return iterator_interface{ iter{ this, std::begin(range) } };
+        }
+
+        constexpr auto end() const
+        {
+            return iterator_interface{ iter{ this, std::end(range) } };
+        }
+    };
+
     template <class Pred>
     struct impl
     {

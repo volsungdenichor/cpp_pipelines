@@ -65,16 +65,14 @@ struct transform_maybe_fn
             }
         };
 
-        using iterator = iterator_interface<iter>;
-
-        constexpr iterator begin() const
+        constexpr auto begin() const
         {
-            return { iter{ this, std::begin(range) } };
+            return iterator_interface{ iter{ this, std::begin(range) } };
         }
 
-        constexpr iterator end() const
+        constexpr auto end() const
         {
-            return { iter{ this, std::end(range) } };
+            return iterator_interface{ iter{ this, std::end(range) } };
         }
     };
 

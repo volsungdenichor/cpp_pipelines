@@ -60,28 +60,27 @@ struct transform_zip_fn
             }
         };
 
-        using iterator = iterator_interface<iter>;
-
-        constexpr iterator begin() const
+        constexpr auto begin() const
         {
             return begin(std::index_sequence_for<Ranges...>{});
         }
 
-        constexpr iterator end() const
+        constexpr auto end() const
         {
             return end(std::index_sequence_for<Ranges...>{});
         }
 
+    private:
         template <std::size_t... I>
-        constexpr iterator begin(std::index_sequence<I...>) const
+        constexpr auto begin(std::index_sequence<I...>) const
         {
-            return { iter{ this, std::tuple{ std::begin(std::get<I>(ranges))... } } };
+            return iterator_interface{ iter{ this, std::tuple{ std::begin(std::get<I>(ranges))... } } };
         }
 
         template <std::size_t... I>
-        constexpr iterator end(std::index_sequence<I...>) const
+        constexpr auto end(std::index_sequence<I...>) const
         {
-            return { iter{ this, std::tuple{ std::end(std::get<I>(ranges))... } } };
+            return iterator_interface{ iter{ this, std::tuple{ std::end(std::get<I>(ranges))... } } };
         }
     };
 
