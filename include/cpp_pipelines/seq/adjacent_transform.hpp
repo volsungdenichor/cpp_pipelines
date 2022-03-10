@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 template <std::size_t N>
 struct adjacent_transform_fn
 {
@@ -34,8 +36,10 @@ struct adjacent_transform_fn
     }
 };
 
+}  // namespace detail
+
 template <std::size_t N>
-static constexpr inline auto adjacent_transform = adjacent_transform_fn<N>{};
+static constexpr inline auto adjacent_transform = detail::adjacent_transform_fn<N>{};
 static constexpr inline auto pairwise_transform = adjacent_transform<2>;
 
 }  // namespace cpp_pipelines::seq

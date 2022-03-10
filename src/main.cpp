@@ -108,9 +108,19 @@ void run()
         Person{ "Celina", 24 },
         Person{ "Daria", -1 },
         Person{ "Ewa", 64 },
+
     };
 
+    static const auto is_vowel = p::any('a', 'e', 'i', 'o', 'u', 'y');
+    const auto pred = fn(&Person::name, seq::front, lowercase, is_vowel);
+
     const auto pipe = fn()
+        >>= seq::enumerate
+        >>= seq::drop_last(2)
+        >>= seq::reverse
+        >>= seq::maybe_front
+        >>= opt::transform(fn(get_element<1>, &Person::name))
+        >>= opt::value
         >>= seq::slice(1, 3);
 
     algorithm::copy(

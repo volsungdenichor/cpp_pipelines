@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct transform_fn
 {
     template <class Func, class Range>
@@ -95,6 +97,8 @@ struct transform_fn
     }
 };
 
-static constexpr inline auto transform = transform_fn{};
+}  // namespace detail
+
+static constexpr inline auto transform = detail::transform_fn{};
 
 }  // namespace cpp_pipelines::seq

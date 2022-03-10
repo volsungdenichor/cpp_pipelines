@@ -7,6 +7,7 @@
 #include <cpp_pipelines/seq/concat.hpp>
 #include <cpp_pipelines/seq/distance.hpp>
 #include <cpp_pipelines/seq/drop.hpp>
+#include <cpp_pipelines/seq/drop_last.hpp>
 #include <cpp_pipelines/seq/drop_while.hpp>
 #include <cpp_pipelines/seq/empty.hpp>
 #include <cpp_pipelines/seq/enumerate.hpp>
@@ -16,12 +17,14 @@
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/slice.hpp>
 #include <cpp_pipelines/seq/take.hpp>
+#include <cpp_pipelines/seq/take_last.hpp>
 #include <cpp_pipelines/seq/take_while.hpp>
 #include <cpp_pipelines/seq/to.hpp>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/transform_join.hpp>
 #include <cpp_pipelines/seq/transform_maybe.hpp>
 #include <cpp_pipelines/seq/transform_zip.hpp>
+#include <cpp_pipelines/seq/trim_while.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 #include <cpp_pipelines/seq/zip.hpp>
 #include <cpp_pipelines/subrange.hpp>

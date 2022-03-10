@@ -106,6 +106,16 @@ struct get_element_fn
     }
 };
 
+template <class Type>
+struct cast_fn
+{
+    template <class T>
+    constexpr Type operator()(T&& item) const
+    {
+        return static_cast<Type>(std::forward<T>(item));
+    }
+};
+
 static constexpr inline auto identity = identity_fn{};
 static constexpr inline auto decay_copy = decay_copy_fn{};
 static constexpr inline auto copy = copy_fn{};
@@ -118,5 +128,8 @@ static constexpr inline auto make_tuple = to_tuple_fn<make_tuple_fn>{};
 
 template <std::size_t I>
 static constexpr inline auto get_element = get_element_fn<I>{};
+
+template <class T>
+static constexpr inline auto cast = cast_fn<T>{};
 
 }  // namespace cpp_pipelines

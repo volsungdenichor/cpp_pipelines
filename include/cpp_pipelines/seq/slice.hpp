@@ -7,14 +7,17 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct slice_fn
 {
-    constexpr auto operator()(std::ptrdiff_t offset, std::ptrdiff_t count) const
+    constexpr auto operator()(std::ptrdiff_t start, std::ptrdiff_t stop) const
     {
-        return drop(offset) >>= take(count);
+        return drop(start) >>= take(std::max(std::ptrdiff_t{ 0 }, stop - start));
     }
 };
+}  // namespace detail
 
-static constexpr inline auto slice = slice_fn{};
+static constexpr inline auto slice = detail::slice_fn{};
 
 }  // namespace cpp_pipelines::seq

@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct transform_zip_fn
 {
     template <class Func, class... Ranges>
@@ -91,6 +93,8 @@ struct transform_zip_fn
     }
 };
 
-static constexpr inline auto transform_zip = transform_zip_fn{};
+}  // namespace detail
+
+static constexpr inline auto transform_zip = detail::transform_zip_fn{};
 
 }  // namespace cpp_pipelines::seq

@@ -401,7 +401,8 @@ static constexpr inline auto inspect = inspect_fn{};
 
 static constexpr inline auto value_or = value_or_fn{};
 static constexpr inline auto value_or_else = value_or_else_fn{};
-static constexpr inline auto value = value_fn{};
+static constexpr inline auto value_or_throw = value_fn{};
+static const inline auto value = value_or_throw();
 
 static constexpr inline auto all_of = check_element_fn<all_of_fn>{};
 static constexpr inline auto any_of = check_element_fn<any_of_fn>{};

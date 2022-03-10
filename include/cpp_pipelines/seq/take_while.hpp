@@ -6,6 +6,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct take_while_fn
 {
     template <class Range, class Pred>
@@ -44,12 +46,11 @@ struct take_while_fn
 
             constexpr bool is_equal(const iter& other) const
             {
-                return it == other.it || (it != std::end(parent->range) && invoke(parent->pred, *it));
+                return it == other.it || invoke(parent->pred, *it);
             }
         };
 
-        constexpr auto
-        begin() const
+        constexpr auto begin() const
         {
             return iterator_interface{ iter{ this, std::begin(range) } };
         }
@@ -81,6 +82,8 @@ struct take_while_fn
     }
 };
 
-static constexpr inline auto take_while = take_while_fn{};
+}  // namespace detail
+
+static constexpr inline auto take_while = detail::take_while_fn{};
 
 }  // namespace cpp_pipelines::seq

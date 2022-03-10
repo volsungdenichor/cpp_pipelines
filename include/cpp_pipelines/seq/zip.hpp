@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct zip_fn
 {
     template <class... Ranges>
@@ -27,6 +29,8 @@ struct zip_fn
     }
 };
 
-static constexpr inline auto zip = zip_fn{};
+}  // namespace detail
+
+static constexpr inline auto zip = detail::zip_fn{};
 
 }  // namespace cpp_pipelines::seq

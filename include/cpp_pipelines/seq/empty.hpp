@@ -6,6 +6,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct empty_fn
 {
     template <class Range>
@@ -21,6 +23,8 @@ struct empty_fn
     }
 };
 
-static constexpr inline auto empty = make_pipeline(empty_fn{});
+}  // namespace detail
+
+static constexpr inline auto empty = make_pipeline(detail::empty_fn{});
 
 }  // namespace cpp_pipelines::seq

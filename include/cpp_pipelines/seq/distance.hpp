@@ -6,6 +6,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct distance_fn
 {
     template <class Range>
@@ -21,7 +23,9 @@ struct distance_fn
     }
 };
 
-static constexpr inline auto distance = make_pipeline(distance_fn{});
+}  // namespace detail
+
+static constexpr inline auto distance = make_pipeline(detail::distance_fn{});
 static constexpr inline auto size = distance;
 
 }  // namespace cpp_pipelines::seq

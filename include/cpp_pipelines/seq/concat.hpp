@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct concat_fn
 {
     template <class Range1, class Range2>
@@ -62,6 +64,8 @@ struct concat_fn
     }
 };
 
-static constexpr inline auto concat = concat_fn{};
+}  // namespace detail
+
+static constexpr inline auto concat = detail::concat_fn{};
 
 }  // namespace cpp_pipelines::seq

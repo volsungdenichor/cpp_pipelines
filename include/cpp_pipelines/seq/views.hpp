@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines
 {
+namespace detail
+{
 struct owning_fn
 {
     template <class Range>
@@ -81,6 +83,10 @@ struct all_fn
     }
 };
 
-static constexpr inline auto all = all_fn{};
+}  // namespace detail
+
+using detail::owning;
+using detail::ref;
+static constexpr inline auto all = detail::all_fn{};
 
 }  // namespace cpp_pipelines

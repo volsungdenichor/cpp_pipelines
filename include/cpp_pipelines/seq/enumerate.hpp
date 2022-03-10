@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct enumerate_fn
 {
     template <class Range>
@@ -84,7 +86,7 @@ struct enumerate_fn
             }
             else
             {
-                return iterator_interface{ iter{ 0, std::end(range) } };
+                return iterator_interface{ iter{ std::numeric_limits<std::ptrdiff_t>::max(), std::end(range) } };
             }
         }
     };
@@ -96,6 +98,8 @@ struct enumerate_fn
     }
 };
 
-static constexpr inline auto enumerate = make_pipeline(enumerate_fn{});
+}  // namespace detail
+
+static constexpr inline auto enumerate = make_pipeline(detail::enumerate_fn{});
 
 }  // namespace cpp_pipelines::seq

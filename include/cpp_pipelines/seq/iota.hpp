@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct iota_fn
 {
     template <class T>
@@ -56,6 +58,8 @@ struct iota_fn
     }
 };
 
-static constexpr inline auto iota = iota_fn{};
+}  // namespace detail
+
+static constexpr inline auto iota = detail::iota_fn{};
 
 }  // namespace cpp_pipelines::seq

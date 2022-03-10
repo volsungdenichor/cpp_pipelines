@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct cache_latest_fn
 {
     template <class Range>
@@ -106,6 +108,8 @@ struct cache_latest_fn
     }
 };
 
-static constexpr inline auto cache_latest = make_pipeline(cache_latest_fn{});
+}  // namespace detail
+
+static constexpr inline auto cache_latest = make_pipeline(detail::cache_latest_fn{});
 
 }  // namespace cpp_pipelines::seq

@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 template <std::size_t N>
 struct adjacent_fn
 {
@@ -22,8 +24,10 @@ private:
     }
 };
 
+}  // namespace detail
+
 template <std::size_t N>
-static constexpr inline auto adjacent = make_pipeline(adjacent_fn<N>{});
+static constexpr inline auto adjacent = make_pipeline(detail::adjacent_fn<N>{});
 static constexpr inline auto pairwise = adjacent<2>;
 
 }  // namespace cpp_pipelines::seq

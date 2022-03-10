@@ -9,6 +9,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct front_fn
 {
     template <class Range>
@@ -63,9 +65,13 @@ struct maybe_at_fn
         return drop(index) >>= maybe_front;
     }
 };
+}  // namespace detail
 
-static constexpr inline auto at = at_fn{};
-static constexpr inline auto maybe_at = maybe_at_fn{};
+using detail::front;
+using detail::maybe_front;
+
+static constexpr inline auto at = detail::at_fn{};
+static constexpr inline auto maybe_at = detail::maybe_at_fn{};
 
 static constexpr inline auto back = reverse >>= front;
 static constexpr inline auto maybe_back = reverse >>= maybe_front;

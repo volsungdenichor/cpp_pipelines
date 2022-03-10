@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 template <template <class> class Container>
 struct to_fn
 {
@@ -14,7 +16,9 @@ struct to_fn
     }
 };
 
+}  // namespace detail
+
 template <template <class> class Container>
-static constexpr inline auto to = make_pipeline(to_fn<Container>{});
+static constexpr inline auto to = make_pipeline(detail::to_fn<Container>{});
 
 }  // namespace cpp_pipelines::seq

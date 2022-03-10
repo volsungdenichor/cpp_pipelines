@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct transform_join_fn
 {
     template <class Func, class Range>
@@ -113,6 +115,8 @@ struct transform_join_fn
     }
 };
 
-static constexpr inline auto transform_join = transform_join_fn{};
+}  // namespace detail
+
+static constexpr inline auto transform_join = detail::transform_join_fn{};
 
 }  // namespace cpp_pipelines::seq

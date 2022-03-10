@@ -5,6 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct filter_fn
 {
     template <class Pred, class Range>
@@ -105,6 +107,8 @@ struct filter_fn
     }
 };
 
-static constexpr inline auto filter = filter_fn{};
+}  // namespace detail
+
+static constexpr inline auto filter = detail::filter_fn{};
 
 }  // namespace cpp_pipelines::seq

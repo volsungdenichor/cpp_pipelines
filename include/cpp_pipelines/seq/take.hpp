@@ -6,6 +6,8 @@
 
 namespace cpp_pipelines::seq
 {
+namespace detail
+{
 struct take_fn
 {
     template <class Range>
@@ -93,6 +95,8 @@ struct take_fn
     }
 };
 
-static constexpr inline auto take = take_fn{};
+}  // namespace detail
+
+static constexpr inline auto take = detail::take_fn{};
 
 }  // namespace cpp_pipelines::seq
