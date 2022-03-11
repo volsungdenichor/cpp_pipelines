@@ -129,6 +129,12 @@ static constexpr inline auto make_tuple = to_tuple_fn<make_tuple_fn>{};
 template <std::size_t I>
 static constexpr inline auto get_element = get_element_fn<I>{};
 
+static constexpr inline auto get_first = get_element<0>;
+static constexpr inline auto get_second = get_element<1>;
+
+static constexpr inline auto get_key = get_element<0>;
+static constexpr inline auto get_value = get_element<1>;
+
 template <class T>
 static constexpr inline auto cast = cast_fn<T>{};
 
