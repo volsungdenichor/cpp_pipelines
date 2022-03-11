@@ -303,28 +303,12 @@ struct value_fn
     }
 };
 
-template <class T, class U>
-using equality_comparable_impl = decltype(std::declval<T&>() == std::declval<U&>());
-
-template <class Pred, class T>
-constexpr bool check(const Pred& pred, const T& value)
-{
-    if constexpr (is_detected_v<equality_comparable_impl, T, Pred>)
-    {
-        return value == pred;
-    }
-    else
-    {
-        return invoke(pred, value);
-    }
-}
-
 struct all_of_fn
 {
     template <class Pred, class Opt>
     constexpr bool operator()(Pred&& pred, Opt&& opt) const
     {
-        return !has_value(opt) || check(pred, get_value(opt));
+        return !has_value(opt) || invoke(pred, get_value(opt));
     }
 };
 
@@ -333,7 +317,7 @@ struct any_of_fn
     template <class Pred, class Opt>
     constexpr bool operator()(Pred&& pred, Opt&& opt) const
     {
-        return has_value(opt) && check(pred, get_value(opt));
+        return has_value(opt) && invoke(pred, get_value(opt));
     }
 };
 
@@ -342,7 +326,7 @@ struct none_of_fn
     template <class Pred, class Opt>
     constexpr bool operator()(Pred&& pred, Opt&& opt) const
     {
-        return !has_value(opt) || !check(pred, get_value(opt));
+        return !has_value(opt) || !invoke(pred, get_value(opt));
     }
 };
 
