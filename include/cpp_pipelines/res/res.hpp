@@ -41,6 +41,9 @@ public:
     {
     }
 
+    constexpr result(const result&) = default;
+    constexpr result(result&&) = default;
+
     template <class U, class = std::enable_if_t<std::is_constructible_v<value_type, U>>>
     constexpr result(U&& value)
         : data{ value_data{ std::forward<U>(value) } }
@@ -370,6 +373,30 @@ struct maybe_error_fn
     }
 };
 
+struct match_fn
+{
+    template <class OnValue, class OnError>
+    struct impl
+    {
+        OnValue on_value;
+        OnError on_error;
+
+        template <class Res>
+        constexpr auto operator()(Res&& res) const
+        {
+            return has_value(res)
+                       ? invoke(on_value, get_value(std::forward<Res>(res)))
+                       : invoke(on_error, get_error(std::forward<Res>(res)));
+        }
+    };
+
+    template <class OnValue, class OnError>
+    constexpr auto operator()(OnValue on_value, OnError on_error) const
+    {
+        return make_pipeline(impl<OnValue, OnError>{ std::move(on_value), std::move(on_error) });
+    }
+};
+
 using opt::filter;
 using opt::value;
 using opt::value_or;
@@ -391,6 +418,8 @@ static constexpr inline auto transform = transform_fn{};
 static constexpr inline auto transform_error = transform_error_fn{};
 static constexpr inline auto maybe_value = make_pipeline(maybe_value_fn{});
 static constexpr inline auto maybe_error = make_pipeline(maybe_error_fn{});
+
+static constexpr inline auto match = match_fn{};
 
 }  // namespace res
 

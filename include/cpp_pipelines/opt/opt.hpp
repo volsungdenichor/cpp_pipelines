@@ -377,6 +377,30 @@ struct accumulate_fn
     }
 };
 
+struct match_fn
+{
+    template <class OnValue, class Otherwise>
+    struct impl
+    {
+        OnValue on_value;
+        Otherwise otherwise;
+
+        template <class Opt>
+        constexpr auto operator()(Opt&& opt) const
+        {
+            return has_value(opt)
+                       ? invoke(on_value, get_value(std::forward<Opt>(opt)))
+                       : invoke(otherwise);
+        }
+    };
+
+    template <class OnValue, class Otherwise>
+    constexpr auto operator()(OnValue on_value, Otherwise otherwise) const
+    {
+        return make_pipeline(impl<OnValue, Otherwise>{ std::move(on_value), std::move(otherwise) });
+    }
+};
+
 static constexpr inline auto filter = filter_fn{};
 static constexpr inline auto and_then = and_then_fn{};
 static constexpr inline auto transform = transform_fn{};
@@ -394,5 +418,7 @@ static constexpr inline auto none_of = check_element_fn<none_of_fn>{};
 static constexpr inline auto matches = any_of;
 
 static constexpr inline auto accumulate = accumulate_fn{};
+
+static constexpr inline auto match = match_fn{};
 
 }  // namespace cpp_pipelines::opt

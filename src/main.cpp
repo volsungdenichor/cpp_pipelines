@@ -8,6 +8,7 @@
 #include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/tap.hpp>
+#include <cpp_pipelines/var.hpp>
 #include <forward_list>
 #include <iostream>
 #include <locale>
@@ -15,10 +16,18 @@
 #include <sstream>
 #include <variant>
 
+struct parse_error
+{
+};
+
+inline std::ostream& operator<<(std::ostream& os, const parse_error&)
+{
+    return os << "parse_error";
+}
 template <class T>
 struct parse_fn
 {
-    cpp_pipelines::result<T, std::string> operator()(std::string text) const
+    cpp_pipelines::result<T, parse_error> operator()(std::string text) const
     {
         std::stringstream ss{ std::move(text) };
         T result;
@@ -26,7 +35,7 @@ struct parse_fn
         if (ss)
             return std::move(result);
         else
-            return cpp_pipelines::error("Cannot parse");
+            return cpp_pipelines::error(parse_error{});
     }
 };
 
@@ -118,18 +127,11 @@ void run()
         Person{ "912", 24 },
     };
 
-    const auto func = fn(&Person::name)
-        >>= fn(parse<int>)
-        >>= res::transform([](auto _) { return _ / 10.0; })
-        >>= res::maybe_value;
+    std::variant<int, double, std::string> v = "Ala";
 
-    const auto pipe = fn() >>= seq::transform_maybe(func);
+    const auto res = v >>= var::match([](int _) { return 1; }, [](double _) { return 2; }, [](const std::string& _) { return 3; });
 
-    auto exp = 10;
-
-    algorithm::copy(
-        persons >>= pipe,
-        ostream_iterator{ std::cout, "\n" });
+    std::cout << res << std::endl;
 }
 
 int main()
