@@ -5,6 +5,7 @@
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/predicates.hpp>
+#include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <forward_list>
@@ -17,14 +18,15 @@
 template <class T>
 struct parse_fn
 {
-    std::optional<T> operator()(std::string text) const
+    cpp_pipelines::result<T, std::string> operator()(std::string text) const
     {
         std::stringstream ss{ std::move(text) };
         T result;
         ss >> result;
-        return ss
-                   ? std::optional{ std::move(result) }
-                   : std::nullopt;
+        if (ss)
+            return std::move(result);
+        else
+            return cpp_pipelines::error("Cannot parse");
     }
 };
 
@@ -106,22 +108,14 @@ void run()
         Person{ "Adam", 10 },
         Person{ "Bartek", 13 },
         Person{ "Celina", 24 },
+        Person{ "542", 24 },
         Person{ "Daria", -1 },
         Person{ "Ewa", 64 },
-
+        Person{ "912", 24 },
     };
 
-    static const auto is_vowel = p::any('a', 'e', 'i', 'o', 'u', 'y');
-    const auto pred = fn(&Person::name, seq::front, lowercase, is_vowel);
-
     const auto pipe = fn()
-        >>= seq::enumerate
-        >>= seq::drop_last(2)
-        >>= seq::reverse
-        >>= seq::maybe_front
-        >>= opt::transform(fn(get_element<1>, &Person::name))
-        >>= opt::value
-        >>= seq::slice(1, 3);
+        >>= seq::transform(fn(&Person::name, parse<int>, res::value_or(-1)));
 
     algorithm::copy(
         persons >>= pipe,
