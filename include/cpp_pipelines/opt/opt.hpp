@@ -216,7 +216,7 @@ struct inspect_fn
         {
             if (has_value(opt))
             {
-                invoke(get_value(opt));
+                invoke(func, get_value(opt));
             }
             return std::forward<Opt>(opt);
         }

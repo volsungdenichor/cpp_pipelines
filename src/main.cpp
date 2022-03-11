@@ -40,11 +40,14 @@ std::optional<double> square_root(double x)
                : std::nullopt;
 }
 
-template <class T>
-void print(const T& item)
+struct print
 {
-    std::cout << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
-}
+    template <class T>
+    void operator()(const T& item) const
+    {
+        std::cout << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
+    }
+};
 
 struct decorate_string
 {
@@ -107,6 +110,7 @@ void run()
     std::vector<Person> persons{
         Person{ "Adam", 10 },
         Person{ "Bartek", 13 },
+        Person{ "-23", 13 },
         Person{ "Celina", 24 },
         Person{ "542", 24 },
         Person{ "Daria", -1 },
@@ -114,8 +118,14 @@ void run()
         Person{ "912", 24 },
     };
 
-    const auto pipe = fn()
-        >>= seq::transform(fn(&Person::name, parse<int>, res::value_or(-1)));
+    const auto func = fn(&Person::name)
+        >>= fn(parse<int>)
+        >>= res::transform([](auto _) { return _ / 10.0; })
+        >>= res::maybe_value;
+
+    const auto pipe = fn() >>= seq::transform_maybe(func);
+
+    auto exp = 10;
 
     algorithm::copy(
         persons >>= pipe,

@@ -197,17 +197,179 @@ struct opt::customization::optional_traits<result<std::reference_wrapper<T>, E>>
     }
 };
 
+template <class... L, class... R>
+constexpr bool operator==(const result<L...>& lhs, const result<R...>& rhs)
+{
+    if (lhs.has_value() && rhs.has_value())
+    {
+        return lhs.value() == rhs.value();
+    }
+    else if (lhs.has_error() && rhs.has_error())
+    {
+        return lhs.error() == rhs.error();
+    }
+    else
+    {
+        return false;
+    }
+}
+
+template <class... L, class... R>
+constexpr bool operator!=(const result<L...>& lhs, const result<R...>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class... L, class R>
+constexpr bool operator==(const result<L...>& lhs, const error_wrapper<R>& rhs)
+{
+    return lhs.has_error() && lhs.error() == rhs.error;
+}
+
+template <class... L, class R>
+constexpr bool operator!=(const result<L...>& lhs, const error_wrapper<R>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class L, class... R>
+constexpr bool operator==(const error_wrapper<L>& lhs, const result<R...>& rhs)
+{
+    return rhs == lhs;
+}
+
+template <class L, class... R>
+constexpr bool operator!=(const error_wrapper<L>& lhs, const result<R...>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class... L, class R>
+constexpr bool operator==(const result<L...>& lhs, const R& rhs)
+{
+    return lhs.has_value() && lhs.value() == rhs;
+}
+
+template <class... L, class R>
+constexpr bool operator!=(const result<L...>& lhs, const R& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <class L, class... R>
+constexpr bool operator==(const L& lhs, const result<R...>& rhs)
+{
+    return rhs == lhs;
+}
+
+template <class L, class... R>
+constexpr bool operator!=(const L& lhs, const result<R...>& rhs)
+{
+    return !(lhs == rhs);
+}
+
 template <class T, class E>
 std::ostream& operator<<(std::ostream& os, const result<T, E>& item)
 {
     if (item)
-        return os << "ok(" << item.value() << ")";
+        return os << "ok{" << item.value() << "}";
     else
-        return os << "error(" << item.error() << ")";
+        return os << "error{" << item.error() << "}";
 }
-
 namespace res
 {
+template <class Res>
+constexpr bool has_value(Res&& item)
+{
+    return static_cast<bool>(item);
+}
+
+template <class Res>
+constexpr decltype(auto) get_value(Res&& item)
+{
+    return *std::forward<Res>(item);
+}
+
+template <class Res>
+constexpr decltype(auto) get_error(Res&& item)
+{
+    return std::forward<Res>(item).error();
+}
+struct transform_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class Res>
+        constexpr auto operator()(Res&& res) const
+        {
+            using T = std::decay_t<decltype(invoke(func, get_value(std::forward<Res>(res))))>;
+            using E = std::decay_t<decltype(get_error(std::forward<Res>(res)))>;
+            using result_type = result<T, E>;
+            return has_value(res)
+                       ? result_type{ invoke(func, get_value(std::forward<Res>(res))) }
+                       : result_type{ error(get_error(std::forward<Res>(res))) };
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
+
+struct transform_error_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class Res>
+        constexpr auto operator()(Res&& res) const
+        {
+            using T = std::decay_t<decltype(get_value(std::forward<Res>(res)))>;
+            using E = std::decay_t<decltype(invoke(func, get_error(std::forward<Res>(res))))>;
+            using result_type = result<T, E>;
+            return res
+                       ? result_type{ get_value(std::forward<Res>(res)) }
+                       : result_type{ error(invoke(func, get_error(std::forward<Res>(res)))) };
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
+
+struct maybe_value_fn
+{
+    template <class Res>
+    constexpr auto operator()(Res&& res) const
+    {
+        using result_type = decltype(opt::to_optional(get_value(std::forward<Res>(res))));
+        return res
+                   ? opt::to_optional(get_value(std::forward<Res>(res)))
+                   : result_type{};
+    }
+};
+
+struct maybe_error_fn
+{
+    template <class Res>
+    constexpr auto operator()(Res&& res) const
+    {
+        return !res
+                   ? std::optional{ get_error(std::forward<Res>(res)) }
+                   : std::nullopt;
+    }
+};
+
 using opt::filter;
 using opt::value;
 using opt::value_or;
@@ -216,6 +378,7 @@ using opt::value_or_throw;
 
 using opt::and_then;
 using opt::inspect;
+using opt::or_else;
 
 using opt::all_of;
 using opt::any_of;
@@ -223,6 +386,11 @@ using opt::matches;
 using opt::none_of;
 
 using opt::accumulate;
+
+static constexpr inline auto transform = transform_fn{};
+static constexpr inline auto transform_error = transform_error_fn{};
+static constexpr inline auto maybe_value = make_pipeline(maybe_value_fn{});
+static constexpr inline auto maybe_error = make_pipeline(maybe_error_fn{});
 
 }  // namespace res
 

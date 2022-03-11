@@ -33,9 +33,9 @@ template <class T>
 ostream& operator<<(ostream& os, const optional<T>& item)
 {
     if (item)
-        os << "{" << *item << "}";
+        os << "some{" << *item << "}";
     else
-        os << "{none}";
+        os << "none";
     return os;
 }
 
