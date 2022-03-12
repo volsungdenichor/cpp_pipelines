@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines
 {
+namespace detail
+{
 struct tap_fn
 {
     template <class Func>
@@ -25,7 +27,8 @@ struct tap_fn
         return make_pipeline(impl<Func>{ std::move(func) });
     }
 };
+}  // namespace detail
 
-static constexpr inline auto tap = tap_fn{};
+static constexpr inline auto tap = detail::tap_fn{};
 
 }  // namespace cpp_pipelines

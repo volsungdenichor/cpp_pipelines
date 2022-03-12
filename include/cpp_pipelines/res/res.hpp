@@ -281,6 +281,8 @@ std::ostream& operator<<(std::ostream& os, const result<T, E>& item)
 }
 namespace res
 {
+namespace detail
+{
 template <class Res>
 constexpr bool has_value(Res&& item)
 {
@@ -397,6 +399,8 @@ struct match_fn
     }
 };
 
+}  // namespace detail
+
 using opt::filter;
 using opt::value;
 using opt::value_or;
@@ -414,12 +418,12 @@ using opt::none_of;
 
 using opt::accumulate;
 
-static constexpr inline auto transform = transform_fn{};
-static constexpr inline auto transform_error = transform_error_fn{};
-static constexpr inline auto maybe_value = make_pipeline(maybe_value_fn{});
-static constexpr inline auto maybe_error = make_pipeline(maybe_error_fn{});
+static constexpr inline auto transform = detail::transform_fn{};
+static constexpr inline auto transform_error = detail::transform_error_fn{};
+static constexpr inline auto maybe_value = make_pipeline(detail::maybe_value_fn{});
+static constexpr inline auto maybe_error = make_pipeline(detail::maybe_error_fn{});
 
-static constexpr inline auto match = match_fn{};
+static constexpr inline auto match = detail::match_fn{};
 
 }  // namespace res
 

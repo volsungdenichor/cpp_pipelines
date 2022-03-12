@@ -14,6 +14,8 @@ struct overloaded : Ts...
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+namespace detail
+{
 struct match_fn
 {
     template <class Func>
@@ -36,6 +38,8 @@ struct match_fn
     }
 };
 
-static constexpr inline auto match = match_fn{};
+}  // namespace detail
+
+static constexpr inline auto match = detail::match_fn{};
 
 }  // namespace cpp_pipelines::var

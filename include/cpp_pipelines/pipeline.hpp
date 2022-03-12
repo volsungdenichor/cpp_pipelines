@@ -23,23 +23,23 @@ struct pipeline_t
 {
     std::tuple<Pipes...> pipes;
 
-    template <class T>
-    constexpr decltype(auto) operator()(T&& item) const
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const
     {
-        return to_return_type(call<0>(std::forward<T>(item)));
+        return to_return_type(call<0>(std::forward<Args>(args)...));
     }
 
 private:
-    template <std::size_t I, class T>
-    constexpr decltype(auto) call(T&& item) const
+    template <std::size_t I, class... Args>
+    constexpr decltype(auto) call(Args&&... args) const
     {
         if constexpr (I + 1 == sizeof...(Pipes))
         {
-            return invoke(std::get<I>(pipes), std::forward<T>(item));
+            return invoke(std::get<I>(pipes), std::forward<Args>(args)...);
         }
         else
         {
-            return call<I + 1>(invoke(std::get<I>(pipes), std::forward<T>(item)));
+            return call<I + 1>(invoke(std::get<I>(pipes), std::forward<Args>(args)...));
         }
     }
 };

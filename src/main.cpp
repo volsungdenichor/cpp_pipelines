@@ -51,10 +51,12 @@ std::optional<double> square_root(double x)
 
 struct print
 {
+    std::string prefix = {};
+
     template <class T>
     void operator()(const T& item) const
     {
-        std::cout << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
+        std::cout << prefix << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
     }
 };
 
@@ -127,11 +129,11 @@ void run()
         Person{ "912", 24 },
     };
 
-    std::variant<int, double, std::string> v = "Ala";
-
-    const auto res = v >>= var::match([](int _) { return 1; }, [](double _) { return 2; }, [](const std::string& _) { return 3; });
-
-    std::cout << res << std::endl;
+    algorithm::copy(
+        persons
+        >>= seq::reverse
+        >>= seq::transform_maybe(fn(&Person::name, tap(print{ "  > " }), parse<int>, tap(print{ "    > " }))),
+        ostream_iterator{ std::cout, "\n" });
 }
 
 int main()

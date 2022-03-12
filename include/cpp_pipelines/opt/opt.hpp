@@ -68,6 +68,8 @@ struct optional_traits<T*>
 
 };  // namespace customization
 
+namespace detail
+{
 struct to_optional_fn
 {
     template <class T>
@@ -82,8 +84,6 @@ struct to_optional_fn
         return std::optional{ std::ref(item) };
     }
 };
-
-static constexpr inline auto to_optional = to_optional_fn{};
 
 template <class Opt>
 constexpr bool has_value(Opt&& opt)
@@ -401,24 +401,31 @@ struct match_fn
     }
 };
 
-static constexpr inline auto filter = filter_fn{};
-static constexpr inline auto and_then = and_then_fn{};
-static constexpr inline auto transform = transform_fn{};
-static constexpr inline auto or_else = or_else_fn{};
-static constexpr inline auto inspect = inspect_fn{};
+}  // namespace detail
 
-static constexpr inline auto value_or = value_or_fn{};
-static constexpr inline auto value_or_else = value_or_else_fn{};
-static constexpr inline auto value_or_throw = value_fn{};
+using detail::get_value;
+using detail::has_value;
+
+static constexpr inline auto to_optional = detail::to_optional_fn{};
+
+static constexpr inline auto filter = detail::filter_fn{};
+static constexpr inline auto and_then = detail::and_then_fn{};
+static constexpr inline auto transform = detail::transform_fn{};
+static constexpr inline auto or_else = detail::or_else_fn{};
+static constexpr inline auto inspect = detail::inspect_fn{};
+
+static constexpr inline auto value_or = detail::value_or_fn{};
+static constexpr inline auto value_or_else = detail::value_or_else_fn{};
+static constexpr inline auto value_or_throw = detail::value_fn{};
 static const inline auto value = value_or_throw();
 
-static constexpr inline auto all_of = check_element_fn<all_of_fn>{};
-static constexpr inline auto any_of = check_element_fn<any_of_fn>{};
-static constexpr inline auto none_of = check_element_fn<none_of_fn>{};
+static constexpr inline auto all_of = detail::check_element_fn<detail::all_of_fn>{};
+static constexpr inline auto any_of = detail::check_element_fn<detail::any_of_fn>{};
+static constexpr inline auto none_of = detail::check_element_fn<detail::none_of_fn>{};
 static constexpr inline auto matches = any_of;
 
-static constexpr inline auto accumulate = accumulate_fn{};
+static constexpr inline auto accumulate = detail::accumulate_fn{};
 
-static constexpr inline auto match = match_fn{};
+static constexpr inline auto match = detail::match_fn{};
 
 }  // namespace cpp_pipelines::opt
