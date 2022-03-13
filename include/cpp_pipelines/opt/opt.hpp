@@ -80,7 +80,7 @@ struct has_value_fn
     }
 };
 
-static constexpr inline auto has_value = has_value_fn{};
+static constexpr inline auto has_value = make_pipeline(has_value_fn{});
 
 template <class Opt>
 constexpr decltype(auto) get_value(Opt&& opt)
@@ -421,7 +421,8 @@ struct match_fn
 using detail::get_value;
 using detail::has_value;
 
-static constexpr inline auto lift = detail::lift_fn{};
+using detail::lift;
+
 static constexpr inline auto lift_if = detail::lift_if_fn{};
 
 static constexpr inline auto filter = detail::filter_fn{};

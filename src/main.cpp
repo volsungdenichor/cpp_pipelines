@@ -105,7 +105,7 @@ struct Person
     }
 };
 
-auto linspace(float start, float stop, int n)
+constexpr auto linspace(float start, float stop, int n)
 {
     using namespace cpp_pipelines;
     return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
@@ -129,12 +129,13 @@ void run()
         Person{ "912", 24 },
     };
 
-    print{}(opt::lift(2));
+    int xxx = 42;
+    print{}(xxx >>= opt::lift_if(__ < 10));
 
     auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
 
     algorithm::copy(
-        seq::generate(f),
+        seq::generate(f) >>= seq::transform([](auto _) { return str(_ * 10); }),
         ostream_iterator{ std::cout, "\n" });
 }
 
