@@ -12,6 +12,7 @@
 #include <cpp_pipelines/seq/empty.hpp>
 #include <cpp_pipelines/seq/enumerate.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
+#include <cpp_pipelines/seq/generate.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
