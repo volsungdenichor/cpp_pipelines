@@ -144,7 +144,9 @@ void run()
     auto f = [x = 9]() mutable { return (x--) >>= take_if(__ >= 0); };
 
     algorithm::copy(
-        seq::generate(f),
+        seq::concat(
+            seq::repeat('y', 5),
+            seq::repeat('x', 3)),
         ostream_iterator{ std::cout, "\n" });
 }
 

@@ -15,6 +15,7 @@
 #include <cpp_pipelines/seq/generate.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/join.hpp>
+#include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/slice.hpp>
 #include <cpp_pipelines/seq/take.hpp>
