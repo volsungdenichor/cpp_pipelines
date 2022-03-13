@@ -42,7 +42,7 @@ struct maybe_front_fn
     constexpr auto operator()(Iter b, Iter e) const
     {
         return b != e
-                   ? opt::to_optional(*b)
+                   ? opt::lift(*b)
                    : std::nullopt;
     }
 };

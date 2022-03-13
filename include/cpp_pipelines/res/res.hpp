@@ -357,9 +357,9 @@ struct maybe_value_fn
     template <class Res>
     constexpr auto operator()(Res&& res) const
     {
-        using result_type = decltype(opt::to_optional(get_value(std::forward<Res>(res))));
+        using result_type = decltype(opt::lift(get_value(std::forward<Res>(res))));
         return res
-                   ? opt::to_optional(get_value(std::forward<Res>(res)))
+                   ? opt::lift(get_value(std::forward<Res>(res)))
                    : result_type{};
     }
 };

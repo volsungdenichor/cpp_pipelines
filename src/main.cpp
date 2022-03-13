@@ -111,18 +111,6 @@ auto linspace(float start, float stop, int n)
     return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
 }
 
-struct take_if_fn
-{
-    template <class Pred>
-    constexpr auto operator()(Pred pred) const
-    {
-        using namespace cpp_pipelines;
-        return fn(opt::to_optional) >>= opt::filter(std::move(pred));
-    }
-};
-
-static constexpr inline auto take_if = take_if_fn{};
-
 void run()
 {
     using namespace std::string_literals;
@@ -141,12 +129,12 @@ void run()
         Person{ "912", 24 },
     };
 
-    auto f = [x = 9]() mutable { return (x--) >>= take_if(__ >= 0); };
+    print{}(opt::lift(2));
+
+    auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
 
     algorithm::copy(
-        seq::concat(
-            seq::repeat('y', 5),
-            seq::repeat('x', 3)),
+        seq::generate(f),
         ostream_iterator{ std::cout, "\n" });
 }
 

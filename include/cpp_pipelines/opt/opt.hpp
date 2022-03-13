@@ -66,11 +66,29 @@ struct optional_traits<T*>
     }
 };
 
-};  // namespace customization
+}  // namespace customization
 
 namespace detail
 {
-struct to_optional_fn
+struct has_value_fn
+{
+    template <class Opt>
+    constexpr bool operator()(Opt&& opt) const
+    {
+        const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
+        return traits.has_value(opt);
+    }
+};
+
+static constexpr inline auto has_value = has_value_fn{};
+
+template <class Opt>
+constexpr decltype(auto) get_value(Opt&& opt)
+{
+    const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
+    return traits.get_value(std::forward<Opt>(opt));
+}
+struct lift_fn
 {
     template <class T>
     constexpr auto operator()(T&& item) const
@@ -85,19 +103,7 @@ struct to_optional_fn
     }
 };
 
-template <class Opt>
-constexpr bool has_value(Opt&& opt)
-{
-    const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
-    return traits.has_value(opt);
-}
-
-template <class Opt>
-constexpr decltype(auto) get_value(Opt&& opt)
-{
-    const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
-    return traits.get_value(std::forward<Opt>(opt));
-}
+static constexpr inline auto lift = make_pipeline(lift_fn{});
 
 struct filter_fn
 {
@@ -119,6 +125,15 @@ struct filter_fn
     constexpr auto operator()(Pred pred) const
     {
         return make_pipeline(impl<Pred>{ std::move(pred) });
+    }
+};
+
+struct lift_if_fn
+{
+    template <class Pred>
+    constexpr auto operator()(Pred pred) const
+    {
+        return lift >>= filter_fn{}(std::move(pred));
     }
 };
 
@@ -148,26 +163,26 @@ struct and_then_fn
 
 struct transform_fn
 {
-    template <class Func, class ToOptional>
+    template <class Func, class Lift>
     struct impl
     {
         Func func;
-        ToOptional to_optional;
+        Lift lift;
 
         template <class Opt>
         constexpr auto operator()(Opt&& opt) const
         {
-            using result_type = decltype(invoke(to_optional, invoke(func, get_value(std::forward<Opt>(opt)))));
+            using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Opt>(opt)))));
             return has_value(opt)
-                       ? invoke(to_optional, invoke(func, get_value(std::forward<Opt>(opt))))
+                       ? invoke(lift, invoke(func, get_value(std::forward<Opt>(opt))))
                        : result_type{};
         }
     };
 
-    template <class Func, class ToOptional = to_optional_fn>
-    constexpr auto operator()(Func func, ToOptional to_optional = {}) const
+    template <class Func, class Lift = lift_fn>
+    constexpr auto operator()(Func func, Lift lift = {}) const
     {
-        return make_pipeline(impl<Func, ToOptional>{ std::move(func), std::move(to_optional) });
+        return make_pipeline(impl<Func, Lift>{ std::move(func), std::move(lift) });
     }
 };
 
@@ -406,7 +421,8 @@ struct match_fn
 using detail::get_value;
 using detail::has_value;
 
-static constexpr inline auto to_optional = detail::to_optional_fn{};
+static constexpr inline auto lift = detail::lift_fn{};
+static constexpr inline auto lift_if = detail::lift_if_fn{};
 
 static constexpr inline auto filter = detail::filter_fn{};
 static constexpr inline auto and_then = detail::and_then_fn{};
