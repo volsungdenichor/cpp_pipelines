@@ -19,6 +19,7 @@
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/slice.hpp>
+#include <cpp_pipelines/seq/stride.hpp>
 #include <cpp_pipelines/seq/take.hpp>
 #include <cpp_pipelines/seq/take_last.hpp>
 #include <cpp_pipelines/seq/take_while.hpp>

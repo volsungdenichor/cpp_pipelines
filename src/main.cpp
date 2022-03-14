@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iomanip>
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
@@ -111,6 +112,11 @@ constexpr auto linspace(float start, float stop, int n)
     return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
 }
 
+const auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
+{
+    return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
+}
+
 void run()
 {
     using namespace std::string_literals;
@@ -129,14 +135,11 @@ void run()
         Person{ "912", 24 },
     };
 
-    int xxx = 42;
-    print{}(xxx >>= opt::lift_if(__ < 10));
-
     auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
 
-    algorithm::copy(
-        seq::generate(f) >>= seq::transform([](auto _) { return str(_ * 10); }),
-        ostream_iterator{ std::cout, "\n" });
+    seq::generate(f)
+    >>= seq::stride(4)
+    >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 
 int main()

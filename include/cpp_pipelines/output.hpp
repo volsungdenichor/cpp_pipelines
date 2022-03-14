@@ -7,15 +7,14 @@
 
 namespace cpp_pipelines
 {
-struct ostream_manipulator
+struct ostream_manipulator : public std::function<void(std::ostream&)>
 {
-    using function_type = std::function<void(std::ostream&)>;
-
-    function_type func;
+    using base_type = std::function<void(std::ostream&)>;
+    using base_type::base_type;
 
     friend std::ostream& operator<<(std::ostream& os, const ostream_manipulator& item)
     {
-        item.func(os);
+        item(os);
         return os;
     }
 };
