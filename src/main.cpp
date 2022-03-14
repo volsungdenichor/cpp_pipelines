@@ -7,6 +7,7 @@
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/seq.hpp>
+#include <cpp_pipelines/slice.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
@@ -117,6 +118,15 @@ const auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
 }
 
+void print_text(cpp_pipelines::const_view<std::string> txt)
+{
+    using namespace cpp_pipelines;
+    std::cout << "\"";
+    txt >>= seq::copy(ostream_iterator{ std::cout, "" });
+    std::cout << "\"";
+    std::cout << std::endl;
+}
+
 void run()
 {
     using namespace std::string_literals;
@@ -135,12 +145,10 @@ void run()
         Person{ "912", 24 },
     };
 
-    auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
+    
 
-    std::string txt = seq::concat(persons >>= seq::transform(&Person::name), seq::single("???"))
-        >>= seq::join_with(", ");
-
-    std::cout << txt << std::endl;
+    std::string_view txt = "Ala ma kota";
+    print_text(txt >>= slice(-3, {}));
 }
 
 int main()

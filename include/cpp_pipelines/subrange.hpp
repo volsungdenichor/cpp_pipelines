@@ -64,4 +64,10 @@ struct is_view_interface<subrange<Iter>> : std::true_type
 {
 };
 
+template <class Container>
+using view = subrange<decltype(std::begin(std::declval<Container&>()))>;
+
+template <class Container>
+using const_view = subrange<decltype(std::begin(std::declval<const Container&>()))>;
+
 }  // namespace cpp_pipelines
