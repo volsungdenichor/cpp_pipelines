@@ -5,10 +5,8 @@
 
 namespace cpp_pipelines::seq
 {
-
 namespace detail
 {
-
 struct stride_fn
 {
     template <class Range>
@@ -18,8 +16,8 @@ struct stride_fn
         std::ptrdiff_t step;
 
         constexpr view(Range range, std::ptrdiff_t step)
-            : range{std::move(range)}
-            , step{step}
+            : range{ std::move(range) }
+            , step{ step }
         {
         }
 
@@ -47,12 +45,12 @@ struct stride_fn
 
         constexpr auto begin() const
         {
-            return iterator_interface{iter{this, std::begin(range)}};
+            return iterator_interface{ iter{ this, std::begin(range) } };
         }
 
         constexpr auto end() const
         {
-            return iterator_interface{iter{this, std::end(range)}};
+            return iterator_interface{ iter{ this, std::end(range) } };
         }
     };
 
@@ -63,18 +61,18 @@ struct stride_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return view_interface{view{all(std::forward<Range>(range)), step}};
+            return view_interface{ view{ all(std::forward<Range>(range)), step } };
         }
     };
 
     constexpr auto operator()(std::ptrdiff_t step) const
     {
-        return make_pipeline(impl{step});
+        return make_pipeline(impl{ step });
     }
 };
 
-} // namespace detail
+}  // namespace detail
 
 static constexpr inline auto stride = detail::stride_fn{};
 
-} // namespace cpp_pipelines::seq
+}  // namespace cpp_pipelines::seq
