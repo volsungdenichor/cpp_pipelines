@@ -4,6 +4,7 @@
 #include <cpp_pipelines/seq/adjacent.hpp>
 #include <cpp_pipelines/seq/adjacent_transform.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>
+#include <cpp_pipelines/seq/chunk.hpp>
 #include <cpp_pipelines/seq/concat.hpp>
 #include <cpp_pipelines/seq/copy.hpp>
 #include <cpp_pipelines/seq/distance.hpp>
@@ -14,8 +15,10 @@
 #include <cpp_pipelines/seq/enumerate.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
+#include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/join.hpp>
+#include <cpp_pipelines/seq/join_with.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/slice.hpp>

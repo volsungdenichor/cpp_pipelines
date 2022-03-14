@@ -57,7 +57,7 @@ namespace detail
 {
 struct delimit_fn
 {
-    template <class Range, class>
+    template <class Range>
     auto operator()(Range&& range, std::string_view separator = {}) const -> ostream_manipulator
     {
         return impl(std::begin(range), std::end(range), separator);

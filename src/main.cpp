@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iomanip>
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
@@ -11,6 +10,7 @@
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
+#include <iomanip>
 #include <iostream>
 #include <locale>
 #include <optional>
@@ -137,9 +137,16 @@ void run()
 
     auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
 
-    seq::generate(f)
-    >>= seq::stride(4)
-    >>= seq::copy(ostream_iterator{ std::cout, "\n" });
+    std::string txt = persons
+        >>= seq::transform(&Person::name)
+        >>= seq::join_with(", ");
+
+    std::cout << txt << std::endl;
+
+    persons
+        >>= seq::transform(&Person::name)
+        >>= seq::join_with(", ")
+        >>= seq::copy(ostream_iterator{ std::cout, "" });
 }
 
 int main()

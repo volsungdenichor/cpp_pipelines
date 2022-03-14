@@ -1,11 +1,10 @@
 #pragma once
 
-#include <memory>
 #include <cpp_pipelines/seq/views.hpp>
+#include <memory>
 
 namespace cpp_pipelines
 {
-
 template <class T>
 struct iterable_base
 {
@@ -18,12 +17,12 @@ struct iterable_base
 
     constexpr auto begin() const
     {
-        return iterator_interface{iter{impl->begin()}};
+        return iterator_interface{ iter{ impl->begin() } };
     }
 
     constexpr auto end() const
     {
-        return iterator_interface{iter{impl->end()}};
+        return iterator_interface{ iter{ impl->end() } };
     }
 
     struct i_iterator
@@ -53,7 +52,7 @@ struct iterable_base
             inner_iter it;
 
             iterator(inner_iter it)
-                : it{it}
+                : it{ it }
             {
             }
 
@@ -79,7 +78,7 @@ struct iterable_base
         };
 
         range_wrapper(Range range)
-            : range{std::move(range)}
+            : range{ std::move(range) }
         {
         }
 
@@ -104,17 +103,17 @@ struct iterable_base
         }
 
         iter(std::unique_ptr<i_iterator> it)
-            : it{std::move(it)}
+            : it{ std::move(it) }
         {
         }
 
         iter(const iter& other)
-            : it{other.it ? other.it->clone() : nullptr}
+            : it{ other.it ? other.it->clone() : nullptr }
         {
         }
 
         iter(iter&& other)
-            : it{std::move(other.it)}
+            : it{ std::move(other.it) }
         {
         }
 
@@ -144,7 +143,7 @@ struct iterable : public view_interface<iterable_base<T>>
 
     template <class Range>
     constexpr iterable(Range&& range)
-        : base_type{std::forward<Range>(range)}
+        : base_type{ std::forward<Range>(range) }
     {
     }
 };
@@ -154,4 +153,4 @@ struct is_view_interface<iterable<T>> : std::true_type
 {
 };
 
-} // namespace cpp_pipelines
+}  // namespace cpp_pipelines
