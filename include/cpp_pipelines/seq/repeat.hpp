@@ -59,8 +59,18 @@ struct repeat_fn
     }
 };
 
+struct single_fn
+{
+    template <class T>
+    constexpr auto operator()(T value) const
+    {
+        return repeat_fn{}(std::move(value), 1);
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto repeat = detail::repeat_fn{};
+static constexpr inline auto single = detail::single_fn{};
 
 }  // namespace cpp_pipelines::seq

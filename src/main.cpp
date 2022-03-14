@@ -137,16 +137,10 @@ void run()
 
     auto f = [x = 9]() mutable { return (x--) >>= opt::lift_if(__ >= 0); };
 
-    std::string txt = persons
-        >>= seq::transform(&Person::name)
+    std::string txt = seq::concat(persons >>= seq::transform(&Person::name), seq::single("???"))
         >>= seq::join_with(", ");
 
     std::cout << txt << std::endl;
-
-    persons
-        >>= seq::transform(&Person::name)
-        >>= seq::join_with(", ")
-        >>= seq::copy(ostream_iterator{ std::cout, "" });
 }
 
 int main()
