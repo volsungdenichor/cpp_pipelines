@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <locale>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <variant>
@@ -143,10 +144,19 @@ void run()
         Person{ "Daria", -1 },
         Person{ "Ewa", 64 },
         Person{ "912", 24 },
+        Person{ "Helena", 24 },
     };
 
-    std::string txt = "        Ala ma kota        ";
-    print_text(txt >>= sub::trim_while(__ == ' ') >>= sub::drop_last(3));
+    std::multimap<int, std::string> map = persons >>= seq::transform([](const Person& p) { return std::pair{ p.age, p.name }; });
+
+    if (auto v = map >>= seq::map_maybe_at(24))
+    {
+        std::cout << v << " " << demangle(typeid(v).name()) << std::endl;
+    }
+    else
+    {
+        std::cout << "-" << std::endl;
+    }
 }
 
 int main()
