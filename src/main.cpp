@@ -2,6 +2,7 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
+#include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/predicates.hpp>
@@ -11,6 +12,7 @@
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <locale>
@@ -128,6 +130,15 @@ void print_text(cpp_pipelines::const_view<std::string> txt)
     std::cout << std::endl;
 }
 
+template <class T>
+constexpr auto istream(std::istream& is)
+{
+    return cpp_pipelines::subrange{
+        std::istream_iterator<T>{ is },
+        std::istream_iterator<T>{}
+    };
+}
+
 void run()
 {
     using namespace std::string_literals;
@@ -147,16 +158,10 @@ void run()
         Person{ "Helena", 24 },
     };
 
-    std::multimap<int, std::string> map = persons >>= seq::transform([](const Person& p) { return std::pair{ p.age, p.name }; });
-
-    if (auto v = map >>= seq::map_maybe_at(24))
-    {
-        std::cout << v << " " << demangle(typeid(v).name()) << std::endl;
-    }
-    else
-    {
-        std::cout << "-" << std::endl;
-    }
+    std::ifstream s{ "file.txt" };
+    istream<double>(s)
+        >>= seq::transform([](auto _) { return 1 + _; })
+        >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 
 int main()

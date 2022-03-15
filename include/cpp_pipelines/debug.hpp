@@ -53,4 +53,10 @@ ostream& operator<<(ostream& os, const tuple<Args...>& item)
     os << ")";
     return os;
 }
+
+template <class A, class B>
+ostream& operator<<(ostream& os, const pair<A, B>& item)
+{
+    return os << "(" << item.first << ", " << item.second << ")";
+}
 }  // namespace std
