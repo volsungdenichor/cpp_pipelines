@@ -10,6 +10,7 @@
 #include <cpp_pipelines/slice.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
+#include <cpp_pipelines/source_location.hpp>
 #include <forward_list>
 #include <iomanip>
 #include <iostream>
@@ -118,13 +119,37 @@ const auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
 }
 
-void print_text(cpp_pipelines::const_view<std::string> txt)
+template <class Func>
+auto seq_inspect(Func func)
 {
-    using namespace cpp_pipelines;
-    std::cout << "\"";
-    txt >>= seq::copy(ostream_iterator{ std::cout, "" });
-    std::cout << "\"";
-    std::cout << std::endl;
+    return cpp_pipelines::seq::transform([=](auto&& item) -> decltype(auto)
+    {
+        cpp_pipelines::invoke(func, item);
+        return cpp_pipelines::to_return_type(std::forward<decltype(item)>(item));
+    });
+}
+
+template <class T>
+std::string build_type_name()
+{
+    using TR = std::remove_reference_t<T>;
+    std::string r = demangle(typeid(TR).name());
+    if (std::is_const_v<TR>)
+        r += " const";
+    if (std::is_volatile_v<TR>)
+        r += " volatile";
+    if (std::is_lvalue_reference_v<T>)
+        r += "&";
+    else if (std::is_rvalue_reference_v<T>)
+        r += "&&";
+    return r;
+}
+
+template <class T>
+std::string_view type_name()
+{
+    static const std::string name = build_type_name<T>();
+    return name;
 }
 
 void run()
@@ -134,7 +159,7 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    std::vector<Person> persons{
+    const std::vector<Person> persons{
         Person{ "Adam", 10 },
         Person{ "Bartek", 13 },
         Person{ "-23", 13 },
@@ -145,10 +170,10 @@ void run()
         Person{ "912", 24 },
     };
 
-    
-
-    std::string_view txt = "Ala ma kota";
-    print_text(txt >>= slice(-3, {}));
+    persons
+        >>= slice(-3, {})
+        >>= seq::transform(&Person::name)
+        >>= seq::copy(ostream_iterator{std::cout, "\n"});
 }
 
 int main()

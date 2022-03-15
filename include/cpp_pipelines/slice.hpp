@@ -35,7 +35,7 @@ struct slice_fn
                                         : std::ptrdiff_t{ size };
 
             const auto b = advance(begin, start_index, end);
-            const auto e = advance(b, stop_index - start_index, end);
+            const auto e = advance(b, std::max(std::ptrdiff_t{ 0 }, stop_index - start_index), end);
             return subrange{ b, e };
         };
 
