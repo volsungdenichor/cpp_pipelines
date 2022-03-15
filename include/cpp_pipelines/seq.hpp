@@ -17,6 +17,7 @@
 #include <cpp_pipelines/seq/generate.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
+#include <cpp_pipelines/seq/istream.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/join_with.hpp>
 #include <cpp_pipelines/seq/map_at.hpp>

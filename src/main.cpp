@@ -130,15 +130,6 @@ void print_text(cpp_pipelines::const_view<std::string> txt)
     std::cout << std::endl;
 }
 
-template <class T>
-constexpr auto istream(std::istream& is)
-{
-    return cpp_pipelines::subrange{
-        std::istream_iterator<T>{ is },
-        std::istream_iterator<T>{}
-    };
-}
-
 void run()
 {
     using namespace std::string_literals;
@@ -158,9 +149,11 @@ void run()
         Person{ "Helena", 24 },
     };
 
-    std::ifstream s{ "file.txt" };
-    istream<double>(s)
-        >>= seq::transform([](auto _) { return 1 + _; })
+    auto words = std::istringstream{ "today is yesterday’s tomorrow" };
+
+    seq::istream<std::string>(words)
+        >>= seq::filter(fn(seq::size, __ > 2))
+        >>= seq::transform([](const auto& s) { return std::quoted(s, '"'); })
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 
