@@ -28,6 +28,6 @@ struct reverse_fn
         return subrange{ end.base(), begin.base() };
     };
 };
+static constexpr inline auto reverse = make_pipeline(reverse_fn{});
 }  // namespace detail
-static constexpr inline auto reverse = make_pipeline(detail::reverse_fn{});
 }  // namespace cpp_pipelines::sub

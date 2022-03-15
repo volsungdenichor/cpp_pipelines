@@ -4,7 +4,6 @@
 #include <cpp_pipelines/sub/drop_last.hpp>
 #include <cpp_pipelines/sub/drop_last_while.hpp>
 #include <cpp_pipelines/sub/drop_while.hpp>
-#include <cpp_pipelines/sub/reverse.hpp>
 #include <cpp_pipelines/sub/slice.hpp>
 #include <cpp_pipelines/sub/take.hpp>
 #include <cpp_pipelines/sub/take_last.hpp>

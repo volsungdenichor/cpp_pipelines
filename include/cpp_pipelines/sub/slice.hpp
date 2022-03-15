@@ -39,7 +39,7 @@ struct slice_fn
             return subrange{ b, e };
         };
 
-        std::ptrdiff_t adjust_index(std::ptrdiff_t index, std::ptrdiff_t size) const
+        constexpr std::ptrdiff_t adjust_index(std::ptrdiff_t index, std::ptrdiff_t size) const
         {
             return std::clamp(index >= 0 ? index : index + size, std::ptrdiff_t{ 0 }, size);
         }
