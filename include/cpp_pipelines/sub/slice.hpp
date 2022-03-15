@@ -6,7 +6,7 @@
 #include <cpp_pipelines/subrange.hpp>
 #include <optional>
 
-namespace cpp_pipelines
+namespace cpp_pipelines::sub
 {
 namespace detail
 {
@@ -52,4 +52,4 @@ struct slice_fn
 };
 }  // namespace detail
 static constexpr inline auto slice = detail::slice_fn{};
-}  // namespace cpp_pipelines
+}  // namespace cpp_pipelines::sub

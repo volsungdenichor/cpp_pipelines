@@ -7,7 +7,7 @@
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/seq.hpp>
-#include <cpp_pipelines/slice.hpp>
+#include <cpp_pipelines/sub.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
@@ -113,7 +113,7 @@ constexpr auto linspace(float start, float stop, int n)
     return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
 }
 
-const auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
+auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
 {
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
 }
@@ -145,10 +145,8 @@ void run()
         Person{ "912", 24 },
     };
 
-    
-
-    std::string_view txt = "Ala ma kota";
-    print_text(txt >>= slice(-3, {}));
+    std::string txt = "        Ala ma kota        ";
+    print_text(txt >>= sub::trim_while(__ == ' ') >>= sub::drop_last(3));
 }
 
 int main()
