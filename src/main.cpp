@@ -2,19 +2,22 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
+#include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/seq.hpp>
-#include <cpp_pipelines/slice.hpp>
+#include <cpp_pipelines/sub.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <cpp_pipelines/source_location.hpp>
 #include <forward_list>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <locale>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <variant>
@@ -114,7 +117,7 @@ constexpr auto linspace(float start, float stop, int n)
     return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
 }
 
-const auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
+auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
 {
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
 }
@@ -168,12 +171,15 @@ void run()
         Person{ "Daria", -1 },
         Person{ "Ewa", 64 },
         Person{ "912", 24 },
+        Person{ "Helena", 24 },
     };
 
-    persons
-        >>= slice(-3, {})
-        >>= seq::transform(&Person::name)
-        >>= seq::copy(ostream_iterator{std::cout, "\n"});
+    auto words = std::istringstream{ "today is yesterday’s tomorrow" };
+
+    seq::istream<std::string>(words)
+        >>= seq::filter(fn(seq::size, __ > 2))
+        >>= seq::transform([](const auto& s) { return std::quoted(s, '"'); })
+        >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 
 int main()

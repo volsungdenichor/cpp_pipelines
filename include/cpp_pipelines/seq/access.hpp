@@ -41,9 +41,10 @@ struct maybe_front_fn
     template <class Iter>
     constexpr auto operator()(Iter b, Iter e) const
     {
+        using result_type = decltype(opt::lift(*b));
         return b != e
                    ? opt::lift(*b)
-                   : std::nullopt;
+                   : result_type{};
     }
 };
 

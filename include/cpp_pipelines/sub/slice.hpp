@@ -6,7 +6,7 @@
 #include <cpp_pipelines/subrange.hpp>
 #include <optional>
 
-namespace cpp_pipelines
+namespace cpp_pipelines::sub
 {
 namespace detail
 {
@@ -39,7 +39,7 @@ struct slice_fn
             return subrange{ b, e };
         };
 
-        std::ptrdiff_t adjust_index(std::ptrdiff_t index, std::ptrdiff_t size) const
+        constexpr std::ptrdiff_t adjust_index(std::ptrdiff_t index, std::ptrdiff_t size) const
         {
             return std::clamp(index >= 0 ? index : index + size, std::ptrdiff_t{ 0 }, size);
         }
@@ -52,4 +52,4 @@ struct slice_fn
 };
 }  // namespace detail
 static constexpr inline auto slice = detail::slice_fn{};
-}  // namespace cpp_pipelines
+}  // namespace cpp_pipelines::sub
