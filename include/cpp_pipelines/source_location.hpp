@@ -47,8 +47,4 @@ private:
 
 }  // namespace cpp_pipelines
 
-#define SOURCE_LOCATION                         \
-    ::cpp_pipelines::source_location            \
-    {                                           \
-        __FILE__, __LINE__, __PRETTY_FUNCTION__ \
-    }
+#define SOURCE_LOCATION ::cpp_pipelines::source_location(__FILE__, __LINE__, __PRETTY_FUNCTION__)
