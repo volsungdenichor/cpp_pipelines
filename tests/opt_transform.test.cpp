@@ -15,6 +15,6 @@ struct God
 TEST_CASE("opt::transform", "[opt]")
 {
     REQUIRE((std::optional{ "Poseidon"s } >>= opt::transform(&std::string::size)) == std::optional{ 8 });
-    auto god = God{ "Zeus" };
+    auto god = God{ "Hades" };
     REQUIRE((std::addressof(god >>= opt::lift >>= opt::transform(&God::name) >>= opt::value)) == std::addressof(god.name));
 }
