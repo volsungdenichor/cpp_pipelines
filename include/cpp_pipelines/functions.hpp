@@ -69,6 +69,15 @@ struct make_tuple_fn
     }
 };
 
+struct make_pair_fn
+{
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const
+    {
+        return std::pair{std::forward<Args>(args)...};
+    }
+};
+
 template <class Policy>
 struct to_tuple_fn
 {
@@ -131,6 +140,7 @@ static constexpr inline auto unwrap = detail::unwrap_fn{};
 
 static constexpr inline auto tie = detail::to_tuple_fn<detail::tie_fn>{};
 static constexpr inline auto make_tuple = detail::to_tuple_fn<detail::make_tuple_fn>{};
+static constexpr inline auto make_pair = detail::to_tuple_fn<detail::make_pair_fn>{};
 
 template <std::size_t I>
 static constexpr inline auto get_element = detail::get_element_fn<I>{};

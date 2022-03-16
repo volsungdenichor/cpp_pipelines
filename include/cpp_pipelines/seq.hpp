@@ -28,6 +28,7 @@
 #include <cpp_pipelines/seq/take_last.hpp>
 #include <cpp_pipelines/seq/take_while.hpp>
 #include <cpp_pipelines/seq/to.hpp>
+#include <cpp_pipelines/seq/to_map.hpp>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/transform_join.hpp>
 #include <cpp_pipelines/seq/transform_maybe.hpp>

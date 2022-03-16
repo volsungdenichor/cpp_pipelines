@@ -174,11 +174,15 @@ void run()
         Person{ "Helena", 24 },
     };
 
-    auto words = std::istringstream{ "today is yesterday’s tomorrow" };
+    const auto map = persons
+        >>= seq::transform(make_pair(fn(&Person::name, seq::size), wrap))
+        >>= seq::to_multimap;
 
-    seq::istream<std::string>(words)
-        >>= seq::filter(fn(seq::size, __ > 2))
-        >>= seq::transform([](const auto& s) { return std::quoted(s, '"'); })
+    std::cout << type_name<decltype(map)>() << std::endl;
+
+    map
+        >>= map::equal_range(6)
+        >>= seq::transform(&Person::name)
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 
