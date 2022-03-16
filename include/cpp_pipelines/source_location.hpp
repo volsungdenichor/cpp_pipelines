@@ -4,16 +4,15 @@
 
 namespace cpp_pipelines
 {
-
 class source_location
 {
 public:
     source_location() = default;
 
     source_location(std::string_view file_name, std::uint32_t line, std::string_view function_name)
-        : _file_name{file_name}
-        , _line{line}
-        , _function_name{function_name}
+        : _file_name{ file_name }
+        , _line{ line }
+        , _function_name{ function_name }
     {
     }
 
@@ -46,6 +45,10 @@ private:
     std::string_view _function_name;
 };
 
-} // namespace cpp_pipelines
+}  // namespace cpp_pipelines
 
-#define SOURCE_LOCATION ::cpp_pipelines::source_location{__FILE__, __LINE__, __PRETTY_FUNCTION__}
+#define SOURCE_LOCATION                         \
+    ::cpp_pipelines::source_location            \
+    {                                           \
+        __FILE__, __LINE__, __PRETTY_FUNCTION__ \
+    }

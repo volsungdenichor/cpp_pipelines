@@ -74,7 +74,7 @@ struct make_pair_fn
     template <class... Args>
     constexpr auto operator()(Args&&... args) const
     {
-        return std::pair{std::forward<Args>(args)...};
+        return std::pair{ std::forward<Args>(args)... };
     }
 };
 
