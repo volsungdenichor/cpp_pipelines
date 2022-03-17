@@ -71,6 +71,14 @@ struct concat_fn
     {
         return view_interface{ view{ all(std::forward<Range1>(range1)), all(std::forward<Range2>(range2)) } };
     }
+
+    template <class Range1, class Range2, class... Ranges>
+    constexpr inline auto operator()(Range1&& range1, Range2&& range2, Ranges&&... ranges) const
+    {
+        return (*this)(
+            (*this)(std::forward<Range1>(range1), std::forward<Range2>(range2)),
+            std::forward<Ranges>(ranges)...);
+    }
 };
 
 }  // namespace detail

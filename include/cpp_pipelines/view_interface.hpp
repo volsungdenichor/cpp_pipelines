@@ -24,6 +24,11 @@ struct view_interface
     constexpr view_interface(const view_interface&) = default;
     constexpr view_interface(view_interface&&) = default;
 
+    constexpr view_interface(Impl impl)
+        : impl{ std::move(impl) }
+    {
+    }
+
     constexpr view_interface& operator=(view_interface other)
     {
         std::swap(impl, other.impl);

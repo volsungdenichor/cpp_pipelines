@@ -68,6 +68,11 @@ struct iterator_interface
     constexpr iterator_interface(const iterator_interface&) = default;
     constexpr iterator_interface(iterator_interface&&) = default;
 
+    constexpr iterator_interface(Impl impl)
+        : impl{ std::move(impl) }
+    {
+    }
+
     constexpr iterator_interface& operator=(iterator_interface other)
     {
         std::swap(impl, other.impl);

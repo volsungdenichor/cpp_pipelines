@@ -24,15 +24,6 @@ struct decay_copy_fn
     }
 };
 
-struct copy_fn
-{
-    template <class T>
-    constexpr auto operator()(T&& item) const -> std::decay_t<T>
-    {
-        return item;
-    }
-};
-
 struct wrap_fn
 {
     template <class T>
@@ -133,7 +124,6 @@ using detail::identity_fn;
 
 static constexpr inline auto identity = identity_fn{};
 static constexpr inline auto decay_copy = detail::decay_copy_fn{};
-static constexpr inline auto copy = detail::copy_fn{};
 
 static constexpr inline auto wrap = detail::wrap_fn{};
 static constexpr inline auto unwrap = detail::unwrap_fn{};
