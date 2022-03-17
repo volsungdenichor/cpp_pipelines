@@ -44,6 +44,8 @@ private:
     }
 };
 
+namespace detail
+{
 struct make_pipeline_fn
 {
     template <class... Pipes>
@@ -72,8 +74,10 @@ private:
     }
 };
 
-static constexpr inline auto make_pipeline = make_pipeline_fn{};
-static constexpr inline auto fn = make_pipeline_fn{};
+}  // namespace detail
+
+static constexpr inline auto make_pipeline = detail::make_pipeline_fn{};
+static constexpr inline auto fn = make_pipeline;
 
 template <class... L, class... R>
 constexpr auto operator>>=(pipeline_t<L...> lhs, pipeline_t<R...> rhs)
