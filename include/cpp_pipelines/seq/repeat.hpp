@@ -19,6 +19,14 @@ struct repeat_fn
             const view* parent;
             std::ptrdiff_t index;
 
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, std::ptrdiff_t index)
+                : parent{ parent }
+                , index{ index }
+            {
+            }
+
             constexpr const T& deref() const
             {
                 return parent->value;

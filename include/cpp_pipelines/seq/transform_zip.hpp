@@ -27,6 +27,14 @@ struct transform_zip_fn
             const view* parent;
             std::tuple<iterator_t<Ranges>...> its;
 
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, std::tuple<iterator_t<Ranges>...> its)
+                : parent{ parent }
+                , its{ its }
+            {
+            }
+
             constexpr decltype(auto) deref() const
             {
                 return to_return_type(call(index_seq{}));

@@ -2,16 +2,18 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
+#include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq.hpp>
+#include <cpp_pipelines/source_location.hpp>
 #include <cpp_pipelines/sub.hpp>
 #include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
-#include <cpp_pipelines/source_location.hpp>
 #include <forward_list>
 #include <fstream>
 #include <iomanip>
@@ -104,6 +106,7 @@ struct Person
 {
     std::string name;
     int age;
+    std::vector<std::string> children;
 
     friend std::ostream& operator<<(std::ostream& os, const Person& item)
     {
@@ -125,8 +128,7 @@ auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
 template <class Func>
 auto seq_inspect(Func func)
 {
-    return cpp_pipelines::seq::transform([=](auto&& item) -> decltype(auto)
-    {
+    return cpp_pipelines::seq::transform([=](auto&& item) -> decltype(auto) {
         cpp_pipelines::invoke(func, item);
         return cpp_pipelines::to_return_type(std::forward<decltype(item)>(item));
     });
@@ -163,26 +165,23 @@ void run()
     using p::__;
 
     const std::vector<Person> persons{
-        Person{ "Adam", 10 },
+        Person{ "Adam", 10, { "A1", "A2", "A3" } },
         Person{ "Bartek", 13 },
         Person{ "-23", 13 },
         Person{ "Celina", 24 },
         Person{ "542", 24 },
         Person{ "Daria", -1 },
-        Person{ "Ewa", 64 },
+        Person{ "Ewa", 64, { "E1" } },
         Person{ "912", 24 },
         Person{ "Helena", 24 },
     };
 
-    const auto map = persons
-        >>= seq::transform(make_pair(fn(&Person::name, seq::size), wrap))
-        >>= seq::to_multimap;
-
-    std::cout << type_name<decltype(map)>() << std::endl;
-
-    map
-        >>= map::equal_range(6)
-        >>= seq::transform(&Person::name)
+    const auto map = seq::concat(
+        persons >>= seq::transform_join([](const Person& p) { return p.children; }),
+        seq::generate([n = 3]() mutable -> std::optional<std::string> {
+            return (n--) >>= opt::lift_if(__ >= 0) >>= opt::transform(str);
+        }))
+        >>= seq::enumerate
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 

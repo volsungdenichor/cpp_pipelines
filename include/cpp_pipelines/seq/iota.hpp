@@ -17,6 +17,13 @@ struct iota_fn
         {
             T value;
 
+            constexpr iter() = default;
+
+            constexpr iter(T value)
+                : value{ value }
+            {
+            }
+
             constexpr T deref() const
             {
                 return value;

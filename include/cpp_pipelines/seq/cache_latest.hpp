@@ -28,7 +28,15 @@ struct cache_latest_fn
                 std::optional<reference>>;
 
             inner_iterator it;
-            mutable cache_type cache = {};
+            mutable cache_type cache;
+
+            constexpr iter() = default;
+
+            constexpr iter(inner_iterator it)
+                : it{ it }
+                , cache{}
+            {
+            }
 
             constexpr reference deref() const
             {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
 namespace cpp_pipelines::seq
@@ -12,7 +13,7 @@ struct generate_fn
     struct view
     {
         static constexpr auto sentinel = std::numeric_limits<std::ptrdiff_t>::max();
-        mutable Func func;
+        mutable semiregular<Func> func;
 
         constexpr view(Func func)
             : func{ std::move(func) }
@@ -25,6 +26,8 @@ struct generate_fn
             using maybe_type = std::decay_t<decltype(std::invoke(parent->func))>;
             mutable maybe_type current;
             std::ptrdiff_t index;
+
+            constexpr iter() = default;
 
             constexpr iter(const view* parent, std::ptrdiff_t index)
                 : parent{ parent }

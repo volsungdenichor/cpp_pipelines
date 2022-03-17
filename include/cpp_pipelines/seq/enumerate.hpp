@@ -24,6 +24,8 @@ struct enumerate_fn
             std::ptrdiff_t index;
             inner_iterator it;
 
+            constexpr iter() = default;
+
             constexpr iter(std::ptrdiff_t index, inner_iterator it)
                 : index{ index }
                 , it{ it }

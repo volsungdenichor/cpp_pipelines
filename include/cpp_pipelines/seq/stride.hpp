@@ -27,6 +27,14 @@ struct stride_fn
             const view* parent;
             inner_iterator it;
 
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, inner_iterator it)
+                : parent{ parent }
+                , it{ it }
+            {
+            }
+
             constexpr range_reference_t<Range> deref() const
             {
                 return *it;

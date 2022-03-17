@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
 namespace cpp_pipelines::seq
@@ -12,7 +13,7 @@ struct transform_join_fn
     template <class Func, class Range>
     struct view
     {
-        Func func;
+        semiregular<Func> func;
         Range range;
 
         constexpr view(Func func, Range range)
@@ -28,8 +29,10 @@ struct transform_join_fn
             inner_iterator it;
             using sub_type = std::decay_t<decltype(all(invoke(parent->func, *it)))>;
             using sub_iterator = iterator_t<sub_type>;
-            sub_type sub;
+            std::optional<sub_type> sub;
             sub_iterator sub_it;
+
+            constexpr iter() = default;
 
             constexpr iter(const view* parent, inner_iterator it)
                 : parent{ parent }
@@ -50,7 +53,7 @@ struct transform_join_fn
 
             constexpr void inc()
             {
-                if (++sub_it == std::end(sub))
+                if (++sub_it == std::end(*sub))
                 {
                     update();
                 }
@@ -70,12 +73,12 @@ struct transform_join_fn
             constexpr void update_sub()
             {
                 sub = all(invoke(parent->func, *it));
-                sub_it = std::begin(sub);
+                sub_it = std::begin(*sub);
             }
 
             constexpr void update()
             {
-                while (it != end() && sub_it == std::end(sub))
+                while (it != end() && sub_it == std::end(*sub))
                 {
                     if (++it != end())
                     {

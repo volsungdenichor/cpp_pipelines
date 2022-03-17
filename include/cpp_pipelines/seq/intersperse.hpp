@@ -26,7 +26,16 @@ struct intersperse_fn
             using inner_iterator = iterator_t<Range>;
             const view* parent;
             inner_iterator it;
-            bool flag = true;
+            bool flag;
+
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, inner_iterator it)
+                : parent{ parent }
+                , it{ it }
+                , flag{ true }
+            {
+            }
 
             constexpr decltype(auto) deref() const
             {

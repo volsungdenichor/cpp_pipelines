@@ -31,6 +31,14 @@ struct chunk_fn
             const view* parent;
             inner_iterator it;
 
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, inner_iterator it)
+                : parent{ parent }
+                , it{ it }
+            {
+            }
+
             constexpr auto deref() const
             {
                 return subrange{ it, advance(it, parent->size, std::end(parent->range)) };

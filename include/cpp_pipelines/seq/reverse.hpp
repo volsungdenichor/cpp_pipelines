@@ -26,6 +26,13 @@ struct reverse_fn
             using reference = iter_reference_t<inner_iterator>;
             inner_iterator it;
 
+            constexpr iter() = default;
+
+            constexpr iter(inner_iterator it)
+                : it{ it }
+            {
+            }
+
             constexpr reference deref() const
             {
                 return *std::prev(it);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
 namespace cpp_pipelines::seq
@@ -12,7 +13,7 @@ struct filter_fn
     template <class Pred, class Range>
     struct view
     {
-        Pred pred;
+        semiregular<Pred> pred;
         Range range;
 
         constexpr view(Pred pred, Range range)
@@ -27,6 +28,8 @@ struct filter_fn
             using reference = iter_reference_t<inner_iterator>;
             const view* parent;
             inner_iterator it;
+
+            constexpr iter() = default;
 
             constexpr iter(const view* parent, inner_iterator it)
                 : parent{ parent }

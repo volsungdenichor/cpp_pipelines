@@ -61,6 +61,13 @@ struct iterator_interface
 {
     Impl impl;
 
+    static_assert(std::is_default_constructible_v<Impl>, "iterator_interface must be default constructible");
+
+    constexpr iterator_interface() = default;
+
+    constexpr iterator_interface(const iterator_interface&) = default;
+    constexpr iterator_interface(iterator_interface&&) = default;
+
     constexpr iterator_interface& operator=(iterator_interface other)
     {
         std::swap(impl, other.impl);

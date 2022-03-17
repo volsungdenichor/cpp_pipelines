@@ -15,6 +15,21 @@ struct owning_fn
 
         using iterator = iterator_t<Range>;
 
+        constexpr view() = default;
+        constexpr view(const view&) = default;
+        constexpr view(view&&) = default;
+
+        constexpr view(std::shared_ptr<Range> range)
+            : range{ std::move(range) }
+        {
+        }
+
+        constexpr view& operator=(view other)
+        {
+            std::swap(range, other.range);
+            return *this;
+        }
+
         constexpr iterator begin() const
         {
             return std::begin(*range);
@@ -41,6 +56,21 @@ struct ref_fn
         Range* range;
 
         using iterator = iterator_t<Range>;
+
+        constexpr view() = default;
+        constexpr view(const view&) = default;
+        constexpr view(view&&) = default;
+
+        constexpr view(Range* range)
+            : range{ range }
+        {
+        }
+
+        constexpr view& operator=(view other)
+        {
+            std::swap(range, other.range);
+            return *this;
+        }
 
         constexpr iterator begin() const
         {

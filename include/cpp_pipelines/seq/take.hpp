@@ -29,6 +29,8 @@ struct take_fn
             inner_iterator it;
             std::ptrdiff_t index;
 
+            constexpr iter() = default;
+
             constexpr iter(const view* parent, inner_iterator it, std::ptrdiff_t index)
                 : parent{ parent }
                 , it{ it }

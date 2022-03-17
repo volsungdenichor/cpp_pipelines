@@ -30,6 +30,8 @@ struct transform_maybe_fn
             using maybe_type = std::decay_t<decltype(invoke(parent->func, *it))>;
             maybe_type current;
 
+            constexpr iter() = default;
+
             constexpr iter(const view* parent, inner_iterator it)
                 : parent{ parent }
                 , it{ it }

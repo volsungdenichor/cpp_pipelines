@@ -27,6 +27,15 @@ struct concat_fn
             iterator_t<Range1> it1;
             iterator_t<Range2> it2;
 
+            constexpr iter() = default;
+
+            constexpr iter(const view* parent, iterator_t<Range1> it1, iterator_t<Range2> it2)
+                : parent{ parent }
+                , it1{ it1 }
+                , it2{ it2 }
+            {
+            }
+
             constexpr decltype(auto) deref() const
             {
                 return to_return_type(it1 != std::end(parent->range1) ? *it1 : *it2);

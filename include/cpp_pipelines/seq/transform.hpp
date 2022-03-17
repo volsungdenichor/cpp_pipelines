@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
 namespace cpp_pipelines::seq
@@ -12,7 +13,7 @@ struct transform_fn
     template <class Func, class Range>
     struct view
     {
-        Func func;
+        semiregular<Func> func;
         Range range;
 
         constexpr view(Func func, Range range)
@@ -26,6 +27,8 @@ struct transform_fn
             using inner_iterator = iterator_t<Range>;
             const view* parent;
             inner_iterator it;
+
+            constexpr iter() = default;
 
             constexpr iter(const view* parent, inner_iterator it)
                 : parent{ parent }

@@ -19,6 +19,17 @@ struct view_interface
     static_assert(std::is_same_v<begin_iterator, end_iterator>, "begin and end must return the same type of iterator");
     static_assert(is_input_iterator<iterator>::value, "iterator type required");
 
+    constexpr view_interface() = default;
+
+    constexpr view_interface(const view_interface&) = default;
+    constexpr view_interface(view_interface&&) = default;
+
+    constexpr view_interface& operator=(view_interface other)
+    {
+        std::swap(impl, other.impl);
+        return *this;
+    }
+
     constexpr iterator begin() const
     {
         return impl.begin();
