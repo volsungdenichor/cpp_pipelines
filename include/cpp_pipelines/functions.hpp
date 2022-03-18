@@ -118,6 +118,30 @@ struct cast_fn
     }
 };
 
+struct associate_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class T>
+        constexpr auto operator()(T&& item) const
+        {
+            using key_type = std::decay_t<T>;
+            using value_type = decltype(invoke(func, std::forward<T>(item)));
+
+            return std::pair<key_type, value_type>{ key_type{ item }, invoke(func, std::forward<T>(item)) };
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return impl<Func>{ std::move(func) };
+    }
+};
+
 }  // namespace detail
 
 using detail::identity_fn;
@@ -143,5 +167,7 @@ static constexpr inline auto get_value = get_element<1>;
 
 template <class T>
 static constexpr inline auto cast = detail::cast_fn<T>{};
+
+static constexpr inline auto associate = detail::associate_fn{};
 
 }  // namespace cpp_pipelines

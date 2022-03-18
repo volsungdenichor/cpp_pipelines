@@ -164,7 +164,16 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    const std::vector<Person> persons{
+    static constexpr auto head_tail = fn(make_tuple(sub::take(1), sub::drop(1)));
+
+    static constexpr auto format_str = [](const std::string& n) {
+        const auto [head, tail] = n >>= head_tail;
+        return seq::concat(
+            head >>= seq::transform(uppercase),
+            tail >>= seq::transform(lowercase));
+    };
+
+    std::vector<Person> persons{
         Person{ "Adam", 10, { "A1", "A2", "A3" } },
         Person{ "Bartek", 13 },
         Person{ "-23", 13 },
@@ -174,20 +183,11 @@ void run()
         Person{ "Ewa", 64, { "E1" } },
         Person{ "912", 24 },
         Person{ "Helena", 24 },
+        Person{ "irena", 49 },
     };
 
-    std::cout << SOURCE_LOCATION << std::endl;
-
-    const auto map = seq::concat(
-        persons >>= seq::transform_join(&Person::children),
-        seq::generate([n = 3]() mutable -> std::optional<std::string> {
-            return (n--) >>= opt::lift_if(__ >= 0) >>= opt::transform(str);
-        }),
-        seq::iota(5) >>= seq::reverse >>= seq::transform(str),
-        seq::iota(10) >>= seq::reverse >>= seq::transform(str),
-        seq::single("???"))
-        >>= seq::transform(L(" > " + _))
-        >>= seq::enumerate
+    seq::iota(15)
+        >>= seq::transform(L(_ % 3 == 0 ? _ : -1))
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 

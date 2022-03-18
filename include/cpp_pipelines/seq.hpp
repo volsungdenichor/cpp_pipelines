@@ -15,6 +15,7 @@
 #include <cpp_pipelines/seq/enumerate.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
+#include <cpp_pipelines/seq/inspect.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/istream.hpp>

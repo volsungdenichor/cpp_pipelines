@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/invoke.hpp>
 #include <optional>
 
 namespace cpp_pipelines
@@ -41,13 +42,13 @@ public:
     template <class... Args>
     constexpr decltype(auto) operator()(Args&&... args) const
     {
-        return std::invoke(get(), std::forward<Args>(args)...);
+        return invoke(get(), std::forward<Args>(args)...);
     }
 
     template <class... Args>
     constexpr decltype(auto) operator()(Args&&... args)
     {
-        return std::invoke(get(), std::forward<Args>(args)...);
+        return invoke(get(), std::forward<Args>(args)...);
     }
 
 private:
