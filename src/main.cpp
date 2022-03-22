@@ -110,28 +110,14 @@ struct Person
 
     friend std::ostream& operator<<(std::ostream& os, const Person& item)
     {
-        return os << "Person{ name=" << item.name << " age=" << item.age << " }";
+        using namespace cpp_pipelines;
+        return os << "Person{ name=" << item.name << " age=" << item.age << " children=[" << delimit(item.children, ", ") << "] }";
     }
 };
-
-constexpr auto linspace(float start, float stop, int n)
-{
-    using namespace cpp_pipelines;
-    return seq::iota(n) >>= seq::transform([=](int _) { return start + (stop - start) * _ / (n - 1); });
-}
 
 auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
 {
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
-}
-
-template <class Func>
-auto seq_inspect(Func func)
-{
-    return cpp_pipelines::seq::transform([=](auto&& item) -> decltype(auto) {
-        cpp_pipelines::invoke(func, item);
-        return cpp_pipelines::to_return_type(std::forward<decltype(item)>(item));
-    });
 }
 
 template <class T>
@@ -150,6 +136,66 @@ std::string build_type_name()
     return r;
 }
 
+using namespace cpp_pipelines;
+
+std::ostream& operator<<(std::ostream& os, const std::forward_iterator_tag)
+{
+    return os << "forward_iterator_tag";
+}
+
+std::ostream& operator<<(std::ostream& os, const std::input_iterator_tag)
+{
+    return os << "input_iterator_tag";
+}
+
+std::ostream& operator<<(std::ostream& os, const std::bidirectional_iterator_tag)
+{
+    return os << "bidirectional_iterator_tag";
+}
+
+std::ostream& operator<<(std::ostream& os, const std::random_access_iterator_tag)
+{
+    return os << "random_access_iterator_tag";
+}
+
+template <class T>
+auto yield_if(bool condition, T item)
+{
+    return condition
+               ? std::vector<T>{ std::move(item) }
+               : std::vector<T>{};
+}
+
+struct transform_y
+{
+    int x, z;
+
+    auto operator()(int y) const
+    {
+        return yield_if(x * x + y * y == z * z, std::tuple{ x, y, z });
+    }
+};
+
+struct transform_x
+{
+    int z;
+
+    auto operator()(int x) const
+    {
+        return seq::iota(x, z + 1) >>= seq::transform_join(transform_y{ x, z }) >>= seq::collect;
+    }
+};
+
+struct transform_z
+{
+    auto operator()(int z) const
+    {
+        return seq::iota(1, z + 1) >>= seq::transform_join(transform_x{ z }) >>= seq::collect;
+    }
+};
+
+const auto triples = seq::iota(1, std::numeric_limits<int>::max()) >>= seq::transform_join(transform_z{});
+
 template <class T>
 std::string_view type_name()
 {
@@ -164,15 +210,6 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    static constexpr auto head_tail = fn(make_tuple(sub::take(1), sub::drop(1)));
-
-    static constexpr auto format_str = [](const std::string& n) {
-        const auto [head, tail] = n >>= head_tail;
-        return seq::concat(
-            head >>= seq::transform(uppercase),
-            tail >>= seq::transform(lowercase));
-    };
-
     std::vector<Person> persons{
         Person{ "Adam", 10, { "A1", "A2", "A3" } },
         Person{ "Bartek", 13 },
@@ -186,6 +223,7 @@ void run()
         Person{ "irena", 49 },
     };
 
+<<<<<<< Updated upstream
     const auto triples = seq::iota(1, std::numeric_limits<int>::max())
         >>= seq::transform_join([](int z)
         {
@@ -210,6 +248,10 @@ void run()
             return str("[", i, "] ", x, ", ", y, ", ", z);
         })
         >>= seq::take(10)
+=======
+    triples
+        >>= seq::take(30)
+>>>>>>> Stashed changes
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 

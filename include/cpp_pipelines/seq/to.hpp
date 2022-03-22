@@ -21,4 +21,6 @@ struct to_fn
 template <template <class> class Container>
 static constexpr inline auto to = make_pipeline(detail::to_fn<Container>{});
 
+static constexpr inline auto collect = to<std::vector>;
+
 }  // namespace cpp_pipelines::seq

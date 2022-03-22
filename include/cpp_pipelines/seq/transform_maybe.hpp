@@ -2,6 +2,7 @@
 
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
 namespace cpp_pipelines::seq
@@ -13,7 +14,7 @@ struct transform_maybe_fn
     template <class Func, class Range>
     struct view
     {
-        Func func;
+        semiregular<Func> func;
         Range range;
 
         constexpr view(Func func, Range range)
