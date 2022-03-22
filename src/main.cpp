@@ -159,48 +159,24 @@ std::ostream& operator<<(std::ostream& os, const std::random_access_iterator_tag
 }
 
 template <class T>
-auto yield_if(bool condition, T item)
-{
-    return condition
-               ? std::vector<T>{ std::move(item) }
-               : std::vector<T>{};
-}
-
-struct transform_y
-{
-    int x, z;
-
-    auto operator()(int y) const
-    {
-        return yield_if(x * x + y * y == z * z, std::tuple{ x, y, z });
-    }
-};
-
-struct transform_x
-{
-    int z;
-
-    auto operator()(int x) const
-    {
-        return seq::iota(x, z + 1) >>= seq::transform_join(transform_y{ x, z }) >>= seq::collect;
-    }
-};
-
-struct transform_z
-{
-    auto operator()(int z) const
-    {
-        return seq::iota(1, z + 1) >>= seq::transform_join(transform_x{ z }) >>= seq::collect;
-    }
-};
-
-const auto triples = seq::iota(1, std::numeric_limits<int>::max()) >>= seq::transform_join(transform_z{});
-
-template <class T>
 std::string_view type_name()
 {
     static const std::string name = build_type_name<T>();
     return name;
+}
+
+auto pythagorean_triples()
+{
+    using namespace cpp_pipelines;
+    return seq::iota(1, std::numeric_limits<int>::max())
+           >>= seq::transform_join([](int z) {
+                   return seq::iota(1, z + 1)
+                          >>= seq::transform_join([=](int x) {
+                                  return seq::iota(x, z + 1)
+                                         >>= seq::transform([=](int y) { return std::tuple{ x, y, z }; })
+                                         >>= seq::filter([](int x, int y, int z) { return x * x + y * y == z * z; });
+                              });
+               });
 }
 
 void run()
@@ -210,33 +186,21 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    std::vector<Person> persons{
-        Person{ "Adam", 10, { "A1", "A2", "A3" } },
-        Person{ "Bartek", 13 },
-        Person{ "-23", 13 },
-        Person{ "Celina", 24 },
-        Person{ "542", 24 },
-        Person{ "Daria", -1 },
-        Person{ "Ewa", 64, { "E1" } },
-        Person{ "912", 24 },
-        Person{ "Helena", 24 },
-        Person{ "irena", 49 },
-    };
+    std::vector<Person>
+        persons{
+            Person{ "Adam", 10, { "A1", "A2", "A3" } },
+            Person{ "Bartek", 13 },
+            Person{ "-23", 13 },
+            Person{ "Celina", 24 },
+            Person{ "542", 24 },
+            Person{ "Daria", -1 },
+            Person{ "Ewa", 64, { "E1" } },
+            Person{ "912", 24 },
+            Person{ "Helena", 24 },
+            Person{ "irena", 49 },
+        };
 
-    const auto triples = seq::iota(1, std::numeric_limits<int>::max())
-        >>= seq::transform_join([](int z) {
-                return seq::iota(1, z + 1)
-                       >>= seq::transform_join([=](int x) {
-                               return seq::iota(x, z + 1)
-                                      >>= seq::transform_maybe([=](int y) {
-                                              return x * x + y * y == z * z
-                                                         ? std::optional{ std::tuple{ x, y, z } }
-                                                         : std::nullopt;
-                                          });
-                           });
-            });
-
-    triples
+    pythagorean_triples()
         >>= seq::enumerate
         >>= seq::take(30)
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
