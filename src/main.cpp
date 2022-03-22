@@ -186,8 +186,30 @@ void run()
         Person{ "irena", 49 },
     };
 
-    seq::iota(15)
-        >>= seq::transform(L(_ % 3 == 0 ? _ : -1))
+    const auto triples = seq::iota(1, std::numeric_limits<int>::max())
+        >>= seq::transform_join([](int z)
+        {
+            return seq::iota(1, z + 1)
+                >>= seq::transform_join([=](int x)
+                {
+                    return seq::iota(x, z + 1)
+                        >>= seq::transform_maybe([=](int y)
+                        {
+                            return x * x + y * y == z * z
+                                ? std::optional{std::tuple{x, y, z }}
+                                : std::nullopt;
+                        });
+                });
+        });
+
+    triples
+        >>= seq::enumerate
+        >>= seq::transform([](auto i, const auto& tuple)
+        {
+            auto [x, y, z] = tuple;
+            return str("[", i, "] ", x, ", ", y, ", ", z);
+        })
+        >>= seq::take(10)
         >>= seq::copy(ostream_iterator{ std::cout, "\n" });
 }
 

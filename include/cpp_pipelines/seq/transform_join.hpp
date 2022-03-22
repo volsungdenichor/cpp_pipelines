@@ -29,7 +29,7 @@ struct transform_join_fn
             inner_iterator it;
             using sub_type = std::decay_t<decltype(all(invoke(parent->func, *it)))>;
             using sub_iterator = iterator_t<sub_type>;
-            std::optional<sub_type> sub;
+            std::shared_ptr<sub_type> sub;
             sub_iterator sub_it;
 
             constexpr iter() = default;
@@ -72,7 +72,7 @@ struct transform_join_fn
 
             constexpr void update_sub()
             {
-                sub = all(invoke(parent->func, *it));
+                sub = std::make_unique<sub_type>(all(invoke(parent->func, *it)));
                 sub_it = std::begin(*sub);
             }
 
