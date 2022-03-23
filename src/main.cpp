@@ -179,6 +179,47 @@ auto pythagorean_triples()
                });
 }
 
+template <class Func, class Args>
+struct bind_back_fn
+{
+    Func func;
+    Args args;
+
+    constexpr bind_back_fn(Func func, Args args)
+        : func{ std::move(func) }
+        , args{ std::move(args) }
+    {
+    }
+
+    template <class... CallArgs>
+    constexpr decltype(auto) operator()(CallArgs&&... call_args) const
+    {
+        return call(std::make_index_sequence<std::tuple_size_v<Args>>{}, std::forward<CallArgs>(call_args)...);
+    }
+
+    template <std::size_t... I, class... CallArgs>
+    constexpr decltype(auto) call(std::index_sequence<I...>, CallArgs&&... call_args) const
+    {
+        return std::invoke(func, std::forward<CallArgs>(call_args)..., std::get<I>(args)...);
+    }
+};
+
+constexpr int min(int x)
+{
+    return x;
+}
+
+template <class... Tail>
+constexpr int min(int x, Tail... tail)
+{
+    return std::min(x, min(tail...));
+}
+
+int gcd(int a, int b, int c)
+{
+    return min(std::gcd(a, b), std::gcd(a, c), std::gcd(b, c));
+}
+
 void run()
 {
     using namespace std::string_literals;
@@ -200,10 +241,10 @@ void run()
             Person{ "irena", 49 },
         };
 
-    pythagorean_triples()
-        >>= seq::enumerate
-        >>= seq::take(30)
-        >>= seq::write(std::cout, "\n");
+    auto b = bind_back(gcd, 15, 12);
+    std::cout << b(10) << std::endl;
+    std::cout << b(20) << std::endl;
+    std::cout << b(30) << std::endl;
 }
 
 int main()

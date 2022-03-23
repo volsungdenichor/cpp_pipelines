@@ -160,6 +160,45 @@ struct hash_fn
     }
 };
 
+template <bool M>
+struct bind_fn
+{
+    template <class Func, class Args>
+    struct impl
+    {
+        Func func;
+        Args args;
+
+        constexpr impl(Func func, Args args)
+            : func{ std::move(func) }
+            , args{ std::move(args) }
+        {
+        }
+
+        template <class... CallArgs>
+        constexpr decltype(auto) operator()(CallArgs&&... call_args) const
+        {
+            return call(std::make_index_sequence<std::tuple_size_v<Args>>{}, std::forward<CallArgs>(call_args)...);
+        }
+
+    private:
+        template <std::size_t... I, class... CallArgs>
+        constexpr decltype(auto) call(std::index_sequence<I...>, CallArgs&&... call_args) const
+        {
+            if constexpr (M)
+                return invoke(func, std::get<I>(args)..., std::forward<CallArgs>(call_args)...);
+            else
+                return invoke(func, std::forward<CallArgs>(call_args)..., std::get<I>(args)...);
+        }
+    };
+
+    template <class Func, class... Args>
+    constexpr auto operator()(Func func, Args... args) const
+    {
+        return impl{ std::move(func), std::tuple{ std::move(args)... } };
+    }
+};
+
 }  // namespace detail
 
 using detail::identity_fn;
@@ -190,5 +229,8 @@ static constexpr inline auto cast = detail::cast_fn<T>{};
 static constexpr inline auto associate = detail::associate_fn{};
 
 static constexpr inline auto hash = detail::hash_fn{};
+
+static constexpr inline auto bind_front = detail::bind_fn<true>{};
+static constexpr inline auto bind_back = detail::bind_fn<false>{};
 
 }  // namespace cpp_pipelines
