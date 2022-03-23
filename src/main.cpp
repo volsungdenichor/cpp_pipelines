@@ -168,7 +168,7 @@ std::string_view type_name()
 auto pythagorean_triples()
 {
     using namespace cpp_pipelines;
-    return seq::iota(1, std::numeric_limits<int>::max())
+    return seq::iota(1)
            >>= seq::transform_join([](int z) {
                    return seq::iota(1, z + 1)
                           >>= seq::transform_join([=](int x) {
@@ -203,7 +203,7 @@ void run()
     pythagorean_triples()
         >>= seq::enumerate
         >>= seq::take(30)
-        >>= seq::copy(ostream_iterator{ std::cout, "\n" });
+        >>= seq::write(std::cout, "\n");
 }
 
 int main()

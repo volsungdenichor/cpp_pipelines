@@ -15,6 +15,15 @@ struct identity_fn
     }
 };
 
+struct dereference_fn
+{
+    template <class T>
+    constexpr decltype(auto) operator()(T&& item) const
+    {
+        return *std::forward<T>(item);
+    }
+};
+
 struct decay_copy_fn
 {
     template <class T>
@@ -142,11 +151,21 @@ struct associate_fn
     }
 };
 
+struct hash_fn
+{
+    template <class T>
+    constexpr std::size_t operator()(const T& item) const
+    {
+        return std::hash<T>{}(item);
+    }
+};
+
 }  // namespace detail
 
 using detail::identity_fn;
 
 static constexpr inline auto identity = identity_fn{};
+static constexpr inline auto dereference = detail::dereference_fn{};
 static constexpr inline auto decay_copy = detail::decay_copy_fn{};
 
 static constexpr inline auto wrap = detail::wrap_fn{};
@@ -169,5 +188,7 @@ template <class T>
 static constexpr inline auto cast = detail::cast_fn<T>{};
 
 static constexpr inline auto associate = detail::associate_fn{};
+
+static constexpr inline auto hash = detail::hash_fn{};
 
 }  // namespace cpp_pipelines

@@ -59,9 +59,9 @@ struct iota_fn
     }
 
     template <class T>
-    constexpr auto operator()(T up) const
+    constexpr auto operator()(T lo) const
     {
-        return (*this)(T{}, up);
+        return (*this)(lo, std::numeric_limits<T>::max());
     }
 };
 

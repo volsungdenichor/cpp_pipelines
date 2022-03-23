@@ -6,7 +6,7 @@ namespace cpp_pipelines
 {
 namespace detail
 {
-struct tap_fn
+struct inspect_fn
 {
     template <class Func>
     struct impl
@@ -29,6 +29,7 @@ struct tap_fn
 };
 }  // namespace detail
 
-static constexpr inline auto tap = detail::tap_fn{};
+static constexpr inline auto inspect = detail::inspect_fn{};
+static constexpr inline auto tap = inspect;
 
 }  // namespace cpp_pipelines

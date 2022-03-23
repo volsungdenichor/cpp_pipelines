@@ -36,5 +36,6 @@
 #include <cpp_pipelines/seq/transform_zip.hpp>
 #include <cpp_pipelines/seq/trim_while.hpp>
 #include <cpp_pipelines/seq/views.hpp>
+#include <cpp_pipelines/seq/write.hpp>
 #include <cpp_pipelines/seq/zip.hpp>
 #include <cpp_pipelines/subrange.hpp>
