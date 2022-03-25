@@ -51,6 +51,12 @@ struct view_interface
         return { begin(), end() };
     }
 
+    template <class C, class T, class It = iterator, class = std::enable_if_t<std::is_same_v<C, iter_value_t<It>>>>
+    constexpr operator std::basic_string_view<C, T>() const
+    {
+        return { std::addressof(front()), static_cast<std::size_t>(size()) };
+    }
+
     constexpr bool empty() const
     {
         return begin() == end();
