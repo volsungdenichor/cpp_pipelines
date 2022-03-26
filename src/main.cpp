@@ -186,23 +186,26 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    std::vector<Person>
-        persons{
-            Person{ "Adam", 10, { "A1", "A2", "A3" } },
-            Person{ "Bartek", 13 },
-            Person{ "-23", 13 },
-            Person{ "Celina", 24 },
-            Person{ "542", 24 },
-            Person{ "Daria", -1 },
-            Person{ "Ewa", 64, { "E1" } },
-            Person{ "912", 24 },
-            Person{ "Helena", 24 },
-            Person{ "irena", 49 },
-        };
+    std::vector<Person> persons = {
+        Person{ "Adam", 10, { "A1", "A2", "A3" } },
+        Person{ "Bartek", 13 },
+        Person{ "-23", 13 },
+        Person{ "Celina", 24 },
+        Person{ "542", 24 },
+        Person{ "Daria", -1 },
+        Person{ "Ewa", 64, { "E1" } },
+        Person{ "912", 24 },
+        Person{ "Helena", 24 },
+        Person{ "irena", 49 },
+    };
 
-    pythagorean_triples()
-        >>= seq::take(10)
-        >>= seq::write(std::cout, "\n");
+    static const auto is_vowel = p::any('a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y');
+
+    std::string text = "Ala ma kota";
+    auto [first, second] = text >>= sub::split_at([](auto b, auto e) { return std::partition(b, e, is_vowel); });
+
+    std::cout << std::string_view{ first } << std::endl;
+    std::cout << std::string_view{ second } << std::endl;
 }
 
 int main()
