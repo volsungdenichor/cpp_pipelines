@@ -54,27 +54,11 @@ struct split_at_fn
         {
             const auto b = std::begin(range);
             const auto e = std::end(range);
-            const auto m = find(b, e);
+            using Iter = decltype(b);
+            const auto m = static_cast<Iter>(middle);
 
             return policy(b, m, e);
         };
-
-        template <class Iter>
-        constexpr Iter find(Iter b, Iter e) const
-        {
-            if constexpr (std::is_constructible_v<Iter, Middle>)
-            {
-                return middle;
-            }
-            else if constexpr (std::is_invocable_v<Middle, Iter, Iter>)
-            {
-                return std::invoke(middle, b, e);
-            }
-            else if constexpr (std::is_invocable_v<Middle, subrange<Iter>>)
-            {
-                return std::invoke(middle, subrange{ b, e });
-            }
-        }
     };
 
     template <class Middle>
