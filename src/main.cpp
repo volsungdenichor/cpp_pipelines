@@ -199,13 +199,8 @@ void run()
         Person{ "irena", 49 },
     };
 
-    static const auto is_vowel = p::any('a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y');
-
-    std::string text = "Ala ma kota";
-    auto [first, second] = text >>= sub::split_at([](auto b, auto e) { return std::partition(b, e, is_vowel); });
-
-    std::cout << std::string_view{ first } << std::endl;
-    std::cout << std::string_view{ second } << std::endl;
+    std::optional<bool> v = {};
+    std::cout << (v == false) << std::endl;
 }
 
 int main()
