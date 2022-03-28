@@ -369,9 +369,10 @@ struct maybe_error_fn
     template <class Res>
     constexpr auto operator()(Res&& res) const
     {
+        using result_type = decltype(opt::lift(get_error(std::forward<Res>(res))));
         return !res
-                   ? std::optional{ get_error(std::forward<Res>(res)) }
-                   : std::nullopt;
+                   ? opt::lift(get_error(std::forward<Res>(res)))
+                   : result_type{};
     }
 };
 
@@ -384,7 +385,7 @@ struct match_fn
         OnError on_error;
 
         template <class Res>
-        constexpr auto operator()(Res&& res) const
+        constexpr decltype(auto) operator()(Res&& res) const
         {
             return has_value(res)
                        ? invoke(on_value, get_value(std::forward<Res>(res)))
