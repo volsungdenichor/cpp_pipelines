@@ -292,13 +292,13 @@ constexpr bool has_value(Res&& item)
 template <class Res>
 constexpr decltype(auto) get_value(Res&& item)
 {
-    return *std::forward<Res>(item);
+    return to_return_type(*std::forward<Res>(item));
 }
 
 template <class Res>
 constexpr decltype(auto) get_error(Res&& item)
 {
-    return std::forward<Res>(item).error();
+    return to_return_type(std::forward<Res>(item).error());
 }
 struct transform_fn
 {
@@ -349,6 +349,24 @@ struct transform_error_fn
     constexpr auto operator()(Func func) const
     {
         return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
+
+struct value_fn
+{
+    template <class Res>
+    constexpr decltype(auto) operator()(Res&& res) const
+    {
+        return get_value(std::forward<Res>(res));
+    }
+};
+
+struct error_fn
+{
+    template <class Res>
+    constexpr decltype(auto) operator()(Res&& res) const
+    {
+        return get_error(std::forward<Res>(res));
     }
 };
 
@@ -421,6 +439,8 @@ using opt::accumulate;
 
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto transform_error = detail::transform_error_fn{};
+
+static constexpr inline auto error = make_pipeline(detail::error_fn{});
 static constexpr inline auto maybe_value = make_pipeline(detail::maybe_value_fn{});
 static constexpr inline auto maybe_error = make_pipeline(detail::maybe_error_fn{});
 

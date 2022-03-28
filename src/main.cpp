@@ -198,9 +198,6 @@ void run()
         Person{ "Helena", 24 },
         Person{ "irena", 49 },
     };
-
-    std::optional<bool> v = {};
-    std::cout << (v == false) << std::endl;
 }
 
 int main()
