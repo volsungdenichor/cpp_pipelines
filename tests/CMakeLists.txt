@@ -1,5 +1,5 @@
 set(UNIT_TEST_SOURCE_LIST
-  opt_transform.test.cpp
+  opt.test.cpp
   res.test.cpp
 )
 
