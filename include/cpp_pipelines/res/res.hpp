@@ -430,8 +430,8 @@ struct match_fn
         constexpr decltype(auto) operator()(Res&& res) const
         {
             return has_value(res)
-                       ? invoke(on_value, get_value(std::forward<Res>(res)))
-                       : invoke(on_error, get_error(std::forward<Res>(res)));
+                       ? to_return_type(invoke(on_value, get_value(std::forward<Res>(res))))
+                       : to_return_type(invoke(on_error, get_error(std::forward<Res>(res))));
         }
     };
 

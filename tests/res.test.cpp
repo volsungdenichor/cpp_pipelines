@@ -52,4 +52,7 @@ TEST_CASE("res: pipelines", "[res]")
     REQUIRE((ok >>= res::and_then([](const std::string& _) -> result<std::size_t, std::string> { return _.size(); }) >>= res::value) == 2);
 
     REQUIRE((err >>= res::and_then([](const std::string& _) -> result<std::size_t, std::string> { return _.size(); }) >>= res::error) == "No value");
+
+    REQUIRE((ok >>= res::match([](const auto&) { return 1; }, [](const auto&) { return 2; })) == 1);
+    REQUIRE((err >>= res::match([](const auto&) { return 1; }, [](const auto& e) { return 2; })) == 2);
 }
