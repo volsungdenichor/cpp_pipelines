@@ -300,6 +300,30 @@ constexpr decltype(auto) get_error(Res&& item)
 {
     return to_return_type(std::forward<Res>(item).error());
 }
+
+struct and_then_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class Res>
+        constexpr auto operator()(Res&& res) const
+        {
+            using result_type = std::decay_t<decltype(invoke(func, get_value(std::forward<Res>(res))))>;
+            return has_value(res)
+                       ? result_type{ invoke(func, get_value(std::forward<Res>(res))) }
+                       : result_type{ error(get_error(std::forward<Res>(res))) };
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
 struct transform_fn
 {
     template <class Func>
@@ -425,7 +449,7 @@ using opt::value_or;
 using opt::value_or_else;
 using opt::value_or_throw;
 
-using opt::and_then;
+static constexpr inline auto and_then = detail::and_then_fn{};
 using opt::inspect;
 using opt::or_else;
 
