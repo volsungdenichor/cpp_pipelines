@@ -420,7 +420,6 @@ struct match_fn
 
 }  // namespace detail
 
-using opt::filter;
 using opt::value;
 using opt::value_or;
 using opt::value_or_else;

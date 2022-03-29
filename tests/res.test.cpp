@@ -32,6 +32,17 @@ TEST_CASE("res: pipelines", "[res]")
     REQUIRE((ok >>= res::maybe_error) == std::nullopt);
     REQUIRE((err >>= res::maybe_value) == std::nullopt);
     REQUIRE((err >>= res::maybe_error) == std::optional{ "No value"s });
-    REQUIRE((ok >>= res::transform(add_brackets) >>= res::value) == "(ok)"s);
-    REQUIRE((err >>= res::transform_error(add_brackets) >>= res::error) == "(No value)"s);
+    REQUIRE((ok >>= res::transform(add_brackets) >>= res::value) == "(ok)");
+    REQUIRE((err >>= res::transform_error(add_brackets) >>= res::error) == "(No value)");
+    REQUIRE((ok >>= res::value) == "ok");
+    REQUIRE((ok >>= res::value_or("?")) == "ok");
+    REQUIRE((err >>= res::value_or("?")) == "?");
+
+    REQUIRE((err
+        >>= res::or_else([]() -> result<std::string, std::string> { return "144"; })
+        >>= res::value) == "144");
+
+    REQUIRE((ok
+        >>= res::and_then([](const std::string& _) -> result<std::size_t, std::string> { return _.size(); })
+        >>= res::value) == 2);
 }
