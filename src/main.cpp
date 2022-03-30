@@ -57,51 +57,6 @@ std::optional<double> square_root(double x)
                : std::nullopt;
 }
 
-struct print
-{
-    std::string prefix = {};
-
-    template <class T>
-    void operator()(const T& item) const
-    {
-        std::cout << prefix << item << " [" << demangle(typeid(item).name()) << "] [" << std::addressof(item) << "]" << std::endl;
-    }
-};
-
-struct decorate_string
-{
-    std::string_view prefix = "";
-    std::string_view suffix = "";
-
-    template <class T>
-    std::string operator()(const T& item) const
-    {
-        return cpp_pipelines::str(prefix, item, suffix);
-    }
-};
-
-template <class Func>
-struct transform_string_fn
-{
-    Func func;
-
-    std::string operator()(std::string text) const
-    {
-        return text >>= cpp_pipelines::seq::transform(std::ref(*this));
-    }
-
-    char operator()(char ch) const
-    {
-        return func(ch);
-    }
-};
-
-template <class Func>
-transform_string_fn(Func) -> transform_string_fn<Func>;
-
-static constexpr inline auto uppercase = transform_string_fn{ [](char ch) { return std::toupper(ch); } };
-static constexpr inline auto lowercase = transform_string_fn{ [](char ch) { return std::tolower(ch); } };
-
 struct Person
 {
     std::string name;
@@ -195,9 +150,11 @@ void run()
         Person{ "Daria", -1 },
         Person{ "Ewa", 64, { "E1" } },
         Person{ "912", 24 },
-        Person{ "Helena", 24 },
+        Person{ "Helena", 24, { "H1", "H2" } },
         Person{ "irena", 49 },
     };
+
+    std::cout << delimit(persons >>= seq::transform_join(&Person::children), " / ");
 }
 
 int main()

@@ -1,6 +1,7 @@
 set(UNIT_TEST_SOURCE_LIST
   opt.test.cpp
   res.test.cpp
+  var.test.cpp
 )
 
 set(TARGET_NAME tests)
