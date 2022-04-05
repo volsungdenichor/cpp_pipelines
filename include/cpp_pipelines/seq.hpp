@@ -14,7 +14,10 @@
 #include <cpp_pipelines/seq/empty.hpp>
 #include <cpp_pipelines/seq/enumerate.hpp>
 #include <cpp_pipelines/seq/filter.hpp>
+#include <cpp_pipelines/seq/for_each.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
+#include <cpp_pipelines/seq/group_by.hpp>
+#include <cpp_pipelines/seq/group_by_key.hpp>
 #include <cpp_pipelines/seq/inspect.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>

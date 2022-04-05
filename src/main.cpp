@@ -141,20 +141,11 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    std::vector<Person> persons = {
-        Person{ "Adam", 10, { "A1", "A2", "A3" } },
-        Person{ "Bartek", 13 },
-        Person{ "-23", 13 },
-        Person{ "Celina", 24 },
-        Person{ "542", 24 },
-        Person{ "Daria", -1 },
-        Person{ "Ewa", 64, { "E1" } },
-        Person{ "912", 24 },
-        Person{ "Helena", 24, { "H1", "H2" } },
-        Person{ "irena", 49 },
-    };
+    std::vector<std::string> vect = { "ala", "anna", "adam", "beata", "bartek", "celina", "dorota", "ewa", "filip", "gosia", "grzesiek" };
 
-    std::cout << delimit(persons >>= seq::transform_join(&Person::children), " / ");
+    vect
+        >>= seq::group_by_key(seq::size)
+        >>= seq::for_each([](const auto& g) { std::cout << delimit(g >>= seq::reverse, ", ") << std::endl; });
 }
 
 int main()
