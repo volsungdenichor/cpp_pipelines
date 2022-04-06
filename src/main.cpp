@@ -186,12 +186,10 @@ void run()
         >>= seq::to_multimap;
 
     map
-        >>= seq::transform(get_key)
-        >>= seq::to<std::set>
-        >>= seq::transform([&](const auto& k) { return std::pair{k, map >>= seq::map_at(k)}; })
+        >>= seq::map_items
         >>= seq::for_each([](const auto& k, const auto& v)
         {
-            std::cout << k << ": " << delimit(v >>= seq::transform(&Person::last_name), ", ") << std::endl;
+            std::cout << k << " " << delimit(v >>= seq::transform(&Person::last_name), ", ") << std::endl;
         });
 }
 
