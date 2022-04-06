@@ -17,8 +17,7 @@ struct for_each_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            std::for_each(std::begin(range), std::end(range), std::ref(func));
-            return std::monostate{};
+            return std::for_each(std::begin(range), std::end(range), func);
         }
     };
 

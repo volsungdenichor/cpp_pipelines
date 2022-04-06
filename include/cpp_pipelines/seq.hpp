@@ -5,6 +5,8 @@
 #include <cpp_pipelines/seq/adjacent_transform.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>
 #include <cpp_pipelines/seq/chunk.hpp>
+#include <cpp_pipelines/seq/chunk_by.hpp>
+#include <cpp_pipelines/seq/chunk_by_key.hpp>
 #include <cpp_pipelines/seq/concat.hpp>
 #include <cpp_pipelines/seq/copy.hpp>
 #include <cpp_pipelines/seq/distance.hpp>
@@ -16,8 +18,6 @@
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/for_each.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
-#include <cpp_pipelines/seq/group_by.hpp>
-#include <cpp_pipelines/seq/group_by_key.hpp>
 #include <cpp_pipelines/seq/inspect.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>

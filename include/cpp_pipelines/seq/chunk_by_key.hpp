@@ -8,7 +8,7 @@ namespace cpp_pipelines::seq
 {
 namespace detail
 {
-struct group_by_key_fn
+struct chunk_by_key_fn
 {
     template <class Func, class Range>
     struct view
@@ -100,5 +100,5 @@ struct group_by_key_fn
 
 }  // namespace detail
 
-static constexpr inline auto group_by_key = detail::group_by_key_fn{};
+static constexpr inline auto chunk_by_key = detail::chunk_by_key_fn{};
 }  // namespace cpp_pipelines::seq

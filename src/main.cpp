@@ -141,11 +141,29 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    std::vector<std::string> vect = { "ala", "anna", "adam", "beata", "bartek", "celina", "dorota", "ewa", "filip", "gosia", "grzesiek" };
+     std::vector<std::pair<int, int>> v = {
+        {1, 1},
+        {1, 1},
+        {1, 2},
+        {1, 2},
+        {1, 2},
+        {1, 2},
+        {2, 2},
+        {2, 2},
+        {2, 3},
+        {2, 3},
+        {2, 3},
+        {2, 3},
+    };
 
-    vect
-        >>= seq::group_by_key(seq::size)
-        >>= seq::for_each([](const auto& g) { std::cout << delimit(g >>= seq::reverse, ", ") << std::endl; });
+    v
+        >>= seq::chunk_by([](const auto& lt, const auto& rt) { return get_second(lt) == get_second(rt); })
+        >>= seq::for_each([](const auto& g)
+        {
+            std::cout << delimit(g, " ") << std::endl;
+        });
+
+
 }
 
 int main()
