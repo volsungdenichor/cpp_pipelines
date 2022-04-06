@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <cpp_pipelines/invoke.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 
 namespace cpp_pipelines::seq
@@ -17,7 +17,11 @@ struct for_each_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return std::for_each(std::begin(range), std::end(range), func);
+            for (auto&& item : std::forward<Range>(range))
+            {
+                invoke(func, std::forward<decltype(item)>(item));
+            }
+            return func;
         }
     };
 

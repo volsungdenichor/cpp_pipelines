@@ -20,6 +20,7 @@
 #include <iostream>
 #include <locale>
 #include <map>
+#include <set>
 #include <optional>
 #include <sstream>
 #include <variant>
@@ -32,6 +33,7 @@ inline std::ostream& operator<<(std::ostream& os, const parse_error&)
 {
     return os << "parse_error";
 }
+
 template <class T>
 struct parse_fn
 {
@@ -57,67 +59,29 @@ std::optional<double> square_root(double x)
                : std::nullopt;
 }
 
+enum class Sex
+{
+    male,
+    female
+};
+
 struct Person
 {
-    std::string name;
-    int age;
-    std::vector<std::string> children;
+    std::string first_name;
+    std::string last_name;
+    int birth = 0;
+    int death = 0;
+    Sex sex;
 
     friend std::ostream& operator<<(std::ostream& os, const Person& item)
     {
-        using namespace cpp_pipelines;
-        return os << "Person{ name=" << item.name << " age=" << item.age << " children=[" << delimit(item.children, ", ") << "] }";
+        return os << item.last_name << ", " << item.first_name << " (" << item.birth << " - " << item.death << ")";
     }
 };
 
 auto zero_padded(std::ptrdiff_t n) -> cpp_pipelines::ostream_manipulator
 {
     return [=](std::ostream& os) { os << std::setw(n) << std::setfill('0'); };
-}
-
-template <class T>
-std::string build_type_name()
-{
-    using TR = std::remove_reference_t<T>;
-    std::string r = demangle(typeid(TR).name());
-    if (std::is_const_v<TR>)
-        r += " const";
-    if (std::is_volatile_v<TR>)
-        r += " volatile";
-    if (std::is_lvalue_reference_v<T>)
-        r += "&";
-    else if (std::is_rvalue_reference_v<T>)
-        r += "&&";
-    return r;
-}
-
-using namespace cpp_pipelines;
-
-std::ostream& operator<<(std::ostream& os, const std::forward_iterator_tag)
-{
-    return os << "forward_iterator_tag";
-}
-
-std::ostream& operator<<(std::ostream& os, const std::input_iterator_tag)
-{
-    return os << "input_iterator_tag";
-}
-
-std::ostream& operator<<(std::ostream& os, const std::bidirectional_iterator_tag)
-{
-    return os << "bidirectional_iterator_tag";
-}
-
-std::ostream& operator<<(std::ostream& os, const std::random_access_iterator_tag)
-{
-    return os << "random_access_iterator_tag";
-}
-
-template <class T>
-std::string_view type_name()
-{
-    static const std::string name = build_type_name<T>();
-    return name;
 }
 
 constexpr auto pythagorean_triples()
@@ -134,6 +98,82 @@ constexpr auto pythagorean_triples()
                });
 }
 
+const std::vector<Person> persons = {
+    {"Adam", "Asnyk", 1838, 1897, Sex::male},
+    {"Krzysztof Kamil", "Baczyński", 1921, 1944, Sex::male},
+    {"Stanisław", "Barańczak", 1946, 2014, Sex::male},
+    {"Miron", "Białoszewski", 1922, 1983, Sex::male},
+    {"Tadeusz", "Boy-Żeleński", 1874, 1941, Sex::male},
+    {"Władysław", "Broniewski", 1897, 1962, Sex::male},
+    {"Jan", "Brzechwa", 1898, 1966, Sex::male},
+    {"Andrzej", "Bursa", 1932, 1957, Sex::male},
+    {"Józef", "Czechowicz", 1903, 1939, Sex::male},
+    {"Aleksander", "Fredro", 1793, 1876, Sex::male},
+    {"Tadeusz", "Gajcy", 1922, 1944, Sex::male},
+    {"Konstanty Ildefons", "Gałczyński", 1905, 1953, Sex::male},
+    {"Stanisław", "Grochowiak", 1934, 1976, Sex::male},
+    {"Marian", "Hemar", 1901, 1972, Sex::male},
+    {"Zbigniew", "Herbert", 1924, 1998, Sex::male},
+    {"Jarosław", "Iwaszkiewicz", 1894, 1980, Sex::male},
+    {"Bruno", "Jasieński", 1901, 1938, Sex::male},
+    {"Mieczysław", "Jastrun", 1903, 1983, Sex::male},
+    {"Anna", "Kamieńska", 1920, 1986, Sex::female},
+    {"Franciszek", "Karpiński", 1741, 1825, Sex::male},
+    {"Jan", "Kasprowicz", 1860, 1936, Sex::male},
+    {"Jan", "Kochanowski", 1530, 1584, Sex::male},
+    {"Maria", "Konopnicka", 1842, 1910, Sex::female},
+    {"Ignacy", "Krasicki", 1735, 1801, Sex::male},
+    {"Zygmunt", "Krasiński", 1812, 1859, Sex::male},
+    {"Jalu", "Kurek", 1904, 1983, Sex::male},
+    {"Jan", "Lechoń", 1899, 1956, Sex::male},
+    {"Bolesław", "Leśmian", 1877, 1937, Sex::male},
+    {"Antoni", "Malczewski", 1793, 1826, Sex::male},
+    {"Tadeusz", "Miciński", 1873, 1918, Sex::male},
+    {"Adam", "Mickiewicz", 1798, 1855, Sex::male},
+    {"Czesław", "Miłosz", 1911, 2004, Sex::male},
+    {"Stanisław", "Młodożeniec", 1895, 1959, Sex::male},
+    {"Jan Andrzej", "Morsztyn", 1621, 1693, Sex::male},
+    {"Zbigniew", "Morsztyn", 1628, 1689, Sex::male},
+    {"Daniel", "Naborowski", 1573, 1640, Sex::male},
+    {"Adam", "Naruszewicz", 1733, 1796, Sex::male},
+    {"Julian Ursyn", "Niemcewicz", 1758, 1841, Sex::male},
+    {"Cyprian Kamil", "Norwid", 1821, 1883, Sex::male},
+    {"Władysław", "Orkan", 1875, 1930, Sex::male},
+    {"Agnieszka", "Osiecka", 1936, 1997, Sex::female},
+    {"Leon", "Pasternak", 1910, 1969, Sex::male},
+    {"Maria", "Pawlikowska-Jasnorzewska", 1891, 1945, Sex::female},
+    {"Wincenty", "Pol", 1807, 1872, Sex::male},
+    {"Halina", "Poświatowska", 1935, 1967, Sex::female},
+    {"Wacław", "Potocki", 1621, 1696, Sex::male},
+    {"Kazimierz", "Tetmajer", 1865, 1940, Sex::male},
+    {"Zenon", "Przesmycki", 1861, 1944, Sex::male},
+    {"Jeremi", "Przybora", 1915, 2004, Sex::male},
+    {"Mikołaj", "Rej", 1505, 1569, Sex::male},
+    {"Tadeusz", "Różewicz", 1921, 2014, Sex::male},
+    {"Jarosław Marek", "Rymkiewicz", 1935, 2022, Sex::male},
+    {"Antoni", "Słonimski", 1895, 1976, Sex::male},
+    {"Juliusz", "Słowacki", 1809, 1849, Sex::male},
+    {"Edward", "Stachura", 1937, 1979, Sex::male},
+    {"Leopold", "Staff", 1878, 1957, Sex::male},
+    {"Władysław", "Syrokomla", 1823, 1862, Sex::male},
+    {"Włodzimierz", "Szymanowicz", 1946, 1967, Sex::male},
+    {"Wisława", "Szymborska", 1923, 2012, Sex::female},
+    {"Julian", "Tuwim", 1894, 1953, Sex::male},
+    {"Jan", "Twardowski", 1915, 2006, Sex::male},
+    {"Kornel", "Ujejski", 1823, 1897, Sex::male},
+    {"Aleksander", "Wat", 1900, 1967, Sex::male},
+    {"Adam", "Ważyk", 1905, 1982, Sex::male},
+    {"Kazimierz", "Wierzyński", 1894, 1969, Sex::male},
+    {"Stanisław Ignacy", "Witkiewicz", 1885, 1939, Sex::male},
+    {"Stefan", "Witwicki", 1801, 1847, Sex::male},
+    {"Rafał", "Wojaczek", 1945, 1971, Sex::male},
+    {"Stanisław", "Wyspiański", 1869, 1907, Sex::male},
+    {"Adam", "Zagajewski", 1945, 2021, Sex::male},
+    {"Emil", "Zegadłowicz", 1888, 1941, Sex::male},
+    {"Narcyza", "Żmichowska", 1819, 1876, Sex::female},
+    {"Jerzy", "Żuławski", 1874, 1915, Sex::male},
+};
+
 void run()
 {
     using namespace std::string_literals;
@@ -141,29 +181,18 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-     std::vector<std::pair<int, int>> v = {
-        {1, 1},
-        {1, 1},
-        {1, 2},
-        {1, 2},
-        {1, 2},
-        {1, 2},
-        {2, 2},
-        {2, 2},
-        {2, 3},
-        {2, 3},
-        {2, 3},
-        {2, 3},
-    };
+    const auto map = persons
+        >>= seq::transform([](const Person& p) { return std::pair{p.birth, std::ref(p)}; })
+        >>= seq::to_multimap;
 
-    v
-        >>= seq::chunk_by([](const auto& lt, const auto& rt) { return get_second(lt) == get_second(rt); })
-        >>= seq::for_each([](const auto& g)
+    map
+        >>= seq::transform(get_key)
+        >>= seq::to<std::set>
+        >>= seq::transform([&](const auto& k) { return std::pair{k, map >>= seq::map_at(k)}; })
+        >>= seq::for_each([](const auto& k, const auto& v)
         {
-            std::cout << delimit(g, " ") << std::endl;
+            std::cout << k << ": " << delimit(v >>= seq::transform(&Person::last_name), ", ") << std::endl;
         });
-
-
 }
 
 int main()

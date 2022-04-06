@@ -199,6 +199,28 @@ struct bind_fn
     }
 };
 
+struct proj_fn
+{
+    template <class Proj, class Func>
+    struct impl
+    {
+        Proj proj;
+        Func func;
+
+        template <class... Args>
+        constexpr decltype(auto) operator()(Args&&... args) const
+        {
+            return invoke(func, invoke(proj, args)...);
+        }
+    };
+
+    template <class Proj, class Func>
+    constexpr auto operator()(Proj proj, Func func) const
+    {
+        return impl<Proj, Func>{ std::move(proj), std::move(func) };
+    }
+};
+
 }  // namespace detail
 
 using detail::identity_fn;
@@ -232,5 +254,7 @@ static constexpr inline auto hash = detail::hash_fn{};
 
 static constexpr inline auto bind_front = detail::bind_fn<true>{};
 static constexpr inline auto bind_back = detail::bind_fn<false>{};
+
+static constexpr inline auto proj = detail::proj_fn{};
 
 }  // namespace cpp_pipelines
