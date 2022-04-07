@@ -25,6 +25,9 @@
 #include <sstream>
 #include <variant>
 
+using namespace std::string_literals;
+using namespace std::string_view_literals;
+
 struct parse_error
 {
 };
@@ -174,23 +177,69 @@ const std::vector<Person> persons = {
     {"Jerzy", "Żuławski", 1874, 1915, Sex::male},
 };
 
+template <class Iter, class Output, class Func>
+Output split(cpp_pipelines::subrange<Iter> range, Func func, Output output)
+{
+    using namespace cpp_pipelines;
+    while (true)
+    {
+        const auto separator = func(range);
+        if (separator.begin() != range.end())
+        {
+            *output++ = subrange{range.begin(), separator.begin()};
+            range = subrange{separator.end(), range.end()};
+        }
+        else
+        {
+            *output++ = range;
+            break;
+        }
+    }
+    return output;
+}
+
+template <class Iter, class Func>
+auto split(cpp_pipelines::subrange<Iter> range, Func func) -> std::vector<cpp_pipelines::subrange<Iter>>
+{
+    std::vector<cpp_pipelines::subrange<Iter>> result;
+    split(range, std::move(func), std::back_inserter(result));
+    return result;
+}
+
+auto separator(std::string_view sub)
+{
+    using namespace cpp_pipelines;
+    return [=](auto text)
+    {
+        return algorithm::search<algorithm::return_found_end>(text, sub) >>= sub::take(sub.size());
+    };
+}
+
+auto separator(char sub)
+{
+    using namespace cpp_pipelines;
+    return [=](auto text)
+    {
+        return algorithm::find<algorithm::return_found_end>(text, sub) >>= sub::take(1);
+    };
+}
+
 void run()
 {
-    using namespace std::string_literals;
     using namespace cpp_pipelines;
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    const auto map = persons
-        >>= seq::transform([](const Person& p) { return std::pair{p.birth, std::ref(p)}; })
-        >>= seq::to_multimap;
+    const auto f = [](auto s)
+    {
+        const auto first = s >>= seq::front;
+        return s >>= sub::drop_while([&](const auto _) { return _ == first; }) >>= sub::take(0);
+    };
 
-    map
-        >>= seq::map_items
-        >>= seq::for_each([](const auto& k, const auto& v)
-        {
-            std::cout << k << " " << delimit(v >>= seq::transform(&Person::last_name), ", ") << std::endl;
-        });
+    "AAaaaaaBBBBBBbBBBAA"sv
+        >>= seq::chunk_by_key([](char ch) { return std::tolower(ch); })
+        >>= seq::transform(cast<std::string_view>)
+        >>= seq::write(std::cout, "\n");
 }
 
 int main()

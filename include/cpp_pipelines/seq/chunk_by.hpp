@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cpp_pipelines/iter_utils.hpp>
+#include <cpp_pipelines/seq/chunk_base.hpp>
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/seq/views.hpp>
-#include <cpp_pipelines/subrange.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -10,67 +10,28 @@ namespace detail
 {
 struct chunk_by_fn
 {
-    template <class Compare, class Range>
-    struct view
+    template <class Compare>
+    struct policy
     {
         semiregular<Compare> compare;
-        Range range;
+
+        template <class Iter>
+        constexpr subrange<Iter> operator()(subrange<Iter> sub) const
+        {
+            const auto& first = *std::begin(sub);
+            const auto b = advance_while(std::begin(sub), [&](const auto& x) { return compare(first, x); }, std::end(sub));
+            return subrange{b, b};
+        }
+    };
+
+    template <class Compare, class Range>
+    struct view : public chunk_view_base<policy<Compare>, Range>
+    {
+        using base_type = chunk_view_base<policy<Compare>, Range>;
 
         constexpr view(Compare compare, Range range)
-            : compare{ std::move(compare) }
-            , range{ std::move(range) }
+            : base_type{policy<Compare>{std::move(compare)}, std::move(range)}
         {
-        }
-
-        struct iter
-        {
-            using inner_iterator = iterator_t<Range>;
-            const view* parent;
-            subrange<inner_iterator> current;
-
-            constexpr iter() = default;
-
-            constexpr iter(const view* parent, inner_iterator it)
-                : parent{ parent }
-                , current{ next(it) }
-            {
-            }
-
-            constexpr auto deref() const
-            {
-                return current;
-            }
-
-            constexpr void inc()
-            {
-                current = next(current.end());
-            }
-
-            constexpr bool is_equal(const iter& other) const
-            {
-                return current.begin() == other.current.begin();
-            }
-
-        private:
-            subrange<inner_iterator> next(inner_iterator it) const
-            {
-                inner_iterator prev = it;
-                while (it != std::end(parent->range) && invoke(parent->compare, *prev, *it))
-                {
-                    ++it;
-                }
-                return { prev, it };
-            }
-        };
-
-        constexpr auto begin() const
-        {
-            return iterator_interface{ iter{ this, std::begin(range) } };
-        }
-
-        constexpr auto end() const
-        {
-            return iterator_interface{ iter{ this, std::end(range) } };
         }
     };
 

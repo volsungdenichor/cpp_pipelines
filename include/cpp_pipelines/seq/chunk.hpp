@@ -1,9 +1,8 @@
 #pragma once
 
+#include <cpp_pipelines/seq/chunk_base.hpp>
 #include <cpp_pipelines/iter_utils.hpp>
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/seq/views.hpp>
-#include <cpp_pipelines/subrange.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -11,58 +10,28 @@ namespace detail
 {
 struct chunk_fn
 {
-    template <class Range>
-    struct view
+    struct policy
     {
-        Range range;
         std::ptrdiff_t size;
         std::ptrdiff_t step;
 
+        template <class Iter>
+        constexpr subrange<Iter> operator()(subrange<Iter> sub) const
+        {
+            const auto b = advance(std::begin(sub), size, std::end(sub));
+            const auto e = advance(std::begin(sub), step, std::end(sub));
+            return subrange{b, e};
+        }
+    };
+
+    template <class Range>
+    struct view : public chunk_view_base<policy, Range>
+    {
+        using base_type = chunk_view_base<policy, Range>;
+
         constexpr view(Range range, std::ptrdiff_t size, std::ptrdiff_t step)
-            : range{ std::move(range) }
-            , size{ size }
-            , step{ step }
+            : base_type{policy{ size, step }, std::move(range)}
         {
-        }
-
-        struct iter
-        {
-            using inner_iterator = iterator_t<Range>;
-            const view* parent;
-            inner_iterator it;
-
-            constexpr iter() = default;
-
-            constexpr iter(const view* parent, inner_iterator it)
-                : parent{ parent }
-                , it{ it }
-            {
-            }
-
-            constexpr auto deref() const
-            {
-                return subrange{ it, advance(it, parent->size, std::end(parent->range)) };
-            }
-
-            constexpr void inc()
-            {
-                it = advance(it, parent->step, std::end(parent->range));
-            }
-
-            constexpr bool is_equal(const iter& other) const
-            {
-                return it == other.it;
-            }
-        };
-
-        constexpr auto begin() const
-        {
-            return iterator_interface{ iter{ this, std::begin(range) } };
-        }
-
-        constexpr auto end() const
-        {
-            return iterator_interface{ iter{ this, std::end(range) } };
         }
     };
 

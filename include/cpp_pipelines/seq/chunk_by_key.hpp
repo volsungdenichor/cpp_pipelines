@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cpp_pipelines/iter_utils.hpp>
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/seq/views.hpp>
-#include <cpp_pipelines/subrange.hpp>
+#include <cpp_pipelines/seq/chunk_base.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -10,72 +10,28 @@ namespace detail
 {
 struct chunk_by_key_fn
 {
-    template <class Func, class Range>
-    struct view
+    template <class Func>
+    struct policy
     {
         semiregular<Func> func;
-        Range range;
+
+        template <class Iter>
+        constexpr subrange<Iter> operator()(subrange<Iter> sub) const
+        {
+            const auto& key = invoke(func, *std::begin(sub));
+            const auto b = advance_while(std::begin(sub), [&](const auto& x) { return invoke(func, x) == key; }, std::end(sub));
+            return subrange{b, b};
+        }
+    };
+
+    template <class Func, class Range>
+    struct view : public chunk_view_base<policy<Func>, Range>
+    {
+        using base_type = chunk_view_base<policy<Func>, Range>;
 
         constexpr view(Func func, Range range)
-            : func{ std::move(func) }
-            , range{ std::move(range) }
+            : base_type{policy<Func>{std::move(func)}, std::move(range)}
         {
-        }
-
-        struct iter
-        {
-            using inner_iterator = iterator_t<Range>;
-            const view* parent;
-            subrange<inner_iterator> current;
-
-            constexpr iter() = default;
-
-            constexpr iter(const view* parent, inner_iterator it)
-                : parent{ parent }
-                , current{ next(it) }
-            {
-            }
-
-            constexpr auto deref() const
-            {
-                return current;
-            }
-
-            constexpr void inc()
-            {
-                current = next(current.end());
-            }
-
-            constexpr bool is_equal(const iter& other) const
-            {
-                return current.begin() == other.current.begin();
-            }
-
-        private:
-            subrange<inner_iterator> next(inner_iterator it) const
-            {
-                inner_iterator prev = it;
-                if (it != std::end(parent->range))
-                {
-                    using key_type = std::decay_t<decltype(invoke(parent->func, *it))>;
-                    key_type key = invoke(parent->func, *it);
-                    while (it != std::end(parent->range) && invoke(parent->func, *it) == key)
-                    {
-                        ++it;
-                    }
-                }
-                return { prev, it };
-            }
-        };
-
-        constexpr auto begin() const
-        {
-            return iterator_interface{ iter{ this, std::begin(range) } };
-        }
-
-        constexpr auto end() const
-        {
-            return iterator_interface{ iter{ this, std::end(range) } };
         }
     };
 
