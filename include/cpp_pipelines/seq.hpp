@@ -26,6 +26,7 @@
 #include <cpp_pipelines/seq/join_with.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
+#include <cpp_pipelines/seq/split.hpp>
 #include <cpp_pipelines/seq/stride.hpp>
 #include <cpp_pipelines/seq/take.hpp>
 #include <cpp_pipelines/seq/take_last.hpp>

@@ -206,21 +206,23 @@ auto split(cpp_pipelines::subrange<Iter> range, Func func) -> std::vector<cpp_pi
     return result;
 }
 
-auto separator(std::string_view sub)
+template <class T>
+constexpr auto on_subrange(T sub)
 {
     using namespace cpp_pipelines;
-    return [=](auto text)
+    return [=](auto subrange)
     {
-        return algorithm::search<algorithm::return_found_end>(text, sub) >>= sub::take(sub.size());
+        return algorithm::search<algorithm::return_found_end>(subrange, sub) >>= sub::take(sub.size());
     };
 }
 
-auto separator(char sub)
+template <class T>
+constexpr auto on_element(T element)
 {
     using namespace cpp_pipelines;
-    return [=](auto text)
+    return [=](auto subrange)
     {
-        return algorithm::find<algorithm::return_found_end>(text, sub) >>= sub::take(1);
+        return algorithm::find<algorithm::return_found_end>(subrange, element) >>= sub::take(1);
     };
 }
 
@@ -230,14 +232,8 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    const auto f = [](auto s)
-    {
-        const auto first = s >>= seq::front;
-        return s >>= sub::drop_while([&](const auto _) { return _ == first; }) >>= sub::take(0);
-    };
-
-    "AAaaaaaBBBBBBbBBBAA"sv
-        >>= seq::chunk_by_key([](char ch) { return std::tolower(ch); })
+    "Ala ma kota"sv
+        >>= seq::split(on_element(' '))
         >>= seq::transform(cast<std::string_view>)
         >>= seq::write(std::cout, "\n");
 }
