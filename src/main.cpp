@@ -30,11 +30,12 @@ using namespace std::string_view_literals;
 
 struct parse_error
 {
+    std::string text;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const parse_error&)
+inline std::ostream& operator<<(std::ostream& os, const parse_error& item)
 {
-    return os << "parse_error";
+    return os << "parse_error: cannot parse '" << item.text << "'";
 }
 
 template <class T>
@@ -42,13 +43,13 @@ struct parse_fn
 {
     cpp_pipelines::result<T, parse_error> operator()(std::string text) const
     {
-        std::stringstream ss{ std::move(text) };
+        std::stringstream ss{ text };
         T result;
         ss >> result;
         if (ss)
             return std::move(result);
         else
-            return cpp_pipelines::error(parse_error{});
+            return cpp_pipelines::error(parse_error{ text });
     }
 };
 
@@ -183,10 +184,8 @@ void run()
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    "Ala ma kota"sv
-        >>= seq::split_on_subrange(" "sv)
-        >>= seq::transform(cast<std::string_view>)
-        >>= seq::write(std::cout, "\n");
+    const auto x = parse<int>("X5X4") >>= res::value;
+    std::cout << x << std::endl;
 }
 
 int main()
@@ -197,6 +196,6 @@ int main()
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << "exception: " << e.what() << '\n';
     }
 }

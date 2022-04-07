@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/opt.hpp>
+#include <cpp_pipelines/output.hpp>
 #include <variant>
 
 namespace cpp_pipelines
@@ -17,7 +18,18 @@ constexpr auto error(E&& e)
     return error_wrapper<std::decay_t<E>>{ std::forward<E>(e) };
 }
 
+template <class T>
 class bad_result_access : public std::runtime_error
+{
+public:
+    bad_result_access(T error)
+        : std::runtime_error{ str(error) }
+    {
+    }
+};
+
+template <>
+class bad_result_access<void> : public std::runtime_error
 {
 public:
     bad_result_access(std::string msg)
@@ -148,7 +160,7 @@ private:
     constexpr void ensure_has_value() const
     {
         if (!has_value())
-            throw bad_result_access{ "value expected, got error" };
+            throw bad_result_access<error_type>{ std::get<error_data>(data).error };
     }
 
     constexpr void ensure_has_error() const
@@ -381,7 +393,7 @@ struct value_fn
     template <class Res>
     constexpr decltype(auto) operator()(Res&& res) const
     {
-        return get_value(std::forward<Res>(res));
+        return to_return_type(std::forward<Res>(res).value());
     }
 };
 
@@ -444,7 +456,7 @@ struct match_fn
 
 }  // namespace detail
 
-using opt::value;
+static constexpr inline auto value = make_pipeline(detail::value_fn{});
 using opt::value_or;
 using opt::value_or_else;
 using opt::value_or_throw;
