@@ -177,24 +177,6 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", 1874, 1915, Sex::male },
 };
 
-template <class T>
-constexpr auto on_subrange(T sub)
-{
-    using namespace cpp_pipelines;
-    return [=](auto subrange) {
-        return algorithm::search<algorithm::return_found_end>(subrange, sub) >>= sub::take(sub.size());
-    };
-}
-
-template <class T>
-constexpr auto on_element(T element)
-{
-    using namespace cpp_pipelines;
-    return [=](auto subrange) {
-        return algorithm::find<algorithm::return_found_end>(subrange, element) >>= sub::take(1);
-    };
-}
-
 void run()
 {
     using namespace cpp_pipelines;
@@ -202,7 +184,7 @@ void run()
     using p::__;
 
     "Ala ma kota"sv
-        >>= seq::split(on_element(' '))
+        >>= seq::split_on_subrange(" "sv)
         >>= seq::transform(cast<std::string_view>)
         >>= seq::write(std::cout, "\n");
 }
