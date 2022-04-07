@@ -16,8 +16,8 @@ struct split_fn
         Range range;
 
         constexpr view(Policy policy, Range range)
-            : policy{std::move(policy)}
-            , range{std::move(range)}
+            : policy{ std::move(policy) }
+            , range{ std::move(range) }
         {
         }
 
@@ -54,11 +54,11 @@ struct split_fn
 
             constexpr void update()
             {
-                const auto sub = subrange{it, std::end(parent->range)};
+                const auto sub = subrange{ it, std::end(parent->range) };
                 const auto separator = !sub.empty()
-                    ? parent->policy(sub)
-                    : subrange{sub.end(), sub.end()};
-                current = subrange{it, separator.begin()};
+                                           ? parent->policy(sub)
+                                           : subrange{ sub.end(), sub.end() };
+                current = subrange{ it, separator.begin() };
                 it = separator.end();
             }
         };

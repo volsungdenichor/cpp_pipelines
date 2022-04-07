@@ -177,41 +177,11 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", 1874, 1915, Sex::male },
 };
 
-template <class Iter, class Output, class Func>
-Output split(cpp_pipelines::subrange<Iter> range, Func func, Output output)
-{
-    using namespace cpp_pipelines;
-    while (true)
-    {
-        const auto separator = func(range);
-        if (separator.begin() != range.end())
-        {
-            *output++ = subrange{range.begin(), separator.begin()};
-            range = subrange{separator.end(), range.end()};
-        }
-        else
-        {
-            *output++ = range;
-            break;
-        }
-    }
-    return output;
-}
-
-template <class Iter, class Func>
-auto split(cpp_pipelines::subrange<Iter> range, Func func) -> std::vector<cpp_pipelines::subrange<Iter>>
-{
-    std::vector<cpp_pipelines::subrange<Iter>> result;
-    split(range, std::move(func), std::back_inserter(result));
-    return result;
-}
-
 template <class T>
 constexpr auto on_subrange(T sub)
 {
     using namespace cpp_pipelines;
-    return [=](auto subrange)
-    {
+    return [=](auto subrange) {
         return algorithm::search<algorithm::return_found_end>(subrange, sub) >>= sub::take(sub.size());
     };
 }
@@ -220,8 +190,7 @@ template <class T>
 constexpr auto on_element(T element)
 {
     using namespace cpp_pipelines;
-    return [=](auto subrange)
-    {
+    return [=](auto subrange) {
         return algorithm::find<algorithm::return_found_end>(subrange, element) >>= sub::take(1);
     };
 }

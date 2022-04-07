@@ -18,15 +18,18 @@ struct chunk_by_fn
         constexpr subrange<Iter> operator()(subrange<Iter> sub) const
         {
             const auto& first = *std::begin(sub);
-            const auto b = advance_while(std::begin(sub), [&](const auto& x) { return compare(first, x); }, std::end(sub));
-            return subrange{b, b};
+            const auto b = advance_while(
+                std::begin(sub),
+                [&](const auto& x) { return compare(first, x); },
+                std::end(sub));
+            return subrange{ b, b };
         }
     };
 
     template <class Compare>
     constexpr auto operator()(Compare compare) const
     {
-        return split(policy<Compare>{std::move(compare)});
+        return split(policy<Compare>{ std::move(compare) });
     }
 };
 

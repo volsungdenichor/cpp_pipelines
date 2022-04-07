@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cpp_pipelines/seq/split.hpp>
 #include <cpp_pipelines/iter_utils.hpp>
+#include <cpp_pipelines/seq/split.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -19,13 +19,13 @@ struct chunk_fn
         {
             const auto b = advance(std::begin(sub), size, std::end(sub));
             const auto e = advance(std::begin(sub), step, std::end(sub));
-            return subrange{b, e};
+            return subrange{ b, e };
         }
     };
 
     constexpr auto operator()(std::ptrdiff_t size) const
     {
-        return split(policy{size, size});
+        return split(policy{ size, size });
     }
 };
 
@@ -33,7 +33,7 @@ struct slide_fn
 {
     constexpr auto operator()(std::ptrdiff_t size) const
     {
-        return split(chunk_fn::policy{size, 1});
+        return split(chunk_fn::policy{ size, 1 });
     }
 };
 

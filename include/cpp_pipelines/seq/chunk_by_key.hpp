@@ -18,15 +18,18 @@ struct chunk_by_key_fn
         constexpr subrange<Iter> operator()(subrange<Iter> sub) const
         {
             const auto& key = invoke(func, *std::begin(sub));
-            const auto b = advance_while(std::begin(sub), [&](const auto& x) { return invoke(func, x) == key; }, std::end(sub));
-            return subrange{b, b};
+            const auto b = advance_while(
+                std::begin(sub),
+                [&](const auto& x) { return invoke(func, x) == key; },
+                std::end(sub));
+            return subrange{ b, b };
         }
     };
 
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return split(policy<Func>{std::move(func)});
+        return split(policy<Func>{ std::move(func) });
     }
 };
 
