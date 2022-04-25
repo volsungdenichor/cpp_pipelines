@@ -23,6 +23,7 @@
 #include <optional>
 #include <set>
 #include <sstream>
+#include <typeindex>
 #include <variant>
 
 using namespace std::string_literals;
@@ -178,14 +179,145 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", 1874, 1915, Sex::male },
 };
 
+class event_aggregator
+{
+public:
+    using sub_id = int;
+    struct context
+    {
+        context(sub_id id, int counter)
+            : id{ id }
+            , counter{ counter }
+            , pending_unsubscription_{ false }
+        {
+        }
+
+        void unsubscribe()
+        {
+            pending_unsubscription_ = true;
+        }
+
+        bool is_pending_unsubscription() const
+        {
+            return pending_unsubscription_;
+        }
+
+        const sub_id id;
+        const int counter;
+
+    private:
+        bool pending_unsubscription_;
+    };
+    template <class E>
+    using event_handler = std::function<void(context&, const E&)>;
+
+    event_aggregator() = default;
+    event_aggregator(const event_aggregator&) = delete;
+    event_aggregator(event_aggregator&&) = default;
+
+    template <class E>
+    sub_id subscribe(event_handler<E> event_handler)
+    {
+        sub_id id = acquire_id();
+        handler_base handler = [event_handler](context& ctx, const void* e) {
+            event_handler(ctx, *static_cast<const E*>(e));
+        };
+
+        _map.emplace(get_type<E>(), sub_info{ id, std::move(handler), 0 });
+        return id;
+    }
+
+    template <class E>
+    void publish(const E& event)
+    {
+        const void* e = static_cast<const void*>(&event);
+        auto [begin, end] = _map.equal_range(get_type<E>());
+
+        std::vector<sub_id> unsubscribed;
+        unsubscribed.reserve(std::distance(begin, end));
+
+        std::for_each(begin, end, [this, e, &unsubscribed](auto& entry) {
+            sub_info& sub_info = entry.second;
+            context ctx{ sub_info.id, ++sub_info.counter };
+            sub_info.handler(ctx, e);
+            if (ctx.is_pending_unsubscription())
+            {
+                unsubscribed.push_back(sub_info.id);
+            }
+        });
+
+        for (sub_id id : unsubscribed)
+        {
+            unsubscribe(id);
+        }
+    }
+
+    void unsubscribe(sub_id id)
+    {
+        for (auto it = _map.begin(), end = _map.end(); it != end;)
+        {
+            if (it->second.id == id)
+            {
+                it = _map.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+private:
+    using handler_base = std::function<void(context&, const void*)>;
+
+    template <class T>
+    static std::type_index get_type()
+    {
+        return { typeid(T) };
+    }
+
+    sub_id acquire_id()
+    {
+        return _next_id++;
+    }
+
+    struct sub_info
+    {
+        sub_id id;
+        handler_base handler;
+        int counter;
+    };
+
+    std::multimap<std::type_index, sub_info> _map;
+    sub_id _next_id = 1;
+};
+
+struct A
+{
+    int x;
+};
+
 void run()
 {
     using namespace cpp_pipelines;
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    const auto x = parse<int>("X5X4") >>= res::value;
-    std::cout << x << std::endl;
+    event_aggregator e{};
+    e.subscribe<A>([](event_aggregator::context& ctx, const A& e) {
+        if (ctx.counter == 2)
+            ctx.unsubscribe();
+        std::cout << e.x << std::endl;
+    });
+
+    e.subscribe<A>([](event_aggregator::context& ctx, const A& e) {
+        std::cout << "    " << e.x << std::endl;
+    });
+
+    e.publish(A{ 3 });
+    e.publish(A{ 5 });
+    e.publish(A{ 7 });
+    e.publish(A{ 9 });
 }
 
 int main()
