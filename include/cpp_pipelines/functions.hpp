@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/invoke.hpp>
+#include <utility>
 
 namespace cpp_pipelines
 {
@@ -127,6 +128,15 @@ struct cast_fn
     }
 };
 
+struct as_const_fn
+{
+    template <class T>
+    constexpr decltype(auto) operator()(T& item) const
+    {
+        return std::as_const(item);
+    }
+};
+
 struct associate_fn
 {
     template <class Func>
@@ -247,6 +257,8 @@ static constexpr inline auto get_value = get_element<1>;
 
 template <class T>
 static constexpr inline auto cast = detail::cast_fn<T>{};
+
+static constexpr inline auto as_const = detail::as_const_fn{};
 
 static constexpr inline auto associate = detail::associate_fn{};
 

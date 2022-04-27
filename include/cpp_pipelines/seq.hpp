@@ -24,6 +24,7 @@
 #include <cpp_pipelines/seq/istream.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/join_with.hpp>
+#include <cpp_pipelines/seq/order_by.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/split.hpp>

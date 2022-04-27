@@ -20,7 +20,7 @@ struct equal_range_fn
         template <class Map>
         constexpr auto operator()(Map& map) const
         {
-            return subrange{ map.equal_range(key) } >>= seq::transform(get_value);
+            return subrange{ map.equal_range(key) };
         }
     };
 
@@ -31,12 +31,36 @@ struct equal_range_fn
     }
 };
 
-struct maybe_at
+struct values_at_fn
 {
+    static constexpr inline auto equal_range = equal_range_fn{};
+
     template <class K>
     constexpr auto operator()(K key) const
     {
-        return equal_range_fn{}(std::move(key)) >>= seq::maybe_front;
+        return equal_range(std::move(key)) >>= seq::transform(get_value);
+    }
+};
+
+struct maybe_at_fn
+{
+    static constexpr inline auto values_at = values_at_fn{};
+
+    template <class K>
+    constexpr auto operator()(K key) const
+    {
+        return values_at(std::move(key)) >>= seq::maybe_front;
+    }
+};
+
+struct at_fn
+{
+    static constexpr inline auto values_at = values_at_fn{};
+
+    template <class K>
+    constexpr auto operator()(K key) const
+    {
+        return values_at(std::move(key)) >>= seq::front;
     }
 };
 
@@ -75,16 +99,20 @@ struct keys_fn
 
 struct items_fn
 {
+    static constexpr inline auto values_at = values_at_fn{};
+
     template <class Map>
     constexpr auto operator()(Map& map) const
     {
-        return keys_fn{}(map) >>= seq::transform([&](const auto& key) { return std::pair{ key, map >>= equal_range_fn{}(key) }; });
+        return keys_fn{}(map) >>= seq::transform([&](const auto& key) { return std::pair{ key, map >>= values_at(key) }; });
     }
 };
 
 }  // namespace detail
 constexpr inline auto equal_range = detail::equal_range_fn{};
-constexpr inline auto maybe_at = detail::maybe_at{};
+constexpr inline auto values_at = detail::values_at_fn{};
+constexpr inline auto at = detail::at_fn{};
+constexpr inline auto maybe_at = detail::maybe_at_fn{};
 constexpr inline auto keys = make_pipeline(detail::keys_fn{});
 constexpr inline auto items = make_pipeline(detail::items_fn{});
 }  // namespace cpp_pipelines::map
