@@ -4,6 +4,7 @@
 #include <cpp_pipelines/seq/adjacent.hpp>
 #include <cpp_pipelines/seq/adjacent_transform.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>
+#include <cpp_pipelines/seq/checks.hpp>
 #include <cpp_pipelines/seq/chunk.hpp>
 #include <cpp_pipelines/seq/chunk_by.hpp>
 #include <cpp_pipelines/seq/chunk_by_key.hpp>

@@ -239,7 +239,7 @@ static constexpr inline auto identity = identity_fn{};
 static constexpr inline auto dereference = detail::dereference_fn{};
 static constexpr inline auto decay_copy = detail::decay_copy_fn{};
 
-static constexpr inline auto wrap = detail::wrap_fn{};
+static constexpr inline auto ref_wrap = detail::wrap_fn{};
 static constexpr inline auto unwrap = detail::unwrap_fn{};
 
 static constexpr inline auto tie = detail::to_tuple_fn<detail::tie_fn>{};
