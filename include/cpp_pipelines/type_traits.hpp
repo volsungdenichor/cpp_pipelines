@@ -68,7 +68,7 @@ struct convertible_to_any
 };
 
 template <class T>
-using iterator_t = decltype(std::begin(std::declval<T>()));
+using iterator_t = decltype(std::begin(std::declval<T&>()));
 
 template <class T>
 using iter_category_t = typename std::iterator_traits<T>::iterator_category;
