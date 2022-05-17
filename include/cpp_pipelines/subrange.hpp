@@ -70,4 +70,10 @@ using view = subrange<decltype(std::begin(std::declval<Container&>()))>;
 template <class Container>
 using const_view = subrange<decltype(std::begin(std::declval<const Container&>()))>;
 
+template <class T>
+using span = subrange<T*>;
+
+template <class T>
+using const_span = subrange<const T*>;
+
 }  // namespace cpp_pipelines

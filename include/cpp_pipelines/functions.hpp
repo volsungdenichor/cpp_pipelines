@@ -25,6 +25,15 @@ struct dereference_fn
     }
 };
 
+struct addressof_fn
+{
+    template <class T>
+    constexpr T* operator()(T& item) const
+    {
+        return std::addressof(item);
+    }
+};
+
 struct decay_copy_fn
 {
     template <class T>
@@ -237,6 +246,7 @@ using detail::identity_fn;
 
 static constexpr inline auto identity = identity_fn{};
 static constexpr inline auto dereference = detail::dereference_fn{};
+static constexpr inline auto addressof = detail::addressof_fn{};
 static constexpr inline auto decay_copy = detail::decay_copy_fn{};
 
 static constexpr inline auto ref_wrap = detail::wrap_fn{};
