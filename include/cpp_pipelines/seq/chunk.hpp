@@ -37,8 +37,64 @@ struct slide_fn
     }
 };
 
+struct chunk_by_fn
+{
+    template <class Compare>
+    struct policy
+    {
+        semiregular<Compare> compare;
+
+        template <class Iter>
+        constexpr subrange<Iter> operator()(subrange<Iter> sub) const
+        {
+            const auto& first = *std::begin(sub);
+            const auto b = advance_while(
+                std::begin(sub),
+                [&](const auto& x) { return compare(first, x); },
+                std::end(sub));
+            return subrange{ b, b };
+        }
+    };
+
+    template <class Compare>
+    constexpr auto operator()(Compare compare) const
+    {
+        return split(policy<Compare>{ std::move(compare) });
+    }
+};
+
+struct chunk_by_key_fn
+{
+    template <class Func>
+    struct policy
+    {
+        semiregular<Func> func;
+
+        template <class Iter>
+        constexpr subrange<Iter> operator()(subrange<Iter> sub) const
+        {
+            const auto& key = invoke(func, *std::begin(sub));
+            const auto b = advance_while(
+                std::begin(sub),
+                [&](const auto& x) { return invoke(func, x) == key; },
+                std::end(sub));
+            return subrange{ b, b };
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return split(policy<Func>{ std::move(func) });
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto chunk = detail::chunk_fn{};
 static constexpr inline auto slide = detail::slide_fn{};
+
+static constexpr inline auto chunk_by = detail::chunk_by_fn{};
+static constexpr inline auto chunk_by_key = detail::chunk_by_key_fn{};
+
 }  // namespace cpp_pipelines::seq

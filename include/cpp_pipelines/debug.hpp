@@ -27,6 +27,19 @@ inline std::string demangle(const char* name)
 
 #endif
 
+template <class T>
+std::string_view type_name()
+{
+    static const std::string result = demangle(typeid(T).name());
+    return result;
+}
+
+template <class T>
+std::string_view type_name(const T&)
+{
+    return type_name<T>();
+}
+
 namespace std
 {
 template <class T>

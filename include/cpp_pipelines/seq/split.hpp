@@ -3,6 +3,7 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/iter_utils.hpp>
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/seq/distance.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 #include <cpp_pipelines/subrange.hpp>
 
@@ -159,7 +160,7 @@ struct split_on_subrange_fn
             const auto b = std::begin(sub);
             const auto e = std::end(sub);
             const auto it = algorithm::search(sub, r);
-            const auto n = advance(it, r.size(), std::end(sub));
+            const auto n = advance(it, size(r), std::end(sub));
             return subrange{ it, n };
         }
     };

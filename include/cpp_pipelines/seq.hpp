@@ -6,8 +6,6 @@
 #include <cpp_pipelines/seq/cache_latest.hpp>
 #include <cpp_pipelines/seq/checks.hpp>
 #include <cpp_pipelines/seq/chunk.hpp>
-#include <cpp_pipelines/seq/chunk_by.hpp>
-#include <cpp_pipelines/seq/chunk_by_key.hpp>
 #include <cpp_pipelines/seq/concat.hpp>
 #include <cpp_pipelines/seq/copy.hpp>
 #include <cpp_pipelines/seq/distance.hpp>
@@ -24,7 +22,6 @@
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/istream.hpp>
 #include <cpp_pipelines/seq/join.hpp>
-#include <cpp_pipelines/seq/join_with.hpp>
 #include <cpp_pipelines/seq/order_by.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
