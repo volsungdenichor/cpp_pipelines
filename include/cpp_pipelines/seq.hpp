@@ -21,6 +21,7 @@
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/istream.hpp>
+#include <cpp_pipelines/seq/iterate.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/order_by.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
