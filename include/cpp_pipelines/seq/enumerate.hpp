@@ -32,7 +32,7 @@ struct enumerate_fn
             {
             }
 
-            constexpr std::tuple<std::ptrdiff_t, range_reference_t<Range>> deref() const
+            constexpr std::pair<std::ptrdiff_t, range_reference_t<Range>> deref() const
             {
                 return { index, *it };
             }
