@@ -9,11 +9,11 @@
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
+#include <cpp_pipelines/scope_functions.hpp>
 #include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/source_location.hpp>
 #include <cpp_pipelines/sub.hpp>
-#include <cpp_pipelines/tap.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
 #include <fstream>
@@ -198,9 +198,10 @@ void run()
 
     static const auto lifespan = [](const Person& p) { return p.life.death - p.life.birth; };
 
-    const auto persons_copy = persons >>= seq::transform(ref_wrap) >>= seq::order_by(greater, lifespan);
+    const auto persons_copy = persons >>= seq::transform(wrap_ref) >>= seq::order_by(greater, lifespan);
 
-    std::cout << (persons >>= seq::none_of([](const Person& p) { return p.life.birth > 2000; })) << std::endl;
+    persons_copy
+        >>= seq::write(std::cout, "\n");
 }
 
 int main()

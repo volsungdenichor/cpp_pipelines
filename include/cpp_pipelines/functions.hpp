@@ -43,7 +43,7 @@ struct decay_copy_fn
     }
 };
 
-struct wrap_fn
+struct wrap_ref_fn
 {
     template <class T>
     constexpr auto operator()(T& item) const -> std::reference_wrapper<T>
@@ -52,7 +52,7 @@ struct wrap_fn
     }
 };
 
-struct unwrap_fn
+struct unwrap_ref_fn
 {
     template <class T>
     constexpr auto operator()(std::reference_wrapper<T> item) const -> T&
@@ -249,8 +249,8 @@ static constexpr inline auto dereference = detail::dereference_fn{};
 static constexpr inline auto addressof = detail::addressof_fn{};
 static constexpr inline auto decay_copy = detail::decay_copy_fn{};
 
-static constexpr inline auto ref_wrap = detail::wrap_fn{};
-static constexpr inline auto unwrap = detail::unwrap_fn{};
+static constexpr inline auto wrap_ref = detail::wrap_ref_fn{};
+static constexpr inline auto unwrap_ref = detail::unwrap_ref_fn{};
 
 static constexpr inline auto tie = detail::to_tuple_fn<detail::tie_fn>{};
 static constexpr inline auto make_tuple = detail::to_tuple_fn<detail::make_tuple_fn>{};
