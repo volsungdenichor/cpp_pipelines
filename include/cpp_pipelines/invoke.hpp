@@ -35,6 +35,10 @@ struct invoke_fn
         {
             return call(std::forward<Func>(func), std::forward<Arg>(arg), std::make_index_sequence<std::tuple_size_v<std::decay_t<Arg>>>{});
         }
+        else
+        {
+            static_assert(always_false<Func, Arg>, "cpp_pipelines::invoke: could not invoke the function");
+        }
     }
 
     template <class Func, class Arg, std::size_t... I>
