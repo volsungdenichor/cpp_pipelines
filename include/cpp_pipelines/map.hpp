@@ -3,6 +3,7 @@
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/seq/access.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
+#include <cpp_pipelines/seq/to_map.hpp>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/subrange.hpp>
 
@@ -66,13 +67,16 @@ struct at_fn
 
 struct keys_fn
 {
+    template <class T>
+    using has_upper_bound = decltype(std::declval<T&>().upper_bound(std::declval<typename T::key_type&>()));
+
     template <class Map>
     struct generator
     {
-        Map* map;
+        const Map* map;
         mutable typename Map::const_iterator it;
 
-        constexpr generator(Map& map)
+        constexpr generator(const Map& map)
             : map{ std::addressof(map) }
             , it{ this->map->begin() }
         {
@@ -83,7 +87,18 @@ struct keys_fn
             if (it != map->end())
             {
                 auto& res = it->first;
-                it = map->upper_bound(it->first);
+                if constexpr (is_detected_v<has_upper_bound, Map>)
+                {
+                    it = map->upper_bound(it->first);
+                }
+                else
+                {
+                    while (it != map->end() && it->first == res)
+                    {
+                        ++it;
+                    }
+                }
+
                 return std::addressof(res);
             }
             return nullptr;
@@ -93,7 +108,7 @@ struct keys_fn
     template <class Map>
     constexpr auto operator()(Map& map) const
     {
-        return seq::generate(generator<Map>{ map });
+        return seq::generate(generator{ map });
     }
 };
 
@@ -108,6 +123,29 @@ struct items_fn
     }
 };
 
+template <template <class, class> class Map>
+struct group_by_as_fn
+{
+    template <class Key, class Value>
+    struct impl
+    {
+        Key key;
+        Value value;
+
+        template <class Range>
+        constexpr auto operator()(Range&& range) const
+        {
+            return std::forward<Range>(range) >>= seq::transform(make_pair(key, value)) >>= seq::to_map_as<Map>;
+        }
+    };
+
+    template <class Key, class Value>
+    constexpr auto operator()(Key key, Value value) const
+    {
+        return make_pipeline(impl<Key, Value>{ std::move(key), std::move(value) });
+    }
+};
+
 }  // namespace detail
 constexpr inline auto equal_range = detail::equal_range_fn{};
 constexpr inline auto values_at = detail::values_at_fn{};
@@ -115,4 +153,7 @@ constexpr inline auto at = detail::at_fn{};
 constexpr inline auto maybe_at = detail::maybe_at_fn{};
 constexpr inline auto keys = make_pipeline(detail::keys_fn{});
 constexpr inline auto items = make_pipeline(detail::items_fn{});
+
+template <template <class, class> class Map>
+constexpr inline auto group_by_as = detail::group_by_as_fn<Map>{};
 }  // namespace cpp_pipelines::map
