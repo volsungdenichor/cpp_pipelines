@@ -2,6 +2,7 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
+#include <cpp_pipelines/integer_types.hpp>
 #include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/operators.hpp>
@@ -190,18 +191,26 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", { 1874, 1915 }, Sex::male },
 };
 
+struct Config
+{
+    std::string hostname;
+    int port;
+};
+
+std::ostream& operator<<(std::ostream& os, const Config& item)
+{
+    return os << item.hostname << ":" << item.port;
+}
+
+const auto default_config = Config{ "127.0.0.1", 8080 };
+
 void run()
 {
     using namespace cpp_pipelines;
     namespace p = cpp_pipelines::predicates;
     using p::__;
 
-    static const auto lifespan = [](const Person& p) { return p.life.death - p.life.birth; };
-
-    const auto persons_copy = persons >>= seq::transform(wrap_ref) >>= seq::order_by(greater, lifespan);
-
-    persons_copy
-        >>= seq::write(std::cout, "\n");
+    std::cout << p::matches(persons.at(0).first_name, p::equal_to("Adam"s)) << std::endl;
 }
 
 int main()
