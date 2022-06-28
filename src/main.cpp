@@ -8,6 +8,7 @@
 #include <cpp_pipelines/operators.hpp>
 #include <cpp_pipelines/opt.hpp>
 #include <cpp_pipelines/output.hpp>
+#include <cpp_pipelines/pattern_matching.hpp>
 #include <cpp_pipelines/predicates.hpp>
 #include <cpp_pipelines/res.hpp>
 #include <cpp_pipelines/scope_functions.hpp>
@@ -207,10 +208,14 @@ const auto default_config = Config{ "127.0.0.1", 8080 };
 void run()
 {
     using namespace cpp_pipelines;
+    using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
-    using p::__;
 
-    std::cout << p::matches(persons.at(0).first_name, p::equal_to("Adam"s)) << std::endl;
+    const auto res = &persons.at(0).first_name >>= pattern_matching::inspect(
+        when(p::is_some()) |= [](const auto& fn) { return fn; },
+        when(p::is_none()) |= "none"s);
+
+    std::cout << res << std::endl;
 }
 
 int main()
