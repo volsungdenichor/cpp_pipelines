@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 #include <tuple>
@@ -10,6 +11,7 @@ namespace detail
 {
 template <class T, class U>
 using is_equality_comparable = decltype(std::declval<const T&>() == std::declval<const U&>());
+
 }  // namespace detail
 
 template <class Impl>
@@ -25,18 +27,47 @@ struct is_predicate_interface<predicate_interface<Impl>> : std::true_type
 {
 };
 
-template <class T, class Pred>
-constexpr bool matches(const T& item, const Pred& pred)
+struct matches_fn
 {
-    if constexpr (is_detected_v<detail::is_equality_comparable, T, Pred> && !is_predicate_interface<Pred>::value)
+    template <class Pred>
+    struct impl
     {
-        return item == pred;
-    }
-    else
+        Pred pred;
+
+        template <class T>
+        constexpr bool operator()(const T& item) const
+        {
+            return matches_fn::check(item, pred);
+        }
+    };
+
+    template <class T, class Pred>
+    constexpr bool operator()(const T& item, const Pred& pred) const
     {
-        return invoke(pred, item);
+        return check(item, pred);
     }
-}
+
+    template <class Pred>
+    constexpr auto operator()(Pred pred) const
+    {
+        return make_pipeline(impl<Pred>{ std::move(pred) });
+    }
+
+    template <class T, class Pred>
+    static bool check(const T& item, const Pred& pred)
+    {
+        if constexpr (is_detected_v<detail::is_equality_comparable, T, Pred> && !is_predicate_interface<Pred>::value)
+        {
+            return item == pred;
+        }
+        else
+        {
+            return invoke(pred, item);
+        }
+    }
+};
+
+static constexpr inline auto matches = matches_fn{};
 
 template <class Impl>
 struct predicate_interface
