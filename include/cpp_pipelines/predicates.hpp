@@ -622,7 +622,7 @@ struct result_of_fn
 
         void format(std::ostream& os) const
         {
-            os << name << "(" << inner << ")";
+            os << "result_of(" << name << ", " << inner << ")";
         }
     };
 
@@ -806,7 +806,7 @@ struct of_type_fn
     }
 };
 
-struct fields_are_fn
+struct elementwise_fn
 {
     template <class Inner>
     struct impl
@@ -1274,7 +1274,7 @@ static constexpr inline auto result_of = detail::result_of_fn{};
 static constexpr inline auto field = detail::result_of_fn{};
 static constexpr inline auto property = detail::result_of_fn{};
 
-static constexpr inline auto fields_are = detail::fields_are_fn{};
+static constexpr inline auto elementwise = detail::elementwise_fn{};
 
 static constexpr inline auto is_empty = detail::is_empty_fn{};
 static constexpr inline auto size_is = detail::size_is_fn{};

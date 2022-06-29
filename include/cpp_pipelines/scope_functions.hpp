@@ -80,4 +80,12 @@ static constexpr inline auto tap = inspect;
 static constexpr inline auto apply = detail::apply_fn{};
 static constexpr inline auto with = detail::with_fn{};
 
+template <class T>
+constexpr T create(const std::function<void(T&)>& func)
+{
+    T result{};
+    func(result);
+    return result;
+}
+
 }  // namespace cpp_pipelines

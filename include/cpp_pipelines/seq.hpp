@@ -17,6 +17,7 @@
 #include <cpp_pipelines/seq/filter.hpp>
 #include <cpp_pipelines/seq/for_each.hpp>
 #include <cpp_pipelines/seq/generate.hpp>
+#include <cpp_pipelines/seq/getlines.hpp>
 #include <cpp_pipelines/seq/inspect.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
 #include <cpp_pipelines/seq/iota.hpp>

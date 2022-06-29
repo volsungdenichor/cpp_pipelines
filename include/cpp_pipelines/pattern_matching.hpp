@@ -121,10 +121,4 @@ struct match_fn
 static constexpr inline auto match = detail::match_fn{};
 static constexpr inline auto when = detail::when_fn{};
 
-#if 1
-static constexpr inline auto switch_ = match;
-static constexpr inline auto case_ = when;
-#endif
-
-
 }  // namespace cpp_pipelines::pattern_matching

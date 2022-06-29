@@ -73,6 +73,16 @@ enum class Sex
     female
 };
 
+std::ostream& operator<<(std::ostream& os, const Sex item)
+{
+    switch (item)
+    {
+        case Sex::male: return os << "male";
+        case Sex::female: return os << "female";
+        default: throw std::runtime_error{ "Unknown value of 'Sex'" };
+    }
+}
+
 struct Life
 {
     int birth = 0;
@@ -211,11 +221,11 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto res = &persons.at(0).first_name >>= pattern_matching::inspect(
-        when(p::is_some()) |= [](const auto& fn) { return fn; },
-        when(p::is_none()) |= "none"s);
-
-    std::cout << res << std::endl;
+    const auto predicate = p::field("sex", &Person::sex, Sex::female) && p::field("first_name", &Person::first_name, p::any("Maria"sv, "Anna"sv));
+    std::cout << predicate << std::endl;
+    persons
+        >>= seq::filter(predicate)
+        >>= seq::write(std::cout, "\n");
 }
 
 int main()
