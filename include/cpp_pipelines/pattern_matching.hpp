@@ -61,7 +61,7 @@ struct when_fn
 };
 
 template <class Func, class... Args>
-decltype(auto) eval(Func&& func, Args&&... args)
+constexpr decltype(auto) eval(Func&& func, Args&&... args)
 {
     if constexpr (std::is_invocable_v<Func, Args...>)
     {
@@ -77,7 +77,7 @@ decltype(auto) eval(Func&& func, Args&&... args)
     }
 }
 
-struct inspect_fn
+struct match_fn
 {
     template <class... Matchers>
     struct impl
@@ -118,7 +118,13 @@ struct inspect_fn
 
 }  // namespace detail
 
+static constexpr inline auto match = detail::match_fn{};
 static constexpr inline auto when = detail::when_fn{};
-static constexpr inline auto inspect = detail::inspect_fn{};
+
+#if 1
+static constexpr inline auto switch_ = match;
+static constexpr inline auto case_ = when;
+#endif
+
 
 }  // namespace cpp_pipelines::pattern_matching
