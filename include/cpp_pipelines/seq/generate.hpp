@@ -77,11 +77,20 @@ struct generate_fn
 struct generate_infinite_fn
 {
     template <class Func>
+    struct impl
+    {
+        mutable Func func;
+
+        constexpr auto operator()() const
+        {
+            return std::optional{ invoke(func) };
+        }
+    };
+
+    template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return generate_fn{}([=]() mutable {
-            return std::optional{ invoke(func) };
-        });
+        return generate_fn{}(impl<Func>{ std::move(func) });
     }
 };
 

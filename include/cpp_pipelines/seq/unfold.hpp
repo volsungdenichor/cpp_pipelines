@@ -9,11 +9,15 @@ namespace detail
 struct unfold_fn
 {
     template <class T, class Func>
-    constexpr auto operator()(T init, Func func) const
+    struct impl
     {
-        using result_type = std::decay_t<decltype(std::get<0>(*func(init)))>;
+        mutable T state;
+        Func func;
 
-        return generate([=, state = std::move(init)]() mutable -> std::optional<result_type> {
+        using result_type = std::decay_t<decltype(std::get<0>(*func(state)))>;
+
+        constexpr auto operator()() const -> std::optional<result_type>
+        {
             if (auto func_result = invoke(func, state))
             {
                 auto [result, new_state] = *std::move(func_result);
@@ -24,21 +28,37 @@ struct unfold_fn
             {
                 return std::nullopt;
             }
-        });
+        }
+    };
+
+    template <class T, class Func>
+    constexpr auto operator()(T init, Func func) const
+    {
+        return generate(impl<T, Func>{ std::move(init), std::move(func) });
     }
 };
 
 struct unfold_infinite_fn
 {
     template <class T, class Func>
-    constexpr auto operator()(T init, Func func) const
+    struct impl
     {
-        return generate([=, state = std::move(init)]() mutable {
+        mutable T state;
+        Func func;
+
+        constexpr auto operator()() const
+        {
             auto func_result = invoke(func, state);
             auto [result, new_state] = std::move(func_result);
             state = std::move(new_state);
             return std::optional{ std::move(result) };
-        });
+        }
+    };
+
+    template <class T, class Func>
+    constexpr auto operator()(T init, Func func) const
+    {
+        return generate(impl<T, Func>{ std::move(init), std::move(func) });
     }
 };
 
