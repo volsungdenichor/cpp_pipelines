@@ -74,6 +74,18 @@ struct generate_fn
     }
 };
 
+struct generate_infinite_fn
+{
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return generate_fn{}([=]() mutable {
+            return std::optional{ invoke(func) };
+        });
+    }
+};
+
 }  // namespace detail
 static constexpr inline auto generate = detail::generate_fn{};
+static constexpr inline auto generate_infinite = detail::generate_infinite_fn{};
 }  // namespace cpp_pipelines::seq

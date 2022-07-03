@@ -73,16 +73,6 @@ enum class Sex
     female
 };
 
-std::ostream& operator<<(std::ostream& os, const Sex item)
-{
-    switch (item)
-    {
-        case Sex::male: return os << "male";
-        case Sex::female: return os << "female";
-        default: throw std::runtime_error{ "Unknown value of 'Sex'" };
-    }
-}
-
 struct Life
 {
     int birth = 0;
@@ -202,29 +192,16 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", { 1874, 1915 }, Sex::male },
 };
 
-struct Config
-{
-    std::string hostname;
-    int port;
-};
-
-std::ostream& operator<<(std::ostream& os, const Config& item)
-{
-    return os << item.hostname << ":" << item.port;
-}
-
-const auto default_config = Config{ "127.0.0.1", 8080 };
-
 void run()
 {
     using namespace cpp_pipelines;
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto predicate = p::field("sex", &Person::sex, Sex::female) && p::field("first_name", &Person::first_name, p::any("Maria"sv, "Anna"sv));
-    std::cout << predicate << std::endl;
-    persons
-        >>= seq::filter(predicate)
+    seq::unfold_infinite(std::pair{ 1, 1 }, [](const auto& pair) {
+        const auto [a, b] = pair;
+        return std::pair{ a, std::pair{ b, a + b } };
+    }) >>= seq::take(10)
         >>= seq::write(std::cout, "\n");
 }
 
