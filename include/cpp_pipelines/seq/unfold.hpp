@@ -14,11 +14,11 @@ struct unfold_fn
         mutable T state;
         Func func;
 
-        using result_type = std::decay_t<decltype(std::get<0>(*func(state)))>;
+        using result_type = std::decay_t<decltype(std::get<0>(*invoke(func, std::move(state))))>;
 
         constexpr auto operator()() const -> std::optional<result_type>
         {
-            if (auto func_result = invoke(func, state))
+            if (auto func_result = invoke(func, std::move(state)))
             {
                 auto [result, new_state] = *std::move(func_result);
                 state = std::move(new_state);
