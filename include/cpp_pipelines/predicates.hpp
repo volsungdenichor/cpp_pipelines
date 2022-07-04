@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 #include <functional>
 #include <iostream>
@@ -88,19 +89,6 @@ constexpr bool matches(const T& item, const Pred& pred)
     {
         static_assert(always_false<T>, "Implementation should implement () operator or be equality comparable");
     }
-}
-
-template <class T, class Pred>
-constexpr T&& assert(T&& item, const Pred& pred)
-{
-    if (matches(item, pred))
-    {
-        return std::forward<T>(item);
-    }
-
-    std::stringstream ss;
-    ss << "expected: " << pred << ", actual: " << item;
-    throw std::runtime_error{ ss.str() };
 }
 
 struct all_tag
@@ -1251,7 +1239,59 @@ struct is_any_element_of_range
     }
 };
 
+struct matches_fn
+{
+    template <class Pred>
+    struct impl
+    {
+        Pred pred;
+
+        template <class T>
+        constexpr bool operator()(T&& item) const
+        {
+            return matches(std::forward<T>(item), pred);
+        }
+    };
+
+    template <class Pred>
+    constexpr auto operator()(Pred pred) const
+    {
+        return make_pipeline(impl<Pred>{ std::move(pred) });
+    }
+};
+
+struct assert_fn
+{
+    template <class Pred>
+    struct impl
+    {
+        Pred pred;
+
+        template <class T>
+        constexpr decltype(auto) operator()(T&& item) const
+        {
+            if (matches(item, pred))
+            {
+                return std::forward<T>(item);
+            }
+
+            std::stringstream ss;
+            ss << "expected: " << pred << ", actual: " << item;
+            throw std::runtime_error{ ss.str() };
+        }
+    };
+
+    template <class Pred>
+    constexpr auto operator()(Pred pred) const
+    {
+        return make_pipeline(impl<Pred>{ std::move(pred) });
+    }
+};
+
 }  // namespace detail
+
+static constexpr inline auto matches = detail::matches_fn{};
+static constexpr inline auto assert = detail::assert_fn{};
 
 template <class T>
 using predicate_t = std::function<bool(const T&)>;
