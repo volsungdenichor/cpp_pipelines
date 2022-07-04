@@ -60,23 +60,6 @@ struct when_fn
     }
 };
 
-template <class Func, class... Args>
-constexpr decltype(auto) eval(Func&& func, Args&&... args)
-{
-    if constexpr (std::is_invocable_v<Func, Args...>)
-    {
-        return std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
-    }
-    else if constexpr (std::is_invocable_v<Func>)
-    {
-        return std::invoke(std::forward<Func>(func));
-    }
-    else
-    {
-        return std::forward<Func>(func);
-    }
-}
-
 struct match_fn
 {
     template <class... Matchers>
@@ -105,6 +88,23 @@ struct match_fn
                 return matcher.pred.template is(item)
                            ? eval(matcher.func, matcher.pred.template as(item))
                            : throw no_match{};
+            }
+        }
+
+        template <class Func, class... Args>
+        constexpr decltype(auto) eval(Func&& func, Args&&... args) const
+        {
+            if constexpr (std::is_invocable_v<Func, Args...>)
+            {
+                return std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
+            }
+            else if constexpr (std::is_invocable_v<Func>)
+            {
+                return std::invoke(std::forward<Func>(func));
+            }
+            else
+            {
+                return std::forward<Func>(func);
             }
         }
     };
