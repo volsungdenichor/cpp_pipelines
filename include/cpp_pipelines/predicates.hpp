@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cpp_pipelines/pipeline.hpp>
+#include <cpp_pipelines/scope_functions.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 #include <functional>
 #include <iostream>
@@ -1268,11 +1269,11 @@ struct assert_fn
         Pred pred;
 
         template <class T>
-        constexpr decltype(auto) operator()(T&& item) const
+        constexpr void operator()(T&& item) const
         {
             if (matches(item, pred))
             {
-                return std::forward<T>(item);
+                return;
             }
 
             std::stringstream ss;
@@ -1284,7 +1285,7 @@ struct assert_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return make_pipeline(impl<Pred>{ std::move(pred) });
+        return inspect(impl<Pred>{ std::move(pred) });
     }
 };
 
