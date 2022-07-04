@@ -620,6 +620,12 @@ struct result_of_fn
             return inner(std::invoke(func, item));
         }
 
+        template <class T>
+        constexpr decltype(auto) as(const T& item) const
+        {
+            return std::invoke(func, item);
+        }
+
         void format(std::ostream& os) const
         {
             os << "result_of(" << name << ", " << inner << ")";
