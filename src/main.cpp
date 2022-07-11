@@ -3,6 +3,7 @@
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/integer_types.hpp>
+#include <cpp_pipelines/iterable.hpp>
 #include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/operators.hpp>
@@ -62,7 +63,9 @@ static constexpr inline auto parse = parse_fn<T>{};
 
 struct square_root_fn
 {
-    struct domain_error{};
+    struct domain_error
+    {
+    };
 
     using error_type = std::variant<domain_error>;
 
@@ -77,8 +80,8 @@ struct square_root_fn
 inline std::ostream& operator<<(std::ostream& os, const square_root_fn::error_type& item)
 {
     return item >>= cpp_pipelines::var::match([&](const square_root_fn::domain_error& e) -> std::ostream& {
-        return os << "square_root::domain_error";
-    });
+               return os << "square_root::domain_error";
+           });
 }
 
 static constexpr inline auto square_root = square_root_fn{};

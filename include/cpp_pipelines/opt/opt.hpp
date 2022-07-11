@@ -446,10 +446,3 @@ static constexpr inline auto accumulate = detail::accumulate_fn{};
 static constexpr inline auto match = detail::match_fn{};
 
 }  // namespace cpp_pipelines::opt
-
-namespace cpp_pipelines
-{
-template <class T>
-using optional_ref = std::optional<std::reference_wrapper<T>>;
-
-}  // namespace cpp_pipelines
