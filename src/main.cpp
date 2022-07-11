@@ -60,12 +60,28 @@ struct parse_fn
 template <class T>
 static constexpr inline auto parse = parse_fn<T>{};
 
-std::optional<double> square_root(double x)
+struct square_root_fn
 {
-    return x >= 0.0
-               ? std::optional{ std::sqrt(x) }
-               : std::nullopt;
+    struct domain_error{};
+
+    using error_type = std::variant<domain_error>;
+
+    cpp_pipelines::result<double, error_type> operator()(double x) const
+    {
+        if (x < 0.0)
+            return cpp_pipelines::error(domain_error{});
+        return std::sqrt(x);
+    }
+};
+
+inline std::ostream& operator<<(std::ostream& os, const square_root_fn::error_type& item)
+{
+    return item >>= cpp_pipelines::var::match([&](const square_root_fn::domain_error& e) -> std::ostream& {
+        return os << "square_root::domain_error";
+    });
 }
+
+static constexpr inline auto square_root = square_root_fn{};
 
 enum class Sex
 {
@@ -114,6 +130,15 @@ constexpr auto pythagorean_triples()
                                          >>= seq::filter([](int x, int y, int z) { return x * x + y * y == z * z; });
                               });
                });
+}
+
+constexpr auto fibonacci_series()
+{
+    using namespace cpp_pipelines;
+    return seq::unfold_infinite(std::pair{ 1, 1 }, [](const auto& pair) {
+        const auto [a, b] = pair;
+        return std::pair{ a, std::pair{ b, a + b } };
+    });
 }
 
 const std::vector<Person> persons = {
@@ -198,10 +223,10 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    seq::unfold_infinite(std::pair{ 1, 1 }, [](const auto& pair) {
-        const auto [a, b] = pair;
-        return std::pair{ a, std::pair{ b, a + b } };
-    }) >>= seq::take(10)
+    fibonacci_series()
+        >>= seq::transform(L(_ - 5))
+        >>= seq::take(10)
+        >>= seq::transform(square_root)
         >>= seq::write(std::cout, "\n");
 }
 
