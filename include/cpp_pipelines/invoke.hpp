@@ -7,7 +7,6 @@
 
 namespace cpp_pipelines
 {
-
 template <class T, class = std::void_t<>>
 struct is_tuple_like : std::false_type
 {
