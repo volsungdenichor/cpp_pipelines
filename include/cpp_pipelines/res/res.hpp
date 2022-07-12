@@ -454,6 +454,25 @@ struct match_fn
     }
 };
 
+struct try_invoke_fn
+{
+    template <class Func, class... Args>
+    auto operator()(Func&& func, Args&&... args) const
+    {
+        using res = decltype(invoke(std::forward<Func>(func), std::forward<Args>(args)...));
+        using result_type = result<res, std::string>;
+
+        try
+        {
+            return result_type{ invoke(std::forward<Func>(func), std::forward<Args>(args)...) };
+        }
+        catch (const std::exception& ex)
+        {
+            return result_type{ error(std::string{ ex.what() }) };
+        }
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto value = make_pipeline(detail::value_fn{});
@@ -480,6 +499,8 @@ static constexpr inline auto maybe_value = make_pipeline(detail::maybe_value_fn{
 static constexpr inline auto maybe_error = make_pipeline(detail::maybe_error_fn{});
 
 static constexpr inline auto match = detail::match_fn{};
+
+static constexpr inline auto try_invoke = detail::try_invoke_fn{};
 
 }  // namespace res
 
