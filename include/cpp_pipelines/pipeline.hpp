@@ -26,7 +26,15 @@ struct pipeline_t
     template <class... Args>
     constexpr decltype(auto) operator()(Args&&... args) const
     {
-        return to_return_type(call<0>(std::forward<Args>(args)...));
+        using result_type = decltype(call<0>(std::forward<Args>(args)...));
+        if constexpr (std::is_void_v<result_type>)
+        {
+            call<0>(std::forward<Args>(args)...);
+        }
+        else
+        {
+            return to_return_type(call<0>(std::forward<Args>(args)...));
+        }
     }
 
 private:

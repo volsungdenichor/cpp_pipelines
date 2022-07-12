@@ -3,7 +3,6 @@
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 #include <functional>
-#include <variant>
 
 namespace cpp_pipelines
 {
@@ -22,7 +21,7 @@ struct invoke_fn
     template <class Func, class... Args>
     constexpr decltype(auto) operator()(Func&& func, Args&&... args) const
     {
-        return invoke(std::forward<Func>(func), unwrap(std::forward<Args>(args))...);
+        return std::invoke(std::forward<Func>(func), unwrap(std::forward<Args>(args))...);
     }
 
     template <class Func, class Arg>
@@ -30,7 +29,7 @@ struct invoke_fn
     {
         if constexpr (std::is_invocable_v<Func, decltype(unwrap(std::forward<Arg>(arg)))>)
         {
-            return invoke(std::forward<Func>(func), unwrap(std::forward<Arg>(arg)));
+            return std::invoke(std::forward<Func>(func), unwrap(std::forward<Arg>(arg)));
         }
         else if constexpr (is_tuple_like<std::decay_t<Arg>>::value)
         {
@@ -58,21 +57,6 @@ struct invoke_fn
     static constexpr T& unwrap(std::reference_wrapper<T> item)
     {
         return item;
-    }
-
-    template <class Func, class... Args>
-    static constexpr decltype(auto) invoke(Func&& func, Args&&... args)
-    {
-        using result_type = decltype(std::invoke(std::forward<Func>(func), std::forward<Args>(args)...));
-        if constexpr (std::is_void_v<result_type>)
-        {
-            std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
-            return std::monostate{};
-        }
-        else
-        {
-            return std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
-        }
     }
 };
 
