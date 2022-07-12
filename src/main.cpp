@@ -1,3 +1,4 @@
+
 #include <cmath>
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/debug.hpp>
@@ -67,7 +68,7 @@ struct square_root_fn
     {
     };
 
-    using error_type = std::variant<domain_error>;
+    using error_type = domain_error;
 
     cpp_pipelines::result<double, error_type> operator()(double x) const
     {
@@ -79,9 +80,7 @@ struct square_root_fn
 
 inline std::ostream& operator<<(std::ostream& os, const square_root_fn::error_type& item)
 {
-    return item >>= cpp_pipelines::var::match([&](const square_root_fn::domain_error& e) -> std::ostream& {
-               return os << "square_root::domain_error";
-           });
+    return os << "square_root::domain_error";
 }
 
 static constexpr inline auto square_root = square_root_fn{};
@@ -226,11 +225,7 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    fibonacci_series()
-        >>= seq::transform(L(_ - 5))
-        >>= seq::take(10)
-        >>= seq::transform(square_root)
-        >>= seq::write(std::cout, "\n");
+    std::cout << square_root(-1) << std::endl;
 }
 
 int main()
