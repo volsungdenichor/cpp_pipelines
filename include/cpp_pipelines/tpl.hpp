@@ -74,8 +74,31 @@ struct for_each_fn
         return make_pipeline(impl<Func>{ std::move(func) });
     }
 };
+
+struct apply_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class T>
+        constexpr decltype(auto) operator()(T&& item) const
+        {
+            return std::apply(func, std::forward<T>(item));
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
+static constexpr inline auto apply = detail::apply_fn{};
 }  // namespace cpp_pipelines::tpl

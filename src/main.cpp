@@ -18,6 +18,7 @@
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/source_location.hpp>
 #include <cpp_pipelines/sub.hpp>
+#include <cpp_pipelines/tpl.hpp>
 #include <cpp_pipelines/var.hpp>
 #include <forward_list>
 #include <fstream>
@@ -47,15 +48,16 @@ inline std::ostream& operator<<(std::ostream& os, const parse_error& item)
 template <class T>
 struct parse_fn
 {
-    cpp_pipelines::result<T, parse_error> operator()(std::string text) const
+    cpp_pipelines::result<T, parse_error> operator()(std::string_view text) const
     {
-        std::stringstream ss{ text };
+        const auto s = std::string{ text };
+        std::stringstream ss{ s };
         T result;
         ss >> result;
         if (ss)
             return std::move(result);
         else
-            return cpp_pipelines::error(parse_error{ text });
+            return cpp_pipelines::error(parse_error{ s });
     }
 };
 
@@ -219,13 +221,33 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", { 1874, 1915 }, Sex::male },
 };
 
+auto split(std::string_view text) -> std::optional<std::pair<std::string_view, std::string_view>>
+{
+    static const auto make_string_view = [](std::string_view::iterator b, std::string_view::iterator e) -> std::string_view {
+        return { std::addressof(*b), std::string_view::size_type(e - b) };
+    };
+
+    auto it = std::find(text.begin(), text.end(), '/');
+    if (it == text.end())
+    {
+        return std::nullopt;
+    }
+    return std::pair{
+        make_string_view(text.begin(), it),
+        make_string_view(std::next(it), text.end())
+    };
+}
+
 void run()
 {
     using namespace cpp_pipelines;
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    std::cout << square_root(-1) << std::endl;
+    split("1/24")                                                          // std::optional<std::pair<std::string_view, std::string_view>>
+        >>= opt::transform(tpl::transform(fn(parse<double>, res::value)))  // std::optional<std::pair<double, double>>
+        >>= opt::transform(tpl::apply(divides))                            // std::optional<double>
+        >>= inspect(cout{ "divide: " });                                   //
 }
 
 int main()
