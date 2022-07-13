@@ -723,6 +723,12 @@ struct of_type_fn
     {
         Inner inner;
 
+        template <class T>
+        constexpr bool operator()(const T& item) const
+        {
+            return std::is_same_v<T, Type>;
+        }
+
         template <class... Types>
         constexpr bool operator()(const std::variant<Types...>& item) const
         {
@@ -784,7 +790,7 @@ struct of_type_fn
 
         void format(std::ostream& os) const
         {
-            os << "is(" << typeid(Type).name() << ", " << inner << ")";
+            os << "of_type(" << typeid(Type).name() << ", " << inner << ")";
         }
     };
 

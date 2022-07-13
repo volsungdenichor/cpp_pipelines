@@ -247,10 +247,13 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    split("3/4", '/')                                                      // std::optional<std::pair<std::string_view, std::string_view>>
-        >>= opt::transform(tpl::transform(fn(parse<double>, res::value)))  // std::optional<std::pair<double, double>>
-        >>= opt::transform(tpl::apply(divides))                            // std::optional<double>
-        >>= inspect(cout{ "divide: " });                                   //
+    split("3/4", '/')
+        >>= p::assert(p::of_type<std::optional<std::pair<std::string_view, std::string_view>>>())  // std::optional<std::pair<std::string_view, std::string_view>>
+        >>= opt::transform(tpl::transform(fn(parse<double>, res::value)))                          // std::optional<std::pair<double, double>>
+        >>= p::assert(p::of_type<std::optional<std::pair<double, double>>>())                      // std::optional<std::pair<std::string_view, std::string_view>>
+        >>= opt::transform(tpl::apply(divides))                                                    // std::optional<double>
+        >>= p::assert(p::of_type<std::optional<double>>())                                         // std::optional<std::pair<std::string_view, std::string_view>>
+        >>= inspect(cout{ "divide: " });                                                           //
 }
 
 int main()
