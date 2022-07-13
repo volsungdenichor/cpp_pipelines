@@ -221,20 +221,23 @@ const std::vector<Person> persons = {
     { "Jerzy", "Żuławski", { 1874, 1915 }, Sex::male },
 };
 
-auto split(std::string_view text) -> std::optional<std::pair<std::string_view, std::string_view>>
+auto split(std::string_view text, char delim = ',') -> std::optional<std::pair<std::string_view, std::string_view>>
 {
     static const auto make_string_view = [](std::string_view::iterator b, std::string_view::iterator e) -> std::string_view {
         return { std::addressof(*b), std::string_view::size_type(e - b) };
     };
 
-    auto it = std::find(text.begin(), text.end(), '/');
-    if (it == text.end())
+    const auto b = std::begin(text);
+    const auto e = std::end(text);
+
+    auto it = std::find(b, e, delim);
+    if (it == e)
     {
         return std::nullopt;
     }
     return std::pair{
-        make_string_view(text.begin(), it),
-        make_string_view(std::next(it), text.end())
+        make_string_view(b, it),
+        make_string_view(std::next(it), e)
     };
 }
 
@@ -244,7 +247,7 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    split("1/24")                                                          // std::optional<std::pair<std::string_view, std::string_view>>
+    split("3/4", '/')                                                      // std::optional<std::pair<std::string_view, std::string_view>>
         >>= opt::transform(tpl::transform(fn(parse<double>, res::value)))  // std::optional<std::pair<double, double>>
         >>= opt::transform(tpl::apply(divides))                            // std::optional<double>
         >>= inspect(cout{ "divide: " });                                   //
