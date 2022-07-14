@@ -241,27 +241,19 @@ auto split(std::string_view text, char delim = ',') -> std::optional<std::pair<s
     };
 }
 
-int value(int x)
-{
-    return -x;
-}
-
-int value(const std::string& x)
-{
-    return -x.size();
-}
-
 void run()
 {
     using namespace cpp_pipelines;
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto new_person = persons.at(0) >>= with(do_all(
-        [](Person& person) { person.last_name += '_'; },
-        [](Person& person) { person.first_name += 'x'; }));
+    static const auto parse_pairwise = tpl::transform(fn(parse<double>, res::value));
+    static const auto divide = tpl::apply(divides);
 
-    std::cout << new_person << std::endl;
+    split("3/4", '/')
+        >>= opt::transform(parse_pairwise)  // std::optional<std::pair<double, double>>
+        >>= opt::transform(divide)          // std::optional<double>
+        >>= inspect(cout{ "divide: " });    //
 }
 
 int main()
