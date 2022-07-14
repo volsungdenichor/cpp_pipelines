@@ -241,19 +241,27 @@ auto split(std::string_view text, char delim = ',') -> std::optional<std::pair<s
     };
 }
 
+int value(int x)
+{
+    return -x;
+}
+
+int value(const std::string& x)
+{
+    return -x.size();
+}
+
 void run()
 {
     using namespace cpp_pipelines;
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    split("3/4", '/')
-        >>= p::assert(p::of_type<std::optional<std::pair<std::string_view, std::string_view>>>())  // std::optional<std::pair<std::string_view, std::string_view>>
-        >>= opt::transform(tpl::transform(fn(parse<double>, res::value)))                          // std::optional<std::pair<double, double>>
-        >>= p::assert(p::of_type<std::optional<std::pair<double, double>>>())                      // std::optional<std::pair<std::string_view, std::string_view>>
-        >>= opt::transform(tpl::apply(divides))                                                    // std::optional<double>
-        >>= p::assert(p::of_type<std::optional<double>>())                                         // std::optional<std::pair<std::string_view, std::string_view>>
-        >>= inspect(cout{ "divide: " });                                                           //
+    const auto new_person = persons.at(0) >>= with(do_all(
+        [](Person& person) { person.last_name += '_'; },
+        [](Person& person) { person.first_name += 'x'; }));
+
+    std::cout << new_person << std::endl;
 }
 
 int main()
