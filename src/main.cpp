@@ -223,22 +223,15 @@ const std::vector<Person> persons = {
 
 auto split(std::string_view text, char delim = ',') -> std::optional<std::pair<std::string_view, std::string_view>>
 {
-    static const auto make_string_view = [](std::string_view::iterator b, std::string_view::iterator e) -> std::string_view {
-        return { std::addressof(*b), std::string_view::size_type(e - b) };
-    };
-
-    const auto b = std::begin(text);
-    const auto e = std::end(text);
-
-    auto it = std::find(b, e, delim);
-    if (it == e)
-    {
-        return std::nullopt;
-    }
-    return std::pair{
-        make_string_view(b, it),
-        make_string_view(std::next(it), e)
-    };
+    using namespace cpp_pipelines;
+    const auto s = text
+        >>= seq::split_on_element(delim)
+        >>= seq::transform(cast<std::string_view>)
+        >>= seq::take(2)
+        >>= seq::to<std::vector>;
+    return s.size() == 2
+               ? std::optional{ std::pair{ s[0], s[1] } }
+               : std::nullopt;
 }
 
 void run()
@@ -250,7 +243,7 @@ void run()
     static const auto parse_pairwise = tpl::transform(fn(parse<double>, res::value));
     static const auto divide = tpl::apply(divides);
 
-    split("3/4", '/')
+    split("54/9", '/')
         >>= opt::transform(parse_pairwise)  // std::optional<std::pair<double, double>>
         >>= opt::transform(divide)          // std::optional<double>
         >>= inspect(cout{ "divide: " });    //
