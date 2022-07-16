@@ -368,6 +368,30 @@ struct check_element_fn
     }
 };
 
+struct for_each_fn
+{
+    template <class Func>
+    struct impl
+    {
+        Func func;
+
+        template <class Opt>
+        constexpr void operator()(Opt&& opt) const
+        {
+            if (has_value(opt))
+            {
+                invoke(func, get_value(std::forward<Opt>(opt)));
+            }
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
+    }
+};
+
 struct accumulate_fn
 {
     template <class BinaryFunc, class Init>
@@ -422,6 +446,7 @@ using detail::get_value;
 using detail::has_value;
 
 using detail::lift;
+static constexpr inline auto some = lift;
 
 static constexpr inline auto lift_if = detail::lift_if_fn{};
 
@@ -441,6 +466,7 @@ static constexpr inline auto any_of = detail::check_element_fn<detail::any_of_fn
 static constexpr inline auto none_of = detail::check_element_fn<detail::none_of_fn>{};
 static constexpr inline auto matches = any_of;
 
+static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto accumulate = detail::accumulate_fn{};
 
 static constexpr inline auto match = detail::match_fn{};

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iosfwd>
 #include <iterator>
 #include <type_traits>
 
@@ -31,6 +32,9 @@ using is_bidirectional_iterator_impl = iterator_of_category<std::bidirectional_i
 
 template <class T>
 using is_random_access_iterator_impl = iterator_of_category<std::random_access_iterator_tag, T>;
+
+template <class T>
+using has_ostream_op_impl = decltype(std::declval<std::ostream&>() << std::declval<const T&>());
 
 }  // namespace detail
 
@@ -141,6 +145,11 @@ struct is_output_iterator : std::false_type
 
 template <class T>
 struct is_output_iterator<T, std::void_t<decltype(*std::declval<T>() = std::declval<convertible_to_any>())>> : std::true_type
+{
+};
+
+template <class T>
+struct has_ostream_operator : is_detected<detail::has_ostream_op_impl, T>
 {
 };
 
