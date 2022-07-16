@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/scope_functions.hpp>
 #include <cpp_pipelines/type_traits.hpp>
@@ -38,30 +39,6 @@ template <class Tuple>
 void print_tuple(std::ostream& os, const Tuple& tuple, std::string_view separator)
 {
     print_tuple(os, tuple, separator, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-}
-
-template <class Iter>
-void print_range(std::ostream& os, Iter b, Iter e, std::string_view separator)
-{
-    for (auto it = b; it != e; ++it)
-    {
-        if (it != b)
-            os << separator;
-        os << *it;
-    }
-}
-
-template <class Range>
-void print_range(std::ostream& os, const Range& range)
-{
-    if constexpr (is_detected_v<has_ostream_op, Range>)
-    {
-        os << range;
-    }
-    else
-    {
-        print_range(os, std::begin(range), std::end(range), ", ");
-    }
 }
 
 template <class Iter>
@@ -1164,9 +1141,7 @@ struct range_fn
 
         void format(std::ostream& os) const
         {
-            os << name << "(";
-            print_range(os, inner);
-            os << ")";
+            os << name << "(" << safe_print(inner) << ")";
         }
     };
     template <class Pred>
@@ -1201,9 +1176,7 @@ struct is_range_fn
 
         void format(std::ostream& os) const
         {
-            os << name << "(";
-            print_range(os, inner);
-            os << ")";
+            os << name << "(" << safe_print(inner) << ")";
         }
     };
     template <class Pred>
@@ -1277,14 +1250,10 @@ struct assert_fn
         template <class T>
         constexpr void operator()(T&& item) const
         {
-            if (matches(item, pred))
+            if (!matches(item, pred))
             {
-                return;
+                throw std::runtime_error{ str("expected: ", safe_print(pred), ", actual: ", safe_print(item), ".") };
             }
-
-            std::stringstream ss;
-            ss << "expected: " << pred << ", actual: " << item;
-            throw std::runtime_error{ ss.str() };
         }
     };
 

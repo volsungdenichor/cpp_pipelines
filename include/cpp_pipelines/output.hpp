@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/type_traits.hpp>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -100,11 +101,47 @@ struct str_fn
     }
 };
 
+struct safe_print_fn
+{
+    template <class T>
+    constexpr auto operator()(T&& item) const -> ostream_manipulator
+    {
+        if constexpr (has_ostream_operator<T>::value)
+        {
+            return { [&](std::ostream& os) { os << item; } };
+        }
+        else if constexpr (is_forward_range<T>::value)
+        {
+            return {
+                [&](std::ostream& os) {
+                    os << "[";
+                    auto b = std::begin(item);
+                    auto e = std::end(item);
+                    bool first = true;
+                    for (auto it = b; it != e; ++it)
+                    {
+                        if (!first)
+                            os << ", ";
+                        os << (*this)(*it);
+                        first = false;
+                    }
+                    os << "]";
+                }
+            };
+        }
+        else
+        {
+            return { [](std::ostream& os) { os << "???"; } };
+        }
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto delimit = detail::delimit_fn{};
 static constexpr inline auto write = detail::write_fn{};
 static constexpr inline auto str = detail::str_fn{};
+static constexpr inline auto safe_print = detail::safe_print_fn{};
 
 struct cout
 {
