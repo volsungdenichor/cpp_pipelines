@@ -104,6 +104,11 @@ struct is_input_iterator : is_detected<detail::is_input_iterator_impl, T>
 };
 
 template <class T>
+struct is_range : is_detected<iterator_t, T>
+{
+};
+
+template <class T>
 struct is_forward_iterator : is_detected<detail::is_forward_iterator_impl, T>
 {
 };

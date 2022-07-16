@@ -104,19 +104,19 @@ struct str_fn
 struct safe_print_fn
 {
     template <class T>
-    constexpr auto operator()(T&& item) const -> ostream_manipulator
+    constexpr auto operator()(const T& item) const -> ostream_manipulator
     {
         if constexpr (has_ostream_operator<T>::value)
         {
             return { [&](std::ostream& os) { os << item; } };
         }
-        else if constexpr (is_forward_range<T>::value)
+        else if constexpr (is_range<T>::value)
         {
             return {
                 [&](std::ostream& os) {
                     os << "[";
-                    auto b = std::begin(item);
-                    auto e = std::end(item);
+                    const auto b = std::begin(item);
+                    const auto e = std::end(item);
                     bool first = true;
                     for (auto it = b; it != e; ++it)
                     {
@@ -129,10 +129,8 @@ struct safe_print_fn
                 }
             };
         }
-        else
-        {
-            return { [](std::ostream& os) { os << "???"; } };
-        }
+
+        return { [](std::ostream& os) { os << "???"; } };
     }
 };
 
