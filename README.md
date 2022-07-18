@@ -1,3 +1,5 @@
-[opt](docs/opt.md)
-
-[seq](docs/seq.md)
+- [opt](docs/opt.md)
+- [seq](docs/seq.md)
+- [sub](docs/sub.md)
+- [var](docs/var.md)
+- [res](docs/res.md)
