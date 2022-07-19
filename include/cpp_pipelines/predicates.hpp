@@ -1207,9 +1207,7 @@ struct is_any_element_of_range
 
         void format(std::ostream& os) const
         {
-            os << "is_any_of(";
-            print_range(os, inner);
-            os << ")";
+            os << "is_any_element_of(" << safe_print(inner) << ")";
         }
     };
     template <class Pred>

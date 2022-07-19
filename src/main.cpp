@@ -240,13 +240,7 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    static const auto parse_pairwise = tpl::transform(fn(parse<double>, res::value));
-    static const auto divide = tpl::apply(divides);
-
-    split("54/9", '/')
-        >>= opt::transform(parse_pairwise)  // std::optional<std::pair<double, double>>
-        >>= opt::transform(divide)          // std::optional<double>
-        >>= inspect(cout{ "divide: " });    //
+    10 >>= p::assert(p::is_any_element_of_range(std::vector{1, 2, 3}));
 }
 
 int main()
