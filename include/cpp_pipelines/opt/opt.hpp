@@ -471,4 +471,12 @@ static constexpr inline auto accumulate = detail::accumulate_fn{};
 
 static constexpr inline auto match = detail::match_fn{};
 
+template <class Func, class... Args>
+constexpr decltype(auto) apply(Func&& func, Args&&... args)
+{
+    return (... && static_cast<bool>(args))
+        ? std::optional{std::invoke(std::forward<Func>(func), *std::forward<Args>(args)...)}
+        : std::nullopt;
+}
+
 }  // namespace cpp_pipelines::opt
