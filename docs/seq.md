@@ -2,7 +2,7 @@
 
 ## seq::transform
 
-std::vector{2, 3, 4} >>= seq::transform([](int x) { return 10 * x; }) == std::vector{20, 30, 40}
+Seq<:strawberry:> >>= seq::transform(func: Func(:strawberry:) -> :cherries:) === Seq<:cherries:>
 
 ## seq::filter
 

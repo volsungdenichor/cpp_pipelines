@@ -10,7 +10,7 @@ namespace detail
 struct identity_fn
 {
     template <class T>
-    constexpr T&& operator()(T&& item) const noexcept
+    constexpr T operator()(T&& item) const noexcept
     {
         return std::forward<T>(item);
     }

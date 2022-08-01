@@ -14,10 +14,10 @@ struct inspect_fn
         Func func;
 
         template <class T>
-        constexpr decltype(auto) operator()(T&& item) const
+        constexpr T operator()(T&& item) const
         {
             invoke(func, item);
-            return to_return_type(std::forward<T>(item));
+            return std::forward<T>(item);
         }
     };
 
