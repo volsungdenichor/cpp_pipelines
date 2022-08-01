@@ -240,7 +240,13 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    10 >>= p::assert(p::is_any_element_of_range(std::vector{1, 2, 3}));
+    const auto res = persons
+        >>= seq::transform(&Person::first_name)
+        >>= seq::transform([](std::string t) { return t + ", "; })
+        >>= seq::take(5)
+        >>= seq::acccumulate(plus);
+
+    std::cout << res << std::endl;
 }
 
 int main()

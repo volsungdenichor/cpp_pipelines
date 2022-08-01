@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/seq/access.hpp>
+#include <cpp_pipelines/seq/accumulate.hpp>
 #include <cpp_pipelines/seq/adjacent.hpp>
 #include <cpp_pipelines/seq/adjacent_transform.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>

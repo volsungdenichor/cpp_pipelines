@@ -2,10 +2,7 @@
 
 ## seq::transform
 
-Seq<:strawberry:> >>= seq::transform(func: Func(:strawberry:) -> :cherries:) === Seq<:cherries:>
-
 ## seq::filter
-
 ## seq::transform_maybe
 
 ## seq::transform_zip
@@ -107,3 +104,5 @@ Seq<:strawberry:> >>= seq::transform(func: Func(:strawberry:) -> :cherries:) ===
 ## seq::unique_by
 ## seq::unique_by_key
 ## seq::unique
+
+## seq::accumulate
