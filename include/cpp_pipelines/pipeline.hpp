@@ -6,16 +6,9 @@
 namespace cpp_pipelines
 {
 template <class T>
-constexpr decltype(auto) to_return_type(T&& item)
+constexpr T to_return_type(T&& item)
 {
-    if constexpr (std::is_lvalue_reference_v<T>)
-    {
-        return item;
-    }
-    else
-    {
-        return std::decay_t<T>{ std::forward<T>(item) };
-    }
+    return std::forward<T>(item);
 }
 
 template <class... Pipes>
