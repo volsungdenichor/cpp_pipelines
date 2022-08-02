@@ -809,7 +809,7 @@ decltype(auto) remove(Range&& range, const T& value, Proj proj = {})
     });
 }
 
-template <class Policy, class Range, class UnaryPred, class Proj = identity_fn>
+template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
 decltype(auto) remove_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);

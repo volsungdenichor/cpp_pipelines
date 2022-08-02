@@ -1,6 +1,7 @@
 
 #include <cmath>
 #include <cpp_pipelines/algorithm.hpp>
+#include <cpp_pipelines/container_utils.hpp>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/integer_types.hpp>
@@ -16,6 +17,7 @@
 #include <cpp_pipelines/scope_functions.hpp>
 #include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq.hpp>
+#include <cpp_pipelines/set.hpp>
 #include <cpp_pipelines/source_location.hpp>
 #include <cpp_pipelines/sub.hpp>
 #include <cpp_pipelines/tpl.hpp>
@@ -240,13 +242,13 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto res = persons
-        >>= seq::transform(&Person::first_name)
-        >>= seq::transform([](std::string t) { return t + ", "; })
-        >>= seq::take(5)
-        >>= seq::acccumulate(plus);
+    const auto lhs = std::set{ 1, 2, 4, 8 };
+    const auto rhs = std::set{ 1, 8 };
 
-    std::cout << res << std::endl;
+    std::cout << set::includes(lhs, rhs) << std::endl;
+    std::cout << delimit(set::sum(lhs, rhs), " ") << std::endl;
+    std::cout << delimit(set::difference(lhs, rhs), " ") << std::endl;
+    std::cout << delimit(set::intersection(lhs, rhs), " ") << std::endl;
 }
 
 int main()

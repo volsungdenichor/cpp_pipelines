@@ -106,3 +106,4 @@
 ## seq::unique
 
 ## seq::accumulate
+## seq::push_back
