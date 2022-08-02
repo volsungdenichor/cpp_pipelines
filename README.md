@@ -1,5 +1,6 @@
 - [opt](docs/opt.md)
 - [seq](docs/seq.md)
+- [set](docs/set.md)
 - [sub](docs/sub.md)
 - [var](docs/var.md)
 - [res](docs/res.md)
