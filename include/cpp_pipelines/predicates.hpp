@@ -4,6 +4,7 @@
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/scope_functions.hpp>
+#include <cpp_pipelines/source_location.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 #include <functional>
 #include <iostream>
@@ -1244,21 +1245,27 @@ struct assert_fn
     struct impl
     {
         Pred pred;
+        std::optional<source_location> loc;
 
         template <class T>
         constexpr void operator()(T&& item) const
         {
             if (!matches(item, pred))
             {
-                throw std::runtime_error{ str("expected: ", safe_print(pred), ", actual: ", safe_print(item), ".") };
+                auto msg = str("expected: ", safe_print(pred), ", actual: ", safe_print(item), ".");
+                if (loc)
+                {
+                    msg += str(" ", *loc);
+                }
+                throw std::runtime_error{ std::move(msg) };
             }
         }
     };
 
     template <class Pred>
-    constexpr auto operator()(Pred pred) const
+    constexpr auto operator()(Pred pred, std::optional<source_location> loc = {}) const
     {
-        return inspect(impl<Pred>{ std::move(pred) });
+        return inspect(impl<Pred>{ std::move(pred), std::move(loc) });
     }
 };
 
