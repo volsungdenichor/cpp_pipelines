@@ -2,6 +2,7 @@
 
 #include <cpp_pipelines/type_traits.hpp>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string_view>
@@ -134,12 +135,45 @@ struct safe_print_fn
     }
 };
 
+struct ostream_arg_fn
+{
+    template <class... Args>
+    auto operator()(const Args&... args) const -> ostream_manipulator
+    {
+        return [&](std::ostream& os) { (os << ... << args); };
+    }
+};
+
+struct ostream_fill_fn
+{
+    auto operator()(char ch) const -> ostream_manipulator
+    {
+        return [=](std::ostream& os) { os << std::setfill(ch); };
+    }
+
+    auto operator()(char ch, std::ptrdiff_t n) const -> ostream_manipulator
+    {
+        return [=](std::ostream& os) { os << std::setfill(ch) << std::setw(n); };
+    }
+};
+
+struct ostream_zero_fill_fn
+{
+    auto operator()(std::ptrdiff_t n) const -> ostream_manipulator
+    {
+        return [=](std::ostream& os) { os << std::setfill('0') << std::setw(n); };
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto delimit = detail::delimit_fn{};
 static constexpr inline auto write = detail::write_fn{};
 static constexpr inline auto str = detail::str_fn{};
 static constexpr inline auto safe_print = detail::safe_print_fn{};
+static constexpr inline auto ostream_arg = detail::ostream_arg_fn{};
+static constexpr inline auto ostream_fill = detail::ostream_fill_fn{};
+static constexpr inline auto ostream_zero_fill = detail::ostream_zero_fill_fn{};
 
 struct cout
 {
