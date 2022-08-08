@@ -69,15 +69,18 @@ private:
     template <class Iter>
     auto impl(Iter begin, Iter end, std::string_view separator = {}) const -> ostream_manipulator
     {
-        return { [b = begin, e = end, s = separator, first = true](std::ostream& os) mutable {
-            for (auto it = b; it != e; ++it)
+        return [=](std::ostream& os) {
+            auto b = begin;
+            auto e = end;
+            if (b != e)
             {
-                if (!first)
-                    os << s;
-                os << *it;
-                first = false;
+                os << *b++;
+                for (auto it = b; it != e; ++it)
+                {
+                    os << separator << *it;
+                }
             }
-        } };
+        };
     }
 };
 
