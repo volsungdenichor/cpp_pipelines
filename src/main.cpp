@@ -6,6 +6,7 @@
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/integer_types.hpp>
 #include <cpp_pipelines/iterable.hpp>
+#include <cpp_pipelines/log.hpp>
 #include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/map.hpp>
 #include <cpp_pipelines/operators.hpp>
@@ -236,19 +237,50 @@ auto split(std::string_view text, char delim = ',') -> std::optional<std::pair<s
                : std::nullopt;
 }
 
+cpp_pipelines::log::value_wrapper<int> calculate_odd(int x)
+{
+    return {
+        x * 100,
+        { "Calculating for odd", "Multiplying by 100" }
+    };
+}
+
+cpp_pipelines::log::value_wrapper<int> calculate_even(int x)
+{
+    return {
+        x * 1000,
+        { "Calculating for even", "Multiplying by 1000" }
+    };
+}
+
+cpp_pipelines::log::value_wrapper<int> calculate(int x)
+{
+    using namespace cpp_pipelines;
+    if (x % 2 == 0)
+    {
+        return x
+               >>= log::lift
+               >>= log::append_logs({ "EVEN", "xxx", "yyy" })
+               >>= log::and_then(&calculate_even);
+    }
+    else
+    {
+        return x >>= log::lift >>= log::and_then(&calculate_odd);
+    }
+}
+
 void run()
 {
     using namespace cpp_pipelines;
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto lhs = std::set{ 1, 2, 4, 8 };
-    const auto rhs = std::set{ 1, 8 };
+    const auto result = log::lift(6)
+        >>= log::invoke(log::transform(multiplies(10)) >>= log::and_then(&calculate), "foo")
+        >>= log::append_logs({ "Ala" })
+        >>= log::value;
 
-    std::cout << set::includes(lhs, rhs) << std::endl;
-    std::cout << delimit(set::sum(lhs, rhs), " ") << std::endl;
-    std::cout << delimit(set::difference(lhs, rhs), " ") << std::endl;
-    std::cout << delimit(set::intersection(lhs, rhs), " ") << std::endl;
+    std::cout << result << std::endl;
 }
 
 int main()
