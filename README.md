@@ -8,3 +8,4 @@
 - [predicates](docs/predicates.md)
 - [functions](docs/functions.md)
 - [scope functions](docs/scope_functions.md)
+- [log](docs/log.md)
