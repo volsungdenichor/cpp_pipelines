@@ -114,7 +114,7 @@ struct transform_fn
         template <class T>
         constexpr auto operator()(T&& item) const
         {
-            return lift(*std::forward<T>(item));
+            return lift(invoke(func, *std::forward<T>(item)));
         }
     };
 
