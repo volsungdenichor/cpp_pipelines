@@ -155,7 +155,7 @@ struct transform_fn
     }
 };
 
-struct value_and_log_fn
+struct flush_fn
 {
     template <class Handler>
     struct impl
@@ -163,10 +163,10 @@ struct value_and_log_fn
         Handler handler;
 
         template <class T>
-        constexpr decltype(auto) operator()(T&& item) const
+        constexpr auto operator()(T&& item) const
         {
             std::for_each(std::begin(item.logs), std::end(item.logs), std::ref(handler));
-            return *std::forward<T>(item);
+            return lift(*std::forward<T>(item));
         }
     };
 
@@ -174,6 +174,15 @@ struct value_and_log_fn
     constexpr auto operator()(Handler handler) const
     {
         return make_pipeline(impl<Handler>{ std::move(handler) });
+    }
+};
+
+struct value_fn
+{
+    template <class T>
+    constexpr decltype(auto) operator()(T&& item) const
+    {
+        return *std::forward<T>(item);
     }
 };
 
@@ -229,7 +238,8 @@ using detail::lift;
 static constexpr inline auto and_then = detail::and_then_fn{};
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto append_logs = detail::append_logs_fn{};
-static constexpr inline auto value_and_log = detail::value_and_log_fn{};
+static constexpr inline auto flush = detail::flush_fn{};
+static constexpr inline auto value = make_pipeline(detail::value_fn{});
 
 }  // namespace log
 
