@@ -275,12 +275,10 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto result = log::lift(6)
-        >>= log::invoke(log::transform(multiplies(10)) >>= log::and_then(&calculate), "foo")
-        >>= log::append_logs({ "Ala" })
-        >>= log::value;
-
-    std::cout << result << std::endl;
+    const auto logged = calculate_even(10)
+        >>= log::and_then([](int x) { return log::lift(x + 1) >>= log::append_logs({ "Lambda" }); });
+    const auto res = logged >>= log::value_and_log([](const log::log_t& item) { std::cout << "| " << item << std::endl; });
+    std::cout << "res=" << res << std::endl;
 }
 
 int main()

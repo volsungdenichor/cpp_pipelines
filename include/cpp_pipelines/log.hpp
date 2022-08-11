@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cpp_pipelines/output.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 #include <iterator>
@@ -10,11 +11,40 @@ namespace cpp_pipelines
 {
 namespace log
 {
-struct logs_t : std::vector<std::string>
+enum category
 {
-    using log_type = std::string;
-    using base_type = std::vector<std::string>;
+    info,
+    debug,
+    warning,
+    error
+};
+
+struct log_t
+{
+    std::string message;
+    category cat;
+
+    log_t(std::string message, category cat = category::debug)
+        : message{ std::move(message) }
+        , cat{ cat }
+    {
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const log_t& item)
+    {
+        return os << item.message;
+    }
+};
+struct logs_t : std::vector<log_t>
+{
+    using log_type = log_t;
+    using base_type = std::vector<log_t>;
     using base_type::base_type;
+
+    logs_t(std::initializer_list<std::string> init)
+    {
+        std::transform(std::begin(init), std::end(init), std::back_inserter(*this), [](std::string item) { return log_t{ std::move(item) }; });
+    }
 
     logs_t& operator+=(logs_t other)
     {
@@ -125,16 +155,25 @@ struct transform_fn
     }
 };
 
-struct value_fn
+struct value_and_log_fn
 {
-    template <class T>
-    constexpr auto operator()(T&& item) const
+    template <class Handler>
+    struct impl
     {
-        for (const auto& log : item.logs)
+        Handler handler;
+
+        template <class T>
+        constexpr decltype(auto) operator()(T&& item) const
         {
-            std::cout << "| " << log << std::endl;
+            std::for_each(std::begin(item.logs), std::end(item.logs), std::ref(handler));
+            return *std::forward<T>(item);
         }
-        return *std::forward<T>(item);
+    };
+
+    template <class Handler>
+    constexpr auto operator()(Handler handler) const
+    {
+        return make_pipeline(impl<Handler>{ std::move(handler) });
     }
 };
 
@@ -190,8 +229,7 @@ using detail::lift;
 static constexpr inline auto and_then = detail::and_then_fn{};
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto append_logs = detail::append_logs_fn{};
-static constexpr inline auto value = make_pipeline(detail::value_fn{});
-static constexpr inline auto invoke = make_pipeline(detail::invoke_fn{});
+static constexpr inline auto value_and_log = detail::value_and_log_fn{};
 
 }  // namespace log
 
