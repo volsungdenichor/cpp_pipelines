@@ -275,13 +275,9 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto handler = [](const log::log_t& item) { std::cout << "|" << item << "\n"; };
+    const auto logged = log::invoke(calculate, "calculate")(10);
+    const auto res = logged >>= log::value_and_flush(cout{ "|: " });
 
-    const auto logged = calculate_even(10)
-        >>= log::and_then([](int x) { return log::lift(x + 1) >>= log::append_logs({ "Lambda" }); });
-    const auto res = logged
-        // >>= log::flush(handler)
-        >>= log::value;
     std::cout << "res=" << res << std::endl;
 }
 

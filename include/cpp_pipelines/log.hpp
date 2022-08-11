@@ -216,9 +216,9 @@ struct invoke_fn
         template <class... Args>
         auto operator()(Args&&... args) const
         {
-            auto in = str(msg, " in: ", std::tie(args...));
+            auto in = str(msg, std::tie(args...));
             auto res = invoke(func, std::forward<Args>(args)...);
-            auto out = str(msg, " out: ", *res);
+            auto out = str(msg, " = ", *res);
             return lift(
                 *std::move(res),
                 logs_t{ std::move(in) } + res.logs + logs_t{ std::move(out) });
@@ -231,6 +231,15 @@ struct invoke_fn
     }
 };
 
+struct value_and_flush_fn
+{
+    template <class Handler>
+    constexpr auto operator()(Handler handler) const
+    {
+        return make_pipeline(flush_fn{}(std::move(handler)), value_fn{});
+    }
+};
+
 }  // namespace detail
 
 using detail::lift;
@@ -238,8 +247,10 @@ using detail::lift;
 static constexpr inline auto and_then = detail::and_then_fn{};
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto append_logs = detail::append_logs_fn{};
+static constexpr inline auto invoke = detail::invoke_fn{};
 static constexpr inline auto flush = detail::flush_fn{};
 static constexpr inline auto value = make_pipeline(detail::value_fn{});
+static constexpr inline auto value_and_flush = detail::value_and_flush_fn{};
 
 }  // namespace log
 
