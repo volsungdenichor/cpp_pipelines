@@ -182,7 +182,7 @@ struct value_fn
     template <class T>
     constexpr decltype(auto) operator()(T&& item) const
     {
-        return *std::forward<T>(item);
+        return to_return_type(*std::forward<T>(item));
     }
 };
 

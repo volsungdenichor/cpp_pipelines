@@ -275,8 +275,9 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto logged = log::invoke(calculate, "calculate")(10);
-    const auto res = logged >>= log::value_and_flush(cout{ "|: " });
+    const auto f = log::invoke(calculate, "calc") >>= log::value_and_flush(cout{ "|: " });
+
+    const auto res = f(10);
 
     std::cout << "res=" << res << std::endl;
 }
