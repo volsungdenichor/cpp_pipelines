@@ -70,27 +70,18 @@ private:
     auto impl(Iter begin, Iter end, std::string_view separator = {}) const -> ostream_manipulator
     {
         return [=](std::ostream& os) {
-            auto b = begin;
-            auto e = end;
-            if (b != e)
+            if (begin == end)
             {
-                os << *b++;
-                for (auto it = b; it != e; ++it)
-                {
-                    os << separator << *it;
-                }
+                return;
+            }
+
+            auto b = begin;
+            os << *b++;
+            for (; b != end; ++b)
+            {
+                os << separator << *b;
             }
         };
-    }
-};
-
-struct write_fn
-{
-    template <class... Args>
-    std::ostream& operator()(std::ostream& os, const Args&... args) const
-    {
-        (os << ... << args);
-        return os;
     }
 };
 
@@ -100,7 +91,7 @@ struct str_fn
     std::string operator()(const Args&... args) const
     {
         std::stringstream ss;
-        write_fn{}(ss, args...);
+        (ss << ... << args);
         return std::move(ss).str();
     }
 };
@@ -171,7 +162,6 @@ struct ostream_zero_fill_fn
 }  // namespace detail
 
 static constexpr inline auto delimit = detail::delimit_fn{};
-static constexpr inline auto write = detail::write_fn{};
 static constexpr inline auto str = detail::str_fn{};
 static constexpr inline auto safe_print = detail::safe_print_fn{};
 static constexpr inline auto ostream_arg = detail::ostream_arg_fn{};
