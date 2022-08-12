@@ -3,6 +3,7 @@
 #include <cpp_pipelines/algorithm.hpp>
 #include <cpp_pipelines/container_utils.hpp>
 #include <cpp_pipelines/debug.hpp>
+#include <cpp_pipelines/format.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/integer_types.hpp>
 #include <cpp_pipelines/iterable.hpp>
@@ -275,11 +276,10 @@ void run()
     using namespace cpp_pipelines::pattern_matching;
     namespace p = cpp_pipelines::predicates;
 
-    const auto f = log::invoke(calculate, "calc") >>= log::value_and_flush(cout{ "|: " });
-
-    const auto res = f(10);
-
-    std::cout << "res=" << res << std::endl;
+    seq::linspace(0.0, 10.0, 21)
+        >>= seq::transform(associate(L(_ * _)))
+        >>= seq::transform(tpl::apply(format("x={}, y={}")))
+        >>= seq::write(std::cout, "\n");
 }
 
 int main()

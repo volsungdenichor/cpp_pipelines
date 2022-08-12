@@ -21,10 +21,10 @@
 #include <cpp_pipelines/seq/getlines.hpp>
 #include <cpp_pipelines/seq/inspect.hpp>
 #include <cpp_pipelines/seq/intersperse.hpp>
-#include <cpp_pipelines/seq/iota.hpp>
 #include <cpp_pipelines/seq/istream.hpp>
 #include <cpp_pipelines/seq/iterate.hpp>
 #include <cpp_pipelines/seq/join.hpp>
+#include <cpp_pipelines/seq/numeric.hpp>
 #include <cpp_pipelines/seq/order_by.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>

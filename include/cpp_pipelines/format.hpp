@@ -83,9 +83,9 @@ struct format_fn
 
         void format_arg(std::ostream& os, std::string_view fmt, int arg_index, const argument_extractor& arg_extractor) const
         {
-            const auto colon = std::find(fmt.begin(), fmt.end(), ':');
-            const auto index_part = make_string_view(fmt.begin(), colon);
-            const auto fmt_part = make_string_view(colon != fmt.end() ? colon + 1 : colon, fmt.end());
+            const auto colon = std::find(std::begin(fmt), std::end(fmt), ':');
+            const auto index_part = make_string_view(std::begin(fmt), colon);
+            const auto fmt_part = make_string_view(colon != std::end(fmt) ? colon + 1 : colon, std::end(fmt));
 
             const auto actual_index = !index_part.empty()
                                           ? parse_int(index_part)
@@ -96,26 +96,26 @@ struct format_fn
 
         void do_format(std::ostream& os, std::string_view fmt, int arg_index, const argument_extractor& arg_extractor) const
         {
-            const auto bracket = std::find_if(fmt.begin(), fmt.end(), [](char c) { return c == '{' || c == '}'; });
-            if (bracket == fmt.end())
+            const auto bracket = std::find_if(std::begin(fmt), std::end(fmt), [](char c) { return c == '{' || c == '}'; });
+            if (bracket == std::end(fmt))
             {
                 return format_text(os, fmt);
             }
-            else if (bracket + 1 != fmt.end() && bracket[0] == bracket[1])
+            else if (bracket + 1 != std::end(fmt) && bracket[0] == bracket[1])
             {
-                format_text(os, make_string_view(fmt.begin(), bracket + 1));
-                return do_format(os, make_string_view(bracket + 2, fmt.end()), arg_index, arg_extractor);
+                format_text(os, make_string_view(std::begin(fmt), bracket + 1));
+                return do_format(os, make_string_view(bracket + 2, std::end(fmt)), arg_index, arg_extractor);
             }
             else if (bracket[0] == '{')
             {
-                const auto closing_bracket = std::find(bracket + 1, fmt.end(), '}');
-                if (closing_bracket == fmt.end())
+                const auto closing_bracket = std::find(bracket + 1, std::end(fmt), '}');
+                if (closing_bracket == std::end(fmt))
                 {
                     throw format_error{ "format: unclosed bracket" };
                 }
-                format_text(os, make_string_view(fmt.begin(), bracket));
+                format_text(os, make_string_view(std::begin(fmt), bracket));
                 format_arg(os, make_string_view(bracket + 1, closing_bracket), arg_index, arg_extractor);
-                return do_format(os, make_string_view(closing_bracket + 1, fmt.end()), arg_index + 1, arg_extractor);
+                return do_format(os, make_string_view(closing_bracket + 1, std::end(fmt)), arg_index + 1, arg_extractor);
             }
             throw format_error{ "format: unexpected opening bracket" };
         }

@@ -26,7 +26,8 @@
 ## seq::trim_while
 
 ## seq::iota
-
+## seq::range
+## seq::linspace
 ## seq::enumerate
 
 ## seq::join
