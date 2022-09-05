@@ -25,7 +25,6 @@
 #include <cpp_pipelines/seq/iterate.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/numeric.hpp>
-#include <cpp_pipelines/seq/order_by.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/split.hpp>
