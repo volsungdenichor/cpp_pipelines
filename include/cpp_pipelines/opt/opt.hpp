@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/tpl.hpp>
 #include <optional>
 
 namespace cpp_pipelines::opt
@@ -453,27 +452,6 @@ struct transform_zip_fn
     }
 };
 
-struct apply_transform_zip_fn
-{
-    template <class Func>
-    struct impl
-    {
-        Func func;
-
-        template <class... Args>
-        constexpr auto operator()(Args&&... args) const
-        {
-            return transform_zip_fn{}(func, std::forward<Args>(args)...);
-        }
-    };
-
-    template <class Func>
-    constexpr auto operator()(Func func) const
-    {
-        return tpl::apply(impl<Func>{ std::move(func) });
-    }
-};
-
 }  // namespace detail
 
 using detail::get_value;
@@ -505,6 +483,5 @@ static constexpr inline auto accumulate = detail::accumulate_fn{};
 
 static constexpr inline auto match = detail::match_fn{};
 static constexpr inline auto transform_zip = detail::transform_zip_fn{};
-static constexpr inline auto apply_transform_zip = detail::apply_transform_zip_fn{};
 
 }  // namespace cpp_pipelines::opt
