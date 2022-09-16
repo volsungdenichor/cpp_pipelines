@@ -442,13 +442,25 @@ struct match_fn
 
 struct zip_transform_fn
 {
-    template <class Func, class... Args>
-    constexpr auto operator()(Func&& func, Args&&... args) const
+    template <class Func>
+    struct impl
     {
-        using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Args>(args))...)));
-        return (... && has_value(args))
-                   ? invoke(lift, invoke(func, get_value(std::forward<Args>(args))...))
-                   : result_type{};
+        Func func;
+
+        template <class... Args>
+        constexpr auto operator()(Args&&... args) const
+        {
+            using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Args>(args))...)));
+            return (... && has_value(args))
+                       ? invoke(lift, invoke(func, get_value(std::forward<Args>(args))...))
+                       : result_type{};
+        }
+    };
+
+    template <class Func>
+    constexpr auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
     }
 };
 
