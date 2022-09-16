@@ -94,10 +94,22 @@ struct zip_transform_fn
         }
     };
 
-    template <class Func, class... Ranges>
-    constexpr inline auto operator()(Func func, Ranges&&... ranges) const
+    template <class Func>
+    struct impl
     {
-        return view_interface{ view{ std::move(func), std::tuple{ all(std::forward<Ranges>(ranges))... } } };
+        Func func;
+
+        template <class... Ranges>
+        constexpr auto operator()(Ranges&&... ranges) const
+        {
+            return view_interface{ view{ std::move(func), std::tuple{ all(std::forward<Ranges>(ranges))... } } };
+        }
+    };
+
+    template <class Func>
+    constexpr inline auto operator()(Func func) const
+    {
+        return make_pipeline(impl<Func>{ std::move(func) });
     }
 };
 

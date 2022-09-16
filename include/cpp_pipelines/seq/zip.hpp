@@ -21,12 +21,12 @@ struct zip_fn
     template <class... Ranges>
     constexpr inline auto operator()(Ranges&&... ranges) const
     {
-        return zip_transform(as_tuple_fn<Ranges...>{}, std::forward<Ranges>(ranges)...);
+        return zip_transform(as_tuple_fn<Ranges...>{})(std::forward<Ranges>(ranges)...);
     }
 };
 
 }  // namespace detail
 
-static constexpr inline auto zip = detail::zip_fn{};
+static constexpr inline auto zip = make_pipeline(detail::zip_fn{});
 
 }  // namespace cpp_pipelines::seq
