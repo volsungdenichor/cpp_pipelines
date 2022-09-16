@@ -440,6 +440,18 @@ struct match_fn
     }
 };
 
+struct transform_zip_fn
+{
+    template <class Func, class... Args>
+    constexpr auto operator()(Func&& func, Args&&... args) const
+    {
+        using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Args>(args))...)));
+        return (... && has_value(args))
+                   ? invoke(lift, invoke(func, get_value(std::forward<Args>(args))...))
+                   : result_type{};
+    }
+};
+
 }  // namespace detail
 
 using detail::get_value;
@@ -470,13 +482,6 @@ static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto accumulate = detail::accumulate_fn{};
 
 static constexpr inline auto match = detail::match_fn{};
-
-template <class Func, class... Args>
-constexpr decltype(auto) apply(Func&& func, Args&&... args)
-{
-    return (... && static_cast<bool>(args))
-        ? std::optional{std::invoke(std::forward<Func>(func), *std::forward<Args>(args)...)}
-        : std::nullopt;
-}
+static constexpr inline auto transform_zip = detail::transform_zip_fn{};
 
 }  // namespace cpp_pipelines::opt
