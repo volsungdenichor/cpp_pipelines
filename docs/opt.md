@@ -29,3 +29,5 @@
 ## opt::for_each
 
 ## opt::accumulate
+
+## opt::transform_zip
