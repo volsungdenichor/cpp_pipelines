@@ -31,3 +31,5 @@
 ## opt::accumulate
 
 ## opt::transform_zip
+
+## opt::apply_transform_zip

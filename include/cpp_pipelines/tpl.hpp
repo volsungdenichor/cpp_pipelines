@@ -77,22 +77,50 @@ struct for_each_fn
 
 struct apply_fn
 {
-    template <class Func>
+    template <class Func, class Args>
     struct impl
     {
         Func func;
+        Args args;
+
+        static constexpr inline std::size_t args_count = std::tuple_size_v<std::decay_t<Args>>;
+
+        constexpr impl(Func func, Args args)
+            : func{ std::move(func) }
+            , args{ std::move(args) }
+        {
+        }
 
         template <class T>
         constexpr decltype(auto) operator()(T&& item) const
         {
-            return std::apply(func, std::forward<T>(item));
+            return call(std::forward<T>(item), std::make_index_sequence<args_count + std::tuple_size_v<std::decay_t<T>>>{});
+        }
+
+        template <class T, std::size_t... I>
+        constexpr decltype(auto) call(T&& item, std::index_sequence<I...>) const
+        {
+            return invoke(func, get<I>(std::forward<T>(item))...);
+        }
+
+        template <std::size_t I, class T>
+        constexpr decltype(auto) get(T&& item) const
+        {
+            if constexpr (I < args_count)
+            {
+                return std::get<I>(args);
+            }
+            else
+            {
+                return std::get<I - args_count>(std::forward<T>(item));
+            }
         }
     };
 
-    template <class Func>
-    constexpr auto operator()(Func func) const
+    template <class Func, class... Args>
+    constexpr auto operator()(Func func, Args... args) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return make_pipeline(impl{ std::move(func), std::tuple{ std::move(args)... } });
     }
 };
 
