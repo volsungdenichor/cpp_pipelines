@@ -5,7 +5,7 @@
 ## seq::filter
 ## seq::transform_maybe
 
-## seq::transform_zip
+## seq::zip_transform
 
 ## seq::enumerate
 

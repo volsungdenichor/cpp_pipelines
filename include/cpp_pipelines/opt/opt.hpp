@@ -440,7 +440,7 @@ struct match_fn
     }
 };
 
-struct transform_zip_fn
+struct zip_transform_fn
 {
     template <class Func, class... Args>
     constexpr auto operator()(Func&& func, Args&&... args) const
@@ -482,6 +482,6 @@ static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto accumulate = detail::accumulate_fn{};
 
 static constexpr inline auto match = detail::match_fn{};
-static constexpr inline auto transform_zip = detail::transform_zip_fn{};
+static constexpr inline auto zip_transform = detail::zip_transform_fn{};
 
 }  // namespace cpp_pipelines::opt

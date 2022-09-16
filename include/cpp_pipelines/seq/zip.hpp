@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/functions.hpp>
-#include <cpp_pipelines/seq/transform_zip.hpp>
+#include <cpp_pipelines/seq/zip_transform.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -21,7 +21,7 @@ struct zip_fn
     template <class... Ranges>
     constexpr inline auto operator()(Ranges&&... ranges) const
     {
-        return transform_zip(as_tuple_fn<Ranges...>{}, std::forward<Ranges>(ranges)...);
+        return zip_transform(as_tuple_fn<Ranges...>{}, std::forward<Ranges>(ranges)...);
     }
 };
 

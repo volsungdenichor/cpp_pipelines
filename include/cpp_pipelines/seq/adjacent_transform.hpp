@@ -2,7 +2,7 @@
 
 #include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/drop.hpp>
-#include <cpp_pipelines/seq/transform_zip.hpp>
+#include <cpp_pipelines/seq/zip_transform.hpp>
 
 namespace cpp_pipelines::seq
 {
@@ -31,7 +31,7 @@ struct adjacent_transform_fn
         template <class Range, std::size_t... I>
         constexpr auto call(Range&& range, std::index_sequence<I...>) const
         {
-            return transform_zip(func, (range >>= drop(I))...);
+            return zip_transform(func, (range >>= drop(I))...);
         }
     };
 
