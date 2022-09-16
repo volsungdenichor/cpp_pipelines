@@ -54,5 +54,5 @@ struct accumulate_fn
     }
 };
 }  // namespace detail
-static constexpr inline auto acccumulate = detail::accumulate_fn{};
+static constexpr inline auto accumulate = detail::accumulate_fn{};
 }  // namespace cpp_pipelines::seq
