@@ -98,4 +98,16 @@ constexpr decltype(auto) operator>>=(T&& item, pipeline_t<Pipes...>&& pipeline)
     return std::move(pipeline)(std::forward<T>(item));
 }
 
+template <class T, class... Pipes>
+constexpr decltype(auto) operator|=(T&& item, const pipeline_t<Pipes...>& pipeline)
+{
+    return std::apply(pipeline, std::forward<T>(item));
+}
+
+template <class T, class... Pipes>
+constexpr decltype(auto) operator|=(T&& item, pipeline_t<Pipes...>&& pipeline)
+{
+    return std::apply(std::move(pipeline), std::forward<T>(item));
+}
+
 }  // namespace cpp_pipelines
