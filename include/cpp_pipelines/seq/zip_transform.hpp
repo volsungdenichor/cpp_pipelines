@@ -102,7 +102,7 @@ struct zip_transform_fn
         template <class... Ranges>
         constexpr auto operator()(Ranges&&... ranges) const
         {
-            return view_interface{ view{ std::move(func), std::tuple{ all(std::forward<Ranges>(ranges))... } } };
+            return view_interface{ view{ func, std::tuple{ all(std::forward<Ranges>(ranges))... } } };
         }
     };
 

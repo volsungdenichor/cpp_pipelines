@@ -40,7 +40,7 @@ struct transform_fn
     {
         return make_pipeline(impl<Func>{ std::move(func) });
     }
-};
+};  // namespace transform_fn
 
 struct for_each_fn
 {
@@ -124,9 +124,49 @@ struct apply_fn
     }
 };
 
+static constexpr inline auto apply = detail::apply_fn{};
+
+template <class Tuple>
+struct tuple_wrapper
+{
+    Tuple tuple;
+};
+
+template <class Tuple>
+tuple_wrapper(Tuple &&) -> tuple_wrapper<std::decay_t<Tuple>>;
+
+template <class Tuple, class... Pipes>
+constexpr decltype(auto) operator>>=(const tuple_wrapper<Tuple>& item, const pipeline_t<Pipes...> pipeline)
+{
+    return item.tuple >>= apply(pipeline);
+}
+
+template <class Tuple, class... Pipes>
+constexpr decltype(auto) operator>>=(tuple_wrapper<Tuple>&& item, const pipeline_t<Pipes...> pipeline)
+{
+    return std::move(item.tuple) >>= apply(pipeline);
+}
+
+struct tuple_fn
+{
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const
+    {
+        return tuple_wrapper{ std::forward_as_tuple(std::forward<Args>(args)...) };
+    }
+
+    template <class Tuple, class = std::enable_if_t<is_tuple_like<std::decay_t<Tuple>>::value>>
+    constexpr auto operator()(Tuple&& tuple) const
+    {
+        return tuple_wrapper{ std::forward<Tuple>(tuple) };
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto apply = detail::apply_fn{};
+static constexpr inline auto tuple = detail::tuple_fn{};
+
 }  // namespace cpp_pipelines::tpl
