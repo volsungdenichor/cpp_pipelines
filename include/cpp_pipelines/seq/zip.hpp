@@ -9,19 +9,19 @@ namespace detail
 {
 struct zip_fn
 {
-    template <class... Ranges>
     struct as_tuple_fn
     {
-        constexpr std::tuple<range_reference_t<Ranges>...> operator()(range_reference_t<Ranges>... args) const
+        template <class... Args>
+        constexpr std::tuple<sanitized_t<Args>...> operator()(Args&&... args) const
         {
-            return { args... };
+            return { std::forward<Args>(args)... };
         }
     };
 
     template <class... Ranges>
     constexpr inline auto operator()(Ranges&&... ranges) const
     {
-        return zip_transform(as_tuple_fn<Ranges...>{})(std::forward<Ranges>(ranges)...);
+        return zip_transform(as_tuple_fn{})(std::forward<Ranges>(ranges)...);
     }
 };
 

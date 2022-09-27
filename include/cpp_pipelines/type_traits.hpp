@@ -58,6 +58,9 @@ struct type_identity
 template <class T>
 using type_identity_t = typename type_identity<T>::type;
 
+template <class T>
+using sanitized_t = std::conditional_t<std::is_lvalue_reference_v<T>, T, std::decay_t<T>>;
+
 template <template <class> class C>
 struct convertible_to
 {

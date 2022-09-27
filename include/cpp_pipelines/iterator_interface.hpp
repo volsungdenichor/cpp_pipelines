@@ -87,10 +87,11 @@ struct iterator_interface
     constexpr auto operator->() const
     {
         decltype(auto) ref = **this;
-        if constexpr (std::is_reference_v<decltype(ref)>)
+        using ref_type = decltype(ref);
+        if constexpr (std::is_reference_v<ref_type>)
             return std::addressof(ref);
         else
-            return pointer_proxy<decltype(ref)>{ std::move(ref) };
+            return pointer_proxy<ref_type>{ std::move(ref) };
     }
 
     template <class T = Impl, class = std::enable_if_t<has_inc_v<T> || has_advance_v<T>>>
