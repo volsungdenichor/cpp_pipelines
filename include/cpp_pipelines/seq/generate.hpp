@@ -12,8 +12,7 @@ struct generate_fn
     template <class Func>
     struct view
     {
-        static constexpr auto sentinel = std::numeric_limits<std::ptrdiff_t>::max();
-        mutable semiregular<Func> func;
+        Func func;
 
         constexpr view(Func func)
             : func{ std::move(func) }
@@ -22,21 +21,23 @@ struct generate_fn
 
         struct iter
         {
-            const view* parent;
-            using maybe_type = std::decay_t<decltype(std::invoke(parent->func))>;
+            semiregular<Func> func;
+            using maybe_type = std::decay_t<decltype(std::invoke(func))>;
             mutable maybe_type current;
             std::ptrdiff_t index;
 
-            constexpr iter() = default;
-
-            constexpr iter(const view* parent, std::ptrdiff_t index)
-                : parent{ parent }
-                , index{ index }
+            constexpr iter()
+                : func{}
+                , current{}
+                , index{ std::numeric_limits<std::ptrdiff_t>::max() }
             {
-                if (index != sentinel)
-                {
-                    current = std::invoke(parent->func);
-                }
+            }
+
+            constexpr iter(Func func)
+                : func{ std::move(func) }
+                , current{ std::invoke(this->func) }
+                , index{ 0 }
+            {
             }
 
             constexpr decltype(auto) deref() const
@@ -46,7 +47,7 @@ struct generate_fn
 
             constexpr void inc()
             {
-                current = std::invoke(parent->func);
+                current = std::invoke(func);
                 ++index;
             }
 
@@ -58,12 +59,12 @@ struct generate_fn
 
         constexpr auto begin() const
         {
-            return iterator_interface{ iter{ this, 0 } };
+            return iterator_interface{ iter{ func } };
         }
 
         constexpr auto end() const
         {
-            return iterator_interface{ iter{ this, sentinel } };
+            return iterator_interface{ iter{} };
         }
     };
 

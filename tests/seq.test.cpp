@@ -205,14 +205,62 @@ TEST_CASE("seq::join", "[seq][join]")
     REQUIRE_THAT((std::vector{ "Alpha"s, "Beta"s, "Gamma"s } >>= seq::join), EqualsRange("AlphaBetaGamma"s));
 }
 
-#if 0
 TEST_CASE("seq::join_with", "[seq][join_with][join]")
 {
-    REQUIRE_THAT((std::vector{ "Alpha"s, "Beta"s, "Gamma"s } >>= seq::join_with(", "sv), EqualsRange("Alpha, Beta, Gamma"s));
+    REQUIRE_THAT((std::vector{ "Alpha"s, "Beta"s, "Gamma"s } >>= seq::join_with(", "sv)), EqualsRange("Alpha, Beta, Gamma"s));
 }
-#endif
 
 TEST_CASE("seq::intersperse", "[seq][intersperse]")
 {
     REQUIRE_THAT((std::vector{ 10, 11, 12 } >>= seq::intersperse(-1)), EqualsRange(std::vector{ 10, -1, 11, -1, 12 }));
+}
+
+TEST_CASE("seq::adjacent_transform", "[seq][adjacent_transform]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5 } >>= seq::adjacent_transform<3>([](int a, int b, int c) { return a + b + c; })), EqualsRange(std::vector{ 6, 9, 12 }));
+}
+
+TEST_CASE("seq::pairwise_transform", "[seq][adjacent_transform]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5 } >>= seq::pairwise_transform(std::plus<>{})), EqualsRange(std::vector{ 3, 5, 7, 9 }));
+}
+
+TEST_CASE("seq::generate", "[seq][generate]")
+{
+    const auto f = [cur = 2]() mutable -> std::optional<std::string> {
+        if (cur > 100)
+            return std::nullopt;
+        auto result = str(cur);
+        cur *= 2;
+        return result;
+    };
+    REQUIRE_THAT(seq::generate(f), EqualsRange(std::vector{ "2"s, "4"s, "8"s, "16"s, "32"s, "64"s }));
+}
+
+TEST_CASE("seq::generate_infinite", "[seq][generate_infinite][generate]")
+{
+    const auto f = [cur = 2]() mutable -> std::string {
+        auto result = str(cur);
+        cur *= 2;
+        return result;
+    };
+    REQUIRE_THAT(seq::generate_infinite(f) >>= seq::take(8), EqualsRange(std::vector{ "2"s, "4"s, "8"s, "16"s, "32"s, "64"s, "128"s, "256"s }));
+}
+
+TEST_CASE("seq::unfold", "[seq][unfold][generate]")
+{
+    const auto f = [](int cur) -> std::optional<std::pair<std::string, int>> {
+        if (cur > 100)
+            return std::nullopt;
+        return std::pair{ str(cur), cur * 2 };
+    };
+    REQUIRE_THAT(seq::unfold(1, f), EqualsRange(std::vector{ "1"s, "2"s, "4"s, "8"s, "16"s, "32"s, "64"s }));
+}
+
+TEST_CASE("seq::unfold_infinite", "[seq][unfold_infinite][generate]")
+{
+    const auto f = [](int cur) -> std::pair<std::string, int> {
+        return std::pair{ str(cur), cur * 2 };
+    };
+    REQUIRE_THAT(seq::unfold_infinite(1, f) >>= seq::take(8), EqualsRange(std::vector{ "1"s, "2"s, "4"s, "8"s, "16"s, "32"s, "64"s, "128"s }));
 }

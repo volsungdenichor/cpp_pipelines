@@ -31,7 +31,7 @@ struct adjacent_transform_fn
         template <class Range, std::size_t... I>
         constexpr auto call(Range&& range, std::index_sequence<I...>) const
         {
-            return zip_transform(func, (range >>= drop(I))...);
+            return std::tuple{ (range >>= drop(I))... } |= seq::zip_transform(func);
         }
     };
 
