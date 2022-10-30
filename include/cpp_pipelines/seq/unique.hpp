@@ -28,8 +28,9 @@ struct unique_by_key_fn
 };
 }  // namespace detail
 
-// TODO
+#if 0
 static constexpr inline auto unique_by = detail::unique_by_fn{};
 static constexpr inline auto unique_by_key = detail::unique_by_key_fn{};
 static constexpr inline auto unique = unique_by(equal_to);
+#endif
 }  // namespace cpp_pipelines::seq

@@ -18,6 +18,15 @@ using namespace cpp_pipelines;
 using namespace std::string_literals;
 using namespace std::string_view_literals;
 
+auto fibonacci()
+{
+    using state_type = std::pair<int, int>;
+    return seq::unfold_infinite(state_type{ 1, 1 }, [](state_type state) -> std::pair<int, state_type> {
+        const auto [a, b] = state;
+        return std::pair{ a, state_type{ b, a + b } };
+    });
+}
+
 template <class Range>
 struct EqualsRangeMatcher : Catch::Matchers::MatcherGenericBase
 {
@@ -263,4 +272,68 @@ TEST_CASE("seq::unfold_infinite", "[seq][unfold_infinite][generate]")
         return std::pair{ str(cur), cur * 2 };
     };
     REQUIRE_THAT(seq::unfold_infinite(1, f) >>= seq::take(8), EqualsRange(std::vector{ "1"s, "2"s, "4"s, "8"s, "16"s, "32"s, "64"s, "128"s }));
+}
+
+TEST_CASE("seq::take", "[seq][slice]")
+{
+    REQUIRE_THAT((fibonacci() >>= seq::take(10)), EqualsRange(std::vector{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55 }));
+}
+
+TEST_CASE("seq::take_while", "[seq][slice]")
+{
+    REQUIRE_THAT((fibonacci() >>= seq::take_while([](int x) { return x < 100; })), EqualsRange(std::vector{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 }));
+}
+
+TEST_CASE("seq::stride", "[seq][slice]")
+{
+    REQUIRE_THAT((fibonacci() >>= seq::stride(3) >>= seq::take(5)), EqualsRange(std::vector{ 1, 3, 13, 55, 233 }));
+}
+
+TEST_CASE("seq::drop", "[seq][slice]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::drop(3)), EqualsRange(std::vector{ 4, 5, 6 }));
+}
+
+TEST_CASE("seq::drop_while", "[seq][slice]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::drop_while([](int x) { return x < 5; })), EqualsRange(std::vector{ 5, 6 }));
+}
+
+TEST_CASE("seq::reverse", "[seq][reverse]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5 } >>= seq::reverse), EqualsRange(std::vector{ 5, 4, 3, 2, 1 }));
+}
+
+TEST_CASE("seq::getlines", "[seq][getlines")
+{
+    std::string text = "Mercury\nVenus\nEarth\nMars\nJupiter\nSaturn\nUranus\nNeptune";
+    std::stringstream ss{ text };
+    REQUIRE_THAT(seq::getlines(ss), EqualsRange(std::vector{ "Mercury"s, "Venus"s, "Earth"s, "Mars"s, "Jupiter"s, "Saturn"s, "Uranus"s, "Neptune"s }));
+}
+
+TEST_CASE("seq::accumulate", "[seq][accumulate]")
+{
+    REQUIRE((seq::range(1, 101) >>= seq::accumulate(std::plus<>{})) == 5050);
+}
+
+TEST_CASE("seq access - non-empty range", "[seq]")
+{
+    const auto v = std::vector{ 10, 12, 14, 16 };
+    REQUIRE((v >>= seq::front) == 10);
+    REQUIRE((v >>= seq::maybe_front) == 10);
+    REQUIRE((v >>= seq::back) == 16);
+    REQUIRE((v >>= seq::maybe_back) == 16);
+    REQUIRE((v >>= seq::at(2)) == 14);
+    REQUIRE((v >>= seq::maybe_at(2)) == 14);
+}
+
+TEST_CASE("seq access - empty range", "[seq]")
+{
+    const auto v = std::vector<int>{};
+    REQUIRE((v >>= seq::maybe_front) == std::nullopt);
+    REQUIRE((v >>= seq::maybe_back) == std::nullopt);
+    REQUIRE((v >>= seq::maybe_at(2)) == std::nullopt);
+    REQUIRE_THROWS(v >>= seq::front);
+    REQUIRE_THROWS(v >>= seq::back);
+    REQUIRE_THROWS(v >>= seq::at(2));
 }
