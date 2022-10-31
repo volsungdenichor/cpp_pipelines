@@ -1,18 +1,11 @@
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_templated.hpp>
+
+
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <cpp_pipelines/tpl.hpp>
 
-namespace std
-{
-template <class... L, class... R>
-bool operator==(const pair<L...>& lhs, const pair<R...>& rhs)
-{
-    return lhs.first == rhs.first && lhs.second == rhs.second;
-}
-}  // namespace std
+#include "test_utils.hpp"
 
 using namespace cpp_pipelines;
 using namespace std::string_literals;
@@ -25,35 +18,6 @@ auto fibonacci()
         const auto [a, b] = state;
         return std::pair{ a, state_type{ b, a + b } };
     });
-}
-
-template <class Range>
-struct EqualsRangeMatcher : Catch::Matchers::MatcherGenericBase
-{
-    EqualsRangeMatcher(const Range& range)
-        : range{ range }
-    {
-    }
-
-    template <class OtherRange>
-    bool match(const OtherRange& other) const
-    {
-        return std::equal(std::begin(range), std::end(range), std::begin(other), std::end(other));
-    }
-
-    std::string describe() const override
-    {
-        return "Equals: " + Catch::rangeToString(range);
-    }
-
-private:
-    const Range& range;
-};
-
-template <class Range>
-auto EqualsRange(const Range& range) -> EqualsRangeMatcher<Range>
-{
-    return EqualsRangeMatcher<Range>{ range };
 }
 
 TEST_CASE("seq::transform", "[seq][transform]")
@@ -276,17 +240,17 @@ TEST_CASE("seq::unfold_infinite", "[seq][unfold_infinite][generate]")
 
 TEST_CASE("seq::take", "[seq][slice]")
 {
-    REQUIRE_THAT((fibonacci() >>= seq::take(10)), EqualsRange(std::vector{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55 }));
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::take(3)), EqualsRange(std::vector{ 1, 2, 3 }));
 }
 
 TEST_CASE("seq::take_while", "[seq][slice]")
 {
-    REQUIRE_THAT((fibonacci() >>= seq::take_while([](int x) { return x < 100; })), EqualsRange(std::vector{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 }));
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::take_while([](int x) { return x < 4; })), EqualsRange(std::vector{ 1, 2, 3 }));
 }
 
-TEST_CASE("seq::stride", "[seq][slice]")
+TEST_CASE("seq::take_last", "[seq][slice]")
 {
-    REQUIRE_THAT((fibonacci() >>= seq::stride(3) >>= seq::take(5)), EqualsRange(std::vector{ 1, 3, 13, 55, 233 }));
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::take_last(3)), EqualsRange(std::vector{ 4, 5, 6 }));
 }
 
 TEST_CASE("seq::drop", "[seq][slice]")
@@ -297,6 +261,16 @@ TEST_CASE("seq::drop", "[seq][slice]")
 TEST_CASE("seq::drop_while", "[seq][slice]")
 {
     REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::drop_while([](int x) { return x < 5; })), EqualsRange(std::vector{ 5, 6 }));
+}
+
+TEST_CASE("seq::drop_last", "[seq][slice]")
+{
+    REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6 } >>= seq::drop_last(3)), EqualsRange(std::vector{ 1, 2, 3 }));
+}
+
+TEST_CASE("seq::stride", "[seq][slice]")
+{
+    REQUIRE_THAT((fibonacci() >>= seq::stride(3) >>= seq::take(5)), EqualsRange(std::vector{ 1, 3, 13, 55, 233 }));
 }
 
 TEST_CASE("seq::reverse", "[seq][reverse]")
@@ -336,4 +310,29 @@ TEST_CASE("seq access - empty range", "[seq]")
     REQUIRE_THROWS(v >>= seq::front);
     REQUIRE_THROWS(v >>= seq::back);
     REQUIRE_THROWS(v >>= seq::at(2));
+}
+
+TEST_CASE("seq::all_of", "[seq]")
+{
+    REQUIRE((std::vector{ 1, 2, 3, 4, 5 } >>= seq::all_of([](int x) { return x < 10; })) == true);
+    REQUIRE((std::vector{ 1, 2, 3, 44, 5 } >>= seq::all_of([](int x) { return x < 10; })) == false);
+}
+
+TEST_CASE("seq::any_of", "[seq]")
+{
+    REQUIRE((std::vector{ 1, 2, 3, 4, 5 } >>= seq::any_of([](int x) { return x < 10; })) == true);
+    REQUIRE((std::vector{ 1, 2, 3, 44, 5 } >>= seq::any_of([](int x) { return x < 10; })) == true);
+    REQUIRE((std::vector{ 10, 12, 13, 44, 15 } >>= seq::any_of([](int x) { return x < 10; })) == false);
+}
+
+TEST_CASE("seq::none_of", "[seq]")
+{
+    REQUIRE((std::vector{ 1, 2, 3, 4, 5 } >>= seq::none_of([](int x) { return x < 10; })) == false);
+    REQUIRE((std::vector{ 1, 2, 3, 44, 5 } >>= seq::none_of([](int x) { return x < 10; })) == false);
+    REQUIRE((std::vector{ 10, 12, 13, 44, 15 } >>= seq::none_of([](int x) { return x < 10; })) == true);
+}
+
+TEST_CASE("seq::concat", "[seq]")
+{
+    REQUIRE_THAT(seq::concat(std::vector{ 1, 2, 3 }, seq::range(100, 105)), EqualsRange(std::vector{ 1, 2, 3, 100, 101, 102, 103, 104 }));
 }

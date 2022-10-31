@@ -2,8 +2,7 @@
 
 #include <cpp_pipelines/iter_utils.hpp>
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/subrange.hpp>
-
+#include <cpp_pipelines/seq/views.hpp>
 namespace cpp_pipelines::seq
 {
 namespace detail
@@ -48,7 +47,7 @@ struct take_while_fn
 
             constexpr bool is_equal(const iter& other) const
             {
-                return it == other.it || invoke(parent->pred, *it);
+                return it == other.it || !invoke(parent->pred, *it);
             }
         };
 
@@ -71,9 +70,7 @@ struct take_while_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            auto b = std::begin(range);
-            auto e = std::end(range);
-            return subrange{ b, advance_while(b, pred, e) };
+            return view_interface{ view{ all(std::forward<Range>(range)), pred } };
         }
     };
 

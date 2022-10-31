@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpp_pipelines/invoke.hpp>
+#include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/type_traits.hpp>
 
 namespace cpp_pipelines
