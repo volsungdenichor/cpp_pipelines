@@ -39,7 +39,6 @@
 #include <cpp_pipelines/seq/transform_maybe.hpp>
 #include <cpp_pipelines/seq/trim_while.hpp>
 #include <cpp_pipelines/seq/unfold.hpp>
-#include <cpp_pipelines/seq/unique.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 #include <cpp_pipelines/seq/write.hpp>
 #include <cpp_pipelines/seq/zip.hpp>

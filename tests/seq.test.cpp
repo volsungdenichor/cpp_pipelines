@@ -65,30 +65,6 @@ TEST_CASE("seq::filter - reverse iterator", "[seq][filter]")
     REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5, 6, 8 } >>= seq::reverse >>= seq::filter(is_even)), EqualsRange(std::vector{ 8, 6, 4, 2 }));
 }
 
-#if 0
-TEST_CASE("seq::unique", "[seq][unique]")
-{
-    REQUIRE((""s >>= seq::unique >>= seq::to_string) == ""s);
-    REQUIRE(("123344445"s >>= seq::unique >>= seq::to_string) == "12345"s);
-}
-
-TEST_CASE("seq::unique_by_key", "[seq][unique][unique_by_key][by_key]")
-{
-    static const auto to_lower = LIFT(std::tolower);
-    REQUIRE((""s >>= seq::unique_by_key(to_lower) >>= seq::to_string) == ""s);
-    REQUIRE(("AaACDdDe"s >>= seq::unique_by_key(to_lower) >>= seq::to_string) == "ACDe"s);
-}
-
-TEST_CASE("seq::unique_by", "[seq][unique][unique_by][by]")
-{
-    const auto cmp = [](char lhs, char rhs) {
-        return std::abs(std::tolower(lhs) - std::tolower(rhs)) <= 1;
-    };
-    REQUIRE((""s >>= seq::unique_by(cmp) >>= seq::to_string) == ""s);
-    REQUIRE(("AaACDdFhH"s >>= seq::unique_by(cmp) >>= seq::to_string) == "ACFh"s);
-}
-#endif
-
 TEST_CASE("seq::chunk", "[seq][chunk]")
 {
     REQUIRE_THAT((""s >>= seq::chunk(3) >>= seq::transform(seq::to_string)), EqualsRange(std::vector<std::string>{}));
@@ -349,4 +325,14 @@ TEST_CASE("seq::write", "[seq][write]")
     std::ostringstream ss;
     std::vector{ 10, 11, 12 } >>= seq::write(ss, ", ");
     REQUIRE(ss.str() == "10, 11, 12, ");
+}
+
+TEST_CASE("seq::repeat", "[seq][repeat]")
+{
+    REQUIRE_THAT(seq::repeat('x', 5), EqualsRange(std::vector{ 'x', 'x', 'x', 'x', 'x' }));
+}
+
+TEST_CASE("seq::single", "[seq][repeat][single]")
+{
+    REQUIRE_THAT(seq::single('x'), EqualsRange(std::vector{ 'x' }));
 }
