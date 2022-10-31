@@ -6,6 +6,7 @@ set(UNIT_TEST_SOURCE_LIST
   var.test.cpp
   seq.test.cpp
   sub.test.cpp
+  map.test.cpp
 )
 
 Include(FetchContent)
