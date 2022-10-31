@@ -278,7 +278,7 @@ TEST_CASE("seq::reverse", "[seq][reverse]")
     REQUIRE_THAT((std::vector{ 1, 2, 3, 4, 5 } >>= seq::reverse), EqualsRange(std::vector{ 5, 4, 3, 2, 1 }));
 }
 
-TEST_CASE("seq::getlines", "[seq][getlines")
+TEST_CASE("seq::getlines", "[seq][getlines][istream]")
 {
     std::string text = "Mercury\nVenus\nEarth\nMars\nJupiter\nSaturn\nUranus\nNeptune";
     std::stringstream ss{ text };
@@ -335,4 +335,18 @@ TEST_CASE("seq::none_of", "[seq]")
 TEST_CASE("seq::concat", "[seq]")
 {
     REQUIRE_THAT(seq::concat(std::vector{ 1, 2, 3 }, seq::range(100, 105)), EqualsRange(std::vector{ 1, 2, 3, 100, 101, 102, 103, 104 }));
+}
+
+TEST_CASE("seq::istream", "[seq][istream]")
+{
+    std::string text = "123 456 789";
+    std::stringstream ss{ text };
+    REQUIRE_THAT(seq::istream<int>(ss), EqualsRange(std::vector{ 123, 456, 789 }));
+}
+
+TEST_CASE("seq::write", "[seq][write]")
+{
+    std::ostringstream ss;
+    std::vector{ 10, 11, 12 } >>= seq::write(ss, ", ");
+    REQUIRE(ss.str() == "10, 11, 12, ");
 }

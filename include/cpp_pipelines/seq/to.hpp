@@ -27,6 +27,5 @@ static constexpr inline auto as = make_pipeline(cast<Container>);
 
 static constexpr inline auto to_vector = to<std::vector>;
 static constexpr inline auto to_string = as<std::string>;
-static constexpr inline auto collect = to_vector;
 
 }  // namespace cpp_pipelines::seq
