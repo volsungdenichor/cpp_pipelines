@@ -7,6 +7,7 @@ set(UNIT_TEST_SOURCE_LIST
   seq.test.cpp
   sub.test.cpp
   map.test.cpp
+  scope_functions.test.cpp
 )
 
 Include(FetchContent)

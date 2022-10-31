@@ -3,6 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_templated.hpp>
 #include <cpp_pipelines/output.hpp>
+#include <cpp_pipelines/view_interface.hpp>
 #include <utility>
 
 namespace std

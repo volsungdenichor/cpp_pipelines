@@ -1,5 +1,3 @@
-
-
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/macros.hpp>
 #include <cpp_pipelines/seq.hpp>
