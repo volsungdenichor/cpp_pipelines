@@ -70,12 +70,12 @@ struct logs_t : std::vector<log_t>
 };
 
 template <class T>
-struct value_wrapper
+struct wrapper
 {
     T value;
     logs_t logs;
 
-    value_wrapper(T value, logs_t logs = {})
+    wrapper(T value, logs_t logs = {})
         : value{ std::move(value) }
         , logs{ std::move(logs) }
     {
@@ -91,7 +91,7 @@ struct value_wrapper
         return std::move(value);
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const value_wrapper& item)
+    friend std::ostream& operator<<(std::ostream& os, const wrapper& item)
     {
         return os << item.value;
     }
@@ -104,7 +104,7 @@ struct lift_fn
     template <class T>
     constexpr auto operator()(T&& value, logs_t logs = {}) const
     {
-        return value_wrapper<std::decay_t<T>>{ std::forward<T>(value), std::move(logs) };
+        return wrapper<std::decay_t<T>>{ std::forward<T>(value), std::move(logs) };
     }
 };
 
@@ -144,7 +144,7 @@ struct transform_fn
         template <class T>
         constexpr auto operator()(T&& item) const
         {
-            return lift(invoke(func, *std::forward<T>(item)));
+            return lift(invoke(func, *std::forward<T>(item)), std::move(item.logs));
         }
     };
 
@@ -155,12 +155,13 @@ struct transform_fn
     }
 };
 
+using handler_t = std::function<void(const log_t&)>;
+
 struct flush_fn
 {
-    template <class Handler>
     struct impl
     {
-        Handler handler;
+        handler_t handler;
 
         template <class T>
         constexpr auto operator()(T&& item) const
@@ -173,7 +174,7 @@ struct flush_fn
     template <class Handler>
     constexpr auto operator()(Handler handler) const
     {
-        return make_pipeline(impl<Handler>{ std::move(handler) });
+        return make_pipeline(impl{ std::move(handler) });
     }
 };
 
@@ -211,30 +212,29 @@ struct invoke_fn
     struct impl
     {
         Func func;
-        std::string msg;
+        std::string func_name;
 
         template <class... Args>
         auto operator()(Args&&... args) const
         {
-            auto in = str(msg, std::tie(args...));
+            auto in = str(func_name, " <- ", std::tuple{ args... });
             auto res = invoke(func, std::forward<Args>(args)...);
-            auto out = str(msg, " = ", *res);
+            auto out = str(func_name, " -> ", *res);
             return lift(
                 *std::move(res),
                 logs_t{ std::move(in) } + res.logs + logs_t{ std::move(out) });
         }
     };
     template <class Func>
-    constexpr auto operator()(Func func, std::string msg = {}) const
+    constexpr auto operator()(Func func, std::string func_name = {}) const
     {
-        return make_pipeline(impl<Func>{ std::move(func), std::move(msg) });
+        return make_pipeline(impl<Func>{ std::move(func), std::move(func_name) });
     }
 };
 
 struct value_and_flush_fn
 {
-    template <class Handler>
-    constexpr auto operator()(Handler handler) const
+    auto operator()(handler_t handler) const
     {
         return make_pipeline(flush_fn{}(std::move(handler)), value_fn{});
     }
