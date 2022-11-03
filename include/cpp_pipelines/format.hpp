@@ -9,15 +9,15 @@ namespace cpp_pipelines
 {
 namespace detail
 {
+struct format_error : std::runtime_error
+{
+    format_error(std::string message)
+        : std::runtime_error{ std::move(message) }
+    {
+    }
+};
 struct format_fn
 {
-    struct format_error : std::runtime_error
-    {
-        format_error(std::string message)
-            : std::runtime_error{ std::move(message) }
-        {
-        }
-    };
     struct impl
     {
         using argument_extractor = std::function<void(std::ostream&, int, std::string_view)>;
@@ -132,5 +132,7 @@ struct format_fn
 };
 
 }  // namespace detail
+
+using detail::format_error;
 static constexpr inline auto format = detail::format_fn{};
 }  // namespace cpp_pipelines

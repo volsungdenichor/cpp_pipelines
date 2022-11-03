@@ -11,6 +11,7 @@ set(UNIT_TEST_SOURCE_LIST
   scope_functions.test.cpp
   functions.test.cpp
   set.test.cpp
+  format.test.cpp
 )
 
 Include(FetchContent)
