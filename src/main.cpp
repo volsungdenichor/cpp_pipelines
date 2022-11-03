@@ -1,6 +1,8 @@
 
 #include <algorithm>
 #include <cpp_pipelines/debug.hpp>
+#include <cpp_pipelines/operators.hpp>
+#include <cpp_pipelines/out_argument.hpp>
 #include <cpp_pipelines/seq.hpp>
 #include <functional>
 #include <iostream>
@@ -9,13 +11,25 @@
 #include <sstream>
 #include <vector>
 
+struct quote_fn
+{
+    template <class T>
+    std::string operator()(const T& item) const
+    {
+        return cpp_pipelines::str('"', item, '"');
+    }
+};
+
+static constexpr inline auto quote = quote_fn{};
+
 void run()
 {
     using namespace cpp_pipelines;
     static constexpr auto sqr = [](auto x) { return x * x; };
-    seq::range(10)
+    seq::iota(0)
         |= seq::transform(sqr)
-        |= seq::transform([](int x) { return str('"', x, '"'); })
+        |= seq::take_while(less(100))
+        |= seq::transform(quote)
         |= seq::write(std::cout, "\n");
 }
 
