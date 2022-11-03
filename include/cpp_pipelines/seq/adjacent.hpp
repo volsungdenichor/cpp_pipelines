@@ -20,7 +20,7 @@ private:
     template <class Range, std::size_t... I>
     constexpr auto call(Range&& range, std::index_sequence<I...>) const
     {
-        return zip((range >>= drop(I))...);
+        return zip((range |= drop(I))...);
     }
 };
 

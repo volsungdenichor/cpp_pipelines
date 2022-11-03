@@ -9,7 +9,7 @@ using namespace std::string_view_literals;
 TEST_CASE("do_all")
 {
     std::string result;
-    std::tuple{ 1, 5 } |= do_all(
+    std::tuple{ 1, 5 } >>= do_all(
         [&](int a, int b) { result += str(a, ",", b); },
         [&](int a, int b) { result += str("[", a, "][", b, "]"); },
         [&](int a, int b) { result += str("(", a, ")(", b, ")"); });

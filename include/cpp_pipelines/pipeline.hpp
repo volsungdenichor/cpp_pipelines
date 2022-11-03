@@ -81,31 +81,31 @@ static constexpr inline auto make_pipeline = detail::make_pipeline_fn{};
 static constexpr inline auto fn = make_pipeline;
 
 template <class... L, class... R>
-constexpr auto operator>>=(pipeline_t<L...> lhs, pipeline_t<R...> rhs)
+constexpr auto operator|=(pipeline_t<L...> lhs, pipeline_t<R...> rhs)
 {
     return make_pipeline(std::move(lhs), std::move(rhs));
 }
 
 template <class T, class... Pipes>
-constexpr decltype(auto) operator>>=(T&& item, const pipeline_t<Pipes...>& pipeline)
+constexpr decltype(auto) operator|=(T&& item, const pipeline_t<Pipes...>& pipeline)
 {
     return pipeline(std::forward<T>(item));
 }
 
 template <class T, class... Pipes>
-constexpr decltype(auto) operator>>=(T&& item, pipeline_t<Pipes...>&& pipeline)
+constexpr decltype(auto) operator|=(T&& item, pipeline_t<Pipes...>&& pipeline)
 {
     return std::move(pipeline)(std::forward<T>(item));
 }
 
 template <class T, class... Pipes>
-constexpr decltype(auto) operator|=(T&& item, const pipeline_t<Pipes...>& pipeline)
+constexpr decltype(auto) operator>>=(T&& item, const pipeline_t<Pipes...>& pipeline)
 {
     return std::apply(pipeline, std::forward<T>(item));
 }
 
 template <class T, class... Pipes>
-constexpr decltype(auto) operator|=(T&& item, pipeline_t<Pipes...>&& pipeline)
+constexpr decltype(auto) operator>>=(T&& item, pipeline_t<Pipes...>&& pipeline)
 {
     return std::apply(std::move(pipeline), std::forward<T>(item));
 }

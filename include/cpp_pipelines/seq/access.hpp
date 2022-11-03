@@ -55,7 +55,7 @@ struct at_fn
 {
     constexpr auto operator()(std::ptrdiff_t index) const
     {
-        return drop(index) >>= front;
+        return drop(index) |= front;
     }
 };
 
@@ -63,7 +63,7 @@ struct maybe_at_fn
 {
     constexpr auto operator()(std::ptrdiff_t index) const
     {
-        return drop(index) >>= maybe_front;
+        return drop(index) |= maybe_front;
     }
 };
 }  // namespace detail
@@ -74,7 +74,7 @@ using detail::maybe_front;
 static constexpr inline auto at = detail::at_fn{};
 static constexpr inline auto maybe_at = detail::maybe_at_fn{};
 
-static constexpr inline auto back = reverse >>= front;
-static constexpr inline auto maybe_back = reverse >>= maybe_front;
+static constexpr inline auto back = reverse |= front;
+static constexpr inline auto maybe_back = reverse |= maybe_front;
 
 }  // namespace cpp_pipelines::seq

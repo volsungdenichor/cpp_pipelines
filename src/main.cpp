@@ -12,9 +12,11 @@
 void run()
 {
     using namespace cpp_pipelines;
-    int a = 0;
-    int b = 1;
-    std::cout << (std::tie(a, b) == std::tuple{ 0, 1 }) << std::endl;
+    static constexpr auto sqr = [](auto x) { return x * x; };
+    seq::range(10)
+        |= seq::transform(sqr)
+        |= seq::transform([](int x) { return str('"', x, '"'); })
+        |= seq::write(std::cout, "\n");
 }
 
 int main()

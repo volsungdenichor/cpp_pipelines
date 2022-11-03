@@ -12,7 +12,7 @@ struct trim_while_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return drop_while(pred) >>= reverse >>= drop_while(pred) >>= reverse;
+        return drop_while(pred) |= reverse |= drop_while(pred) |= reverse;
     }
 };
 

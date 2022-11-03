@@ -39,7 +39,7 @@ struct values_at_fn
     template <class K>
     constexpr auto operator()(K key) const
     {
-        return equal_range(std::move(key)) >>= seq::transform(get_value);
+        return equal_range(std::move(key)) |= seq::transform(get_value);
     }
 };
 
@@ -50,7 +50,7 @@ struct maybe_at_fn
     template <class K>
     constexpr auto operator()(K key) const
     {
-        return values_at(std::move(key)) >>= seq::maybe_front;
+        return values_at(std::move(key)) |= seq::maybe_front;
     }
 };
 
@@ -61,7 +61,7 @@ struct at_fn
     template <class K>
     constexpr auto operator()(K key) const
     {
-        return values_at(std::move(key)) >>= seq::front;
+        return values_at(std::move(key)) |= seq::front;
     }
 };
 
@@ -119,7 +119,7 @@ struct items_fn
     template <class Map>
     constexpr auto operator()(Map& map) const
     {
-        return keys_fn{}(map) >>= seq::transform([&](const auto& key) { return std::pair{ key, map >>= values_at(key) }; });
+        return keys_fn{}(map) |= seq::transform([&](const auto& key) { return std::pair{ key, map |= values_at(key) }; });
     }
 };
 
@@ -135,7 +135,7 @@ struct group_by_as_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return std::forward<Range>(range) >>= seq::transform(make_pair(key, value)) >>= seq::to_map_as<Map>;
+            return std::forward<Range>(range) |= seq::transform(make_pair(key, value)) |= seq::to_map_as<Map>;
         }
     };
 

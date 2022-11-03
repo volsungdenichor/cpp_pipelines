@@ -87,7 +87,7 @@ struct linspace_fn
     constexpr auto operator()(T lower, type_identity_t<T> upper, std::ptrdiff_t count) const
     {
         static_assert(std::is_floating_point_v<T>, "linspace: floating point type expected");
-        return iota_fn{}(0, count) >>= transform([=](int n) { return lower + n * (upper - lower) / (count - 1); });
+        return iota_fn{}(0, count) |= transform([=](int n) { return lower + n * (upper - lower) / (count - 1); });
     }
 };
 

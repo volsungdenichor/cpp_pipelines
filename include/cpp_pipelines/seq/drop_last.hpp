@@ -11,7 +11,7 @@ struct drop_last_fn
 {
     constexpr auto operator()(std::ptrdiff_t n) const
     {
-        return reverse >>= drop(n) >>= reverse;
+        return reverse |= drop(n) |= reverse;
     }
 };
 }  // namespace detail

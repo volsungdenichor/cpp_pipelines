@@ -7,6 +7,6 @@ using namespace std::string_literals;
 
 TEST_CASE("var", "[res]")
 {
-    REQUIRE((std::variant<int, char>{ 3 } >>= var::match([](int) { return 1; }, [](char) { return 2; })) == 1);
-    REQUIRE((std::variant<int, char>{ 'x' } >>= var::match([](int) { return 1; }, [](char) { return 2; })) == 2);
+    REQUIRE((std::variant<int, char>{ 3 } |= var::match([](int) { return 1; }, [](char) { return 2; })) == 1);
+    REQUIRE((std::variant<int, char>{ 'x' } |= var::match([](int) { return 1; }, [](char) { return 2; })) == 2);
 }

@@ -12,7 +12,7 @@ struct drop_last_while_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return reverse >>= drop_while(std::move(pred)) >>= reverse;
+        return reverse |= drop_while(std::move(pred)) |= reverse;
     }
 };
 }  // namespace detail

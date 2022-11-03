@@ -11,7 +11,7 @@ struct take_last_fn
 {
     constexpr auto operator()(std::ptrdiff_t n) const
     {
-        return reverse >>= take(n) >>= reverse;
+        return reverse |= take(n) |= reverse;
     }
 };
 }  // namespace detail

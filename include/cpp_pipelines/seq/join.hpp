@@ -14,7 +14,7 @@ struct join_with_fn
     template <class T>
     constexpr auto operator()(T delimiter) const
     {
-        return intersperse(std::move(delimiter)) >>= transform_join(identity);
+        return intersperse(std::move(delimiter)) |= transform_join(identity);
     }
 };
 

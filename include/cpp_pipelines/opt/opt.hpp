@@ -133,7 +133,7 @@ struct lift_if_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return lift >>= filter_fn{}(std::move(pred));
+        return lift |= filter_fn{}(std::move(pred));
     }
 };
 
