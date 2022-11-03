@@ -4,6 +4,8 @@
 
 namespace cpp_pipelines
 {
+namespace detail
+{
 template <class Iter>
 struct subrange_base
 {
@@ -20,11 +22,12 @@ struct subrange_base
         return e;
     }
 };
+}  // namespace detail
 
 template <class Iter>
-struct subrange : public view_interface<subrange_base<Iter>>
+struct subrange : public view_interface<detail::subrange_base<Iter>>
 {
-    using base_type = view_interface<subrange_base<Iter>>;
+    using base_type = view_interface<detail::subrange_base<Iter>>;
 
     constexpr subrange()
         : base_type{}
@@ -33,7 +36,7 @@ struct subrange : public view_interface<subrange_base<Iter>>
 
     template <class It>
     constexpr subrange(It b, It e)
-        : base_type{ subrange_base<Iter>{ b, e } }
+        : base_type{ detail::subrange_base<Iter>{ b, e } }
     {
     }
 

@@ -9,6 +9,8 @@ set(UNIT_TEST_SOURCE_LIST
   map.test.cpp
   log.test.cpp
   scope_functions.test.cpp
+  functions.test.cpp
+  set.test.cpp
 )
 
 Include(FetchContent)
