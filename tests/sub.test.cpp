@@ -64,6 +64,10 @@ TEST_CASE("sub::slice", "[sub][slice]")
     REQUIRE_THAT(v |= sub::slice(-2, {}), EqualsRange(std::vector{ 5, 6 }));
     REQUIRE_THAT(v |= sub::slice({}, -2), EqualsRange(std::vector{ 1, 2, 3, 4 }));
     REQUIRE_THAT(v |= sub::slice(10, 20), EqualsRange(std::vector<int>{}));
+    REQUIRE_THAT(v |= sub::slice(3, 1), EqualsRange(std::vector<int>{}));
+    REQUIRE_THAT(v |= sub::slice(-4, -2), EqualsRange(std::vector{ 3, 4 }));
+    REQUIRE_THAT(v |= sub::slice(-5, 4), EqualsRange(std::vector{ 2, 3, 4 }));
+    REQUIRE_THAT(v |= sub::slice(3, -1), EqualsRange(std::vector{ 4, 5 }));
 }
 
 TEST_CASE("sub::trim_while", "[sub][trim_while]")
