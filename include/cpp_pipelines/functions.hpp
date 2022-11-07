@@ -75,7 +75,7 @@ struct make_tuple_fn
     template <class... Args>
     constexpr auto operator()(Args&&... args) const
     {
-        return std::make_tuple(std::forward<Args>(args)...);
+        return std::tuple{ std::forward<Args>(args)... };
     }
 };
 

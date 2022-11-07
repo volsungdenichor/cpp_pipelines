@@ -1,9 +1,10 @@
-
 #include <algorithm>
 #include <cpp_pipelines/debug.hpp>
+#include <cpp_pipelines/format.hpp>
 #include <cpp_pipelines/operators.hpp>
 #include <cpp_pipelines/out_argument.hpp>
 #include <cpp_pipelines/seq.hpp>
+#include <cpp_pipelines/tpl.hpp>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -26,10 +27,11 @@ void run()
 {
     using namespace cpp_pipelines;
     static constexpr auto sqr = [](auto x) { return x * x; };
+    static constexpr auto cube = [](auto x) { return x * x * x; };
     seq::iota(0)
-        |= seq::transform(sqr)
-        |= seq::take_while(less(100))
-        |= seq::transform(quote)
+        |= seq::transform(make_pair(sqr, cube))
+        |= seq::take_while(fn(get_element<0>, less(100)))
+        |= seq::transform(tpl::transform(quote))
         |= seq::write(std::cout, "\n");
 }
 

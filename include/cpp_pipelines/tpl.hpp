@@ -6,6 +6,14 @@ namespace cpp_pipelines::tpl
 {
 namespace detail
 {
+struct create_fn
+{
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const
+    {
+        return std::tuple<Args...>{ std::forward<Args>(args)... };
+    }
+};
 struct transform_fn
 {
     template <class Func>
@@ -128,6 +136,7 @@ static constexpr inline auto apply = detail::apply_fn{};
 
 }  // namespace detail
 
+static constexpr inline auto create = detail::create_fn{};
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto apply = detail::apply_fn{};
