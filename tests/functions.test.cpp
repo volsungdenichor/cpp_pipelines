@@ -1,4 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_templated.hpp>
+#include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/functions.hpp>
 #include <cpp_pipelines/output.hpp>
 
@@ -19,6 +21,29 @@ struct TestStruct
 };
 
 }  // namespace
+
+template <class Type>
+struct OfTypeMatcher : Catch::Matchers::MatcherGenericBase
+{
+    template <class T>
+    bool match(const T& item) const
+    {
+        return std::is_same_v<Type, T>;
+    }
+
+    std::string describe() const override
+    {
+        std::stringstream ss;
+        ss << "Of type " << type_name<Type>();
+        return ss.str();
+    }
+};
+
+template <class Type>
+auto OfType() -> OfTypeMatcher<Type>
+{
+    return {};
+}
 
 TEST_CASE("identity - lvalue", "[functions]")
 {
@@ -52,22 +77,39 @@ TEST_CASE("decay_copy", "[functions]")
     REQUIRE(decay_copy(create_string()) == "?");
 }
 
+TEST_CASE("tuple creation", "[functions]")
+{
+    const auto rvalue = create_string;
+    int lvalue = 42;
+    const float const_lvalue = 53.0;
+
+    REQUIRE_THAT(make_pair(lvalue, rvalue()), (OfType<std::pair<int, std::string>>()));
+    REQUIRE_THAT(tie_as_pair(lvalue, const_lvalue), (OfType<std::pair<int&, const float&>>()));
+    REQUIRE_THAT(forward_as_pair(lvalue, rvalue()), (OfType<std::pair<int&, std::string&&>>()));
+    REQUIRE_THAT(to_pair(lvalue, rvalue()), (OfType<std::pair<int&, std::string>>()));
+
+    REQUIRE_THAT(make_tuple(lvalue, rvalue()), (OfType<std::tuple<int, std::string>>()));
+    REQUIRE_THAT(tie(lvalue, const_lvalue), (OfType<std::tuple<int&, const float&>>()));
+    REQUIRE_THAT(forward_as_tuple(lvalue, rvalue()), (OfType<std::tuple<int&, std::string&&>>()));
+    REQUIRE_THAT(to_tuple(lvalue, rvalue()), (OfType<std::tuple<int&, std::string>>()));
+}
+
 TEST_CASE("tie", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };
-    REQUIRE(tie(&TestStruct::b, &TestStruct::a)(test_struct) == std::tie(test_struct.b, test_struct.a));
+    REQUIRE(collect_results(tie)(&TestStruct::b, &TestStruct::a)(test_struct) == std::tie(test_struct.b, test_struct.a));
 }
 
 TEST_CASE("make_tuple", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };
-    REQUIRE(make_tuple(&TestStruct::b, &TestStruct::a)(test_struct) == std::tuple{ test_struct.b, test_struct.a });
+    REQUIRE(collect_results(make_tuple)(&TestStruct::b, &TestStruct::a)(test_struct) == std::tuple{ test_struct.b, test_struct.a });
 }
 
 TEST_CASE("make_pair", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };
-    REQUIRE(make_pair(&TestStruct::b, &TestStruct::a)(test_struct) == std::pair{ test_struct.b, test_struct.a });
+    REQUIRE(collect_results(make_pair)(&TestStruct::b, &TestStruct::a)(test_struct) == std::pair{ test_struct.b, test_struct.a });
 }
 
 TEST_CASE("get_element", "[functions][get_element]")
@@ -122,8 +164,8 @@ TEST_CASE("bind", "[functions]")
 
 TEST_CASE("proj", "[functions]")
 {
-    const auto eq = proj(tie(&TestStruct::a, &TestStruct::b), std::equal_to<>{});
-    const auto lt = proj(tie(&TestStruct::a, &TestStruct::b), std::less<>{});
+    const auto eq = proj(collect_results(tie)(&TestStruct::a, &TestStruct::b), std::equal_to<>{});
+    const auto lt = proj(collect_results(tie)(&TestStruct::a, &TestStruct::b), std::less<>{});
     REQUIRE(eq(TestStruct{ 3, 1 }, TestStruct{ 3, 1 }) == true);
 
     REQUIRE(lt(TestStruct{ 2, 3 }, TestStruct{ 3, 1 }) == true);

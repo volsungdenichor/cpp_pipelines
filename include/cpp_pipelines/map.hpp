@@ -135,7 +135,7 @@ struct group_by_as_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return std::forward<Range>(range) |= seq::transform(make_pair(key, value)) |= seq::to_map_as<Map>;
+            return std::forward<Range>(range) |= seq::transform(collect_results(make_pair)(key, value)) |= seq::to_map_as<Map>;
         }
     };
 

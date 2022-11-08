@@ -61,59 +61,53 @@ struct unwrap_ref_fn
     }
 };
 
-struct tie_fn
-{
-    template <class... Args>
-    constexpr auto operator()(Args&... args) const
-    {
-        return std::tie(args...);
-    }
-};
-
-struct make_tuple_fn
+template <template <class...> class Tuple, template <class> class Type>
+struct create_tuple_fn
 {
     template <class... Args>
     constexpr auto operator()(Args&&... args) const
     {
-        return std::tuple{ std::forward<Args>(args)... };
+        return Tuple<Type<Args>...>{ std::forward<Args>(args)... };
     }
 };
 
-struct make_pair_fn
+struct collect_results_fn
 {
-    template <class... Args>
-    constexpr auto operator()(Args&&... args) const
-    {
-        return std::pair{ std::forward<Args>(args)... };
-    }
-};
-
-template <class Policy>
-struct to_tuple_fn
-{
-    template <class... Getters>
+    template <class Collector, class... Getters>
     struct impl
     {
+        Collector collector;
         std::tuple<Getters...> getters;
 
         template <class T>
-        constexpr auto operator()(T&& item) const
+        constexpr decltype(auto) operator()(T&& item) const
         {
             return call(std::forward<T>(item), std::index_sequence_for<Getters...>{});
         }
 
         template <class T, std::size_t... I>
-        constexpr auto call(T&& item, std::index_sequence<I...>) const
+        constexpr decltype(auto) call(T&& item, std::index_sequence<I...>) const
         {
-            const auto policy = Policy{};
-            return policy(invoke(std::get<I>(getters), std::forward<T>(item))...);
+            return collector(invoke(std::get<I>(getters), std::forward<T>(item))...);
         }
     };
 
-    template <class... Getters>
-    constexpr auto operator()(Getters... getters) const
+    template <class Collector>
+    struct inter
     {
-        return impl<Getters...>{ std::tuple<Getters...>{ std::move(getters)... } };
+        Collector collector;
+
+        template <class... Getters>
+        constexpr auto operator()(Getters... getters) const
+        {
+            return impl<Collector, Getters...>{ collector, std::tuple<Getters...>{ std::move(getters)... } };
+        }
+    };
+
+    template <class Collector>
+    constexpr auto operator()(Collector collector) const
+    {
+        return inter<Collector>{ std::move(collector) };
     }
 };
 
@@ -252,9 +246,17 @@ static constexpr inline auto decay_copy = detail::decay_copy_fn{};
 static constexpr inline auto wrap_ref = detail::wrap_ref_fn{};
 static constexpr inline auto unwrap_ref = detail::unwrap_ref_fn{};
 
-static constexpr inline auto tie = detail::to_tuple_fn<detail::tie_fn>{};
-static constexpr inline auto make_tuple = detail::to_tuple_fn<detail::make_tuple_fn>{};
-static constexpr inline auto make_pair = detail::to_tuple_fn<detail::make_pair_fn>{};
+static constexpr inline auto tie = detail::create_tuple_fn<std::tuple, std::add_lvalue_reference_t>{};
+static constexpr inline auto make_tuple = detail::create_tuple_fn<std::tuple, std::decay_t>{};
+static constexpr inline auto forward_as_tuple = detail::create_tuple_fn<std::tuple, std::add_rvalue_reference_t>{};
+static constexpr inline auto to_tuple = detail::create_tuple_fn<std::tuple, type_identity_t>{};
+
+static constexpr inline auto tie_as_pair = detail::create_tuple_fn<std::pair, std::add_lvalue_reference_t>{};
+static constexpr inline auto make_pair = detail::create_tuple_fn<std::pair, std::decay_t>{};
+static constexpr inline auto forward_as_pair = detail::create_tuple_fn<std::pair, std::add_rvalue_reference_t>{};
+static constexpr inline auto to_pair = detail::create_tuple_fn<std::pair, type_identity_t>{};
+
+static constexpr inline auto collect_results = detail::collect_results_fn{};
 
 template <std::size_t I>
 static constexpr inline auto get_element = detail::get_element_fn<I>{};
