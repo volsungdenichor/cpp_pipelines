@@ -94,6 +94,17 @@ TEST_CASE("tuple creation", "[functions]")
     REQUIRE_THAT(to_tuple(lvalue, rvalue()), (OfType<std::tuple<int&, std::string>>()));
 }
 
+TEST_CASE("collect_results", "[functions]")
+{
+    static const auto to_string = [](int ch) -> std::string { return std::string(1, static_cast<char>(ch)); };
+    const auto func = collect_results(str)(
+        [](int ch) -> std::string { return to_string(std::tolower(ch)); },
+        [](int ch) -> char { return '-'; },
+        [](int ch) -> std::string { return to_string(std::toupper(ch)); });
+    REQUIRE(func('x') == "x-X");
+    REQUIRE(func('C') == "c-C");
+}
+
 TEST_CASE("tie", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };

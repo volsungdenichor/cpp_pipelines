@@ -29,7 +29,7 @@ void run()
     static constexpr auto sqr = [](auto x) { return x * x; };
     static constexpr auto cube = [](auto x) { return x * x * x; };
     seq::iota(0)
-        |= seq::transform(make_pair(sqr, cube))
+        |= seq::transform(collect_results(make_pair)(sqr, cube))
         |= seq::take_while(fn(get_element<0>, less(100)))
         |= seq::transform(tpl::transform(quote))
         |= seq::write(std::cout, "\n");
