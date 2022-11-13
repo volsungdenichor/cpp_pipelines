@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <cpp_pipelines/debug.hpp>
 #include <cpp_pipelines/format.hpp>
+#include <cpp_pipelines/geo/interval.hpp>
+#include <cpp_pipelines/geo/matrix.hpp>
+#include <cpp_pipelines/geo/vertex_array.hpp>
 #include <cpp_pipelines/operators.hpp>
 #include <cpp_pipelines/out_argument.hpp>
 #include <cpp_pipelines/seq.hpp>
@@ -12,27 +15,10 @@
 #include <sstream>
 #include <vector>
 
-struct quote_fn
-{
-    template <class T>
-    std::string operator()(const T& item) const
-    {
-        return cpp_pipelines::str('"', item, '"');
-    }
-};
-
-static constexpr inline auto quote = quote_fn{};
-
 void run()
 {
-    using namespace cpp_pipelines;
-    static constexpr auto sqr = [](auto x) { return x * x; };
-    static constexpr auto cube = [](auto x) { return x * x * x; };
-    seq::iota(0)
-        |= seq::transform(collect_results(make_pair)(sqr, cube))
-        |= seq::take_while(fn(get_element<0>, less(100)))
-        |= seq::transform(tpl::transform(quote))
-        |= seq::write(std::cout, "\n");
+    // using namespace cpp_pipelines;
+    // std::cout << ((geo::make_interval(0, 5) + 1) * 10) << std::endl;
 }
 
 int main()
