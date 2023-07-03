@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 

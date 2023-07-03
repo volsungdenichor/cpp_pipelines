@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 

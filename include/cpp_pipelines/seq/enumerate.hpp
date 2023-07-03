@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/seq/views.hpp>
 
