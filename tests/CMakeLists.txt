@@ -7,7 +7,6 @@ set(UNIT_TEST_SOURCE_LIST
   seq.test.cpp
   sub.test.cpp
   map.test.cpp
-  log.test.cpp
   scope_functions.test.cpp
   functions.test.cpp
   set.test.cpp

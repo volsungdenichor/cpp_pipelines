@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpp_pipelines/index_sequence.hpp>
 #include <cpp_pipelines/pipeline.hpp>
 
 namespace cpp_pipelines::tpl
@@ -132,6 +133,23 @@ struct apply_fn
     }
 };
 
+template <std::size_t N>
+struct erase_fn
+{
+    template <class Tuple, std::size_t... I>
+    constexpr auto call(Tuple&& tuple, std::index_sequence<I...>) const -> std::tuple<std::tuple_element_t<I, std::decay_t<Tuple>>...>
+    {
+        return { std::get<I>(std::forward<Tuple>(tuple))... };
+    }
+
+    template <class Tuple>
+    constexpr auto operator()(Tuple&& tuple) const
+    {
+        using indices = cat_sequence<sequence<0, N>, sequence<N + 1, std::tuple_size_v<std::decay_t<Tuple>>>>;
+        return call(std::forward<Tuple>(tuple), indices{});
+    }
+};
+
 static constexpr inline auto apply = detail::apply_fn{};
 
 }  // namespace detail
@@ -140,5 +158,8 @@ static constexpr inline auto create = detail::create_fn{};
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto apply = detail::apply_fn{};
+
+template <std::size_t N>
+static constexpr inline auto erase = detail::erase_fn<N>{};
 
 }  // namespace cpp_pipelines::tpl
