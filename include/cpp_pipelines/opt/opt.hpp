@@ -75,7 +75,7 @@ struct has_value_fn
     template <class Opt>
     constexpr bool operator()(Opt&& opt) const
     {
-        const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
+        constexpr auto traits = customization::optional_traits<std::decay_t<Opt>>{};
         return traits.has_value(opt);
     }
 };
@@ -85,7 +85,7 @@ static constexpr inline auto has_value = fn(has_value_fn{});
 template <class Opt>
 constexpr decltype(auto) get_value(Opt&& opt)
 {
-    const auto traits = customization::optional_traits<std::decay_t<Opt>>{};
+    constexpr auto traits = customization::optional_traits<std::decay_t<Opt>>{};
     return traits.get_value(std::forward<Opt>(opt));
 }
 struct lift_fn
@@ -113,27 +113,16 @@ struct filter_fn
         Pred pred;
 
         template <class Opt>
-        constexpr auto operator()(Opt&& opt) const
+        constexpr auto operator()(Opt&& opt) const -> std::decay_t<Opt>
         {
-            return has_value(opt) && invoke(pred, get_value(opt))
-                       ? std::forward<Opt>(opt)
-                       : std::decay_t<Opt>{};
+            return has_value(opt) && invoke(pred, get_value(opt)) ? std::forward<Opt>(opt) : std::decay_t<Opt>{};
         }
     };
 
     template <class Pred>
-    constexpr auto operator()(Pred pred) const
+    constexpr auto operator()(Pred&& pred) const
     {
-        return fn(impl<Pred>{ std::move(pred) });
-    }
-};
-
-struct lift_if_fn
-{
-    template <class Pred>
-    constexpr auto operator()(Pred pred) const
-    {
-        return lift |= filter_fn{}(std::move(pred));
+        return fn(impl<std::decay_t<Pred>>{ std::forward<Pred>(pred) });
     }
 };
 
@@ -148,16 +137,14 @@ struct and_then_fn
         constexpr auto operator()(Opt&& opt) const
         {
             using result_type = decltype(invoke(func, get_value(std::forward<Opt>(opt))));
-            return has_value(opt)
-                       ? invoke(func, get_value(std::forward<Opt>(opt)))
-                       : result_type{};
+            return has_value(opt) ? invoke(func, get_value(std::forward<Opt>(opt))) : result_type{};
         }
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -173,16 +160,14 @@ struct transform_fn
         constexpr auto operator()(Opt&& opt) const
         {
             using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Opt>(opt)))));
-            return has_value(opt)
-                       ? invoke(lift, invoke(func, get_value(std::forward<Opt>(opt))))
-                       : result_type{};
+            return has_value(opt) ? invoke(lift, invoke(func, get_value(std::forward<Opt>(opt)))) : result_type{};
         }
     };
 
     template <class Func, class Lift = lift_fn>
-    constexpr auto operator()(Func func, Lift lift = {}) const
+    constexpr auto operator()(Func&& func, Lift&& lift = {}) const
     {
-        return fn(impl<Func, Lift>{ std::move(func), std::move(lift) });
+        return fn(impl<std::decay_t<Func>, std::decay_t<Lift>>{ std::forward<Func>(func), std::forward<Lift>(lift) });
     }
 };
 
@@ -194,28 +179,23 @@ struct or_else_fn
         Func func;
 
         template <class Opt>
-        constexpr auto operator()(Opt&& opt) const
+        constexpr auto operator()(Opt&& opt) const -> std::decay_t<Opt>
         {
-            using result_type = decltype(std::invoke(func));
-            if constexpr (std::is_void_v<result_type>)
+            if constexpr (std::is_void_v<decltype(std::invoke(func))>)
             {
-                return has_value(opt)
-                           ? std::forward<Opt>(opt)
-                           : (std::invoke(func), std::decay_t<Opt>{});
+                return has_value(opt) ? std::forward<Opt>(opt) : (invoke(func), std::decay_t<Opt>{});
             }
             else
             {
-                return has_value(opt)
-                           ? std::forward<Opt>(opt)
-                           : std::invoke(func);
+                return has_value(opt) ? std::forward<Opt>(opt) : invoke(func);
             }
         }
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -227,7 +207,7 @@ struct inspect_fn
         Func func;
 
         template <class Opt>
-        constexpr auto operator()(Opt&& opt) const
+        constexpr auto operator()(Opt&& opt) const -> std::decay_t<Opt>
         {
             if (has_value(opt))
             {
@@ -238,9 +218,9 @@ struct inspect_fn
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -252,16 +232,16 @@ struct value_or_fn
         T default_value;
 
         template <class Opt>
-        constexpr decltype(auto) operator()(Opt&& opt) const
+        constexpr auto operator()(Opt&& opt) const
         {
             return to_return_type(has_value(opt) ? get_value(std::forward<Opt>(opt)) : default_value);
         }
     };
 
     template <class T>
-    constexpr auto operator()(T default_value) const
+    constexpr auto operator()(T&& default_value) const
     {
-        return fn(impl<T>{ std::move(default_value) });
+        return fn(impl<std::decay_t<T>>{ std::forward<T>(default_value) });
     }
 };
 
@@ -280,9 +260,9 @@ struct value_or_else_fn
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -362,9 +342,9 @@ struct check_element_fn
     };
 
     template <class Pred>
-    constexpr auto operator()(Pred pred) const
+    constexpr auto operator()(Pred&& pred) const
     {
-        return fn(impl<Pred>{ std::move(pred) });
+        return fn(impl<std::decay_t<Pred>>{ std::forward<Pred>(pred) });
     }
 };
 
@@ -386,9 +366,9 @@ struct for_each_fn
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -403,16 +383,14 @@ struct accumulate_fn
         template <class Opt>
         constexpr auto operator()(Opt&& opt) const
         {
-            return has_value(opt)
-                       ? invoke(init, get_value(std::forward<Opt>(opt)))
-                       : init;
+            return has_value(opt) ? invoke(init, get_value(std::forward<Opt>(opt))) : init;
         }
     };
 
     template <class BinaryFunc, class Init>
-    constexpr auto operator()(BinaryFunc func, Init init) const
+    constexpr auto operator()(BinaryFunc&& func, Init init) const
     {
-        return fn(impl<BinaryFunc, Init>{ std::move(func), std::move(init) });
+        return fn(impl<std::decay_t<BinaryFunc>, Init>{ std::forward<BinaryFunc>(func), std::move(init) });
     }
 };
 
@@ -427,16 +405,15 @@ struct match_fn
         template <class Opt>
         constexpr auto operator()(Opt&& opt) const
         {
-            return has_value(opt)
-                       ? invoke(on_value, get_value(std::forward<Opt>(opt)))
-                       : invoke(otherwise);
+            return has_value(opt) ? invoke(on_value, get_value(std::forward<Opt>(opt))) : invoke(otherwise);
         }
     };
 
     template <class OnValue, class Otherwise>
-    constexpr auto operator()(OnValue on_value, Otherwise otherwise) const
+    constexpr auto operator()(OnValue&& on_value, Otherwise&& otherwise) const
     {
-        return fn(impl<OnValue, Otherwise>{ std::move(on_value), std::move(otherwise) });
+        return fn(impl<std::decay_t<OnValue>, std::decay_t<Otherwise>>{ std::forward<OnValue>(on_value),
+                                                                        std::forward<Otherwise>(otherwise) });
     }
 };
 
@@ -451,16 +428,15 @@ struct zip_transform_fn
         constexpr auto operator()(Args&&... args) const
         {
             using result_type = decltype(invoke(lift, invoke(func, get_value(std::forward<Args>(args))...)));
-            return (... && has_value(args))
-                       ? invoke(lift, invoke(func, get_value(std::forward<Args>(args))...))
-                       : result_type{};
+            return (... && has_value(args)) ? invoke(lift, invoke(func, get_value(std::forward<Args>(args))...))
+                                            : result_type{};
         }
     };
 
     template <class Func>
-    constexpr auto operator()(Func func) const
+    constexpr auto operator()(Func&& func) const
     {
-        return fn(impl<Func>{ std::move(func) });
+        return fn(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
@@ -471,8 +447,6 @@ using detail::has_value;
 
 using detail::lift;
 static constexpr inline auto some = lift;
-
-static constexpr inline auto lift_if = detail::lift_if_fn{};
 
 static constexpr inline auto filter = detail::filter_fn{};
 static constexpr inline auto and_then = detail::and_then_fn{};
