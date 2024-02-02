@@ -26,9 +26,7 @@ struct ostream_iterator : std::iterator<std::output_iterator_tag, void, void, vo
     std::ostream* os;
     std::string_view separator;
 
-    ostream_iterator(std::ostream& os, std::string_view separator = {})
-        : os{ &os }
-        , separator{ separator }
+    ostream_iterator(std::ostream& os, std::string_view separator = {}) : os{ &os }, separator{ separator }
     {
     }
 
@@ -69,7 +67,8 @@ private:
     template <class Iter>
     auto impl(Iter begin, Iter end, std::string_view separator = {}) const -> ostream_manipulator
     {
-        return [=](std::ostream& os) {
+        return [=](std::ostream& os)
+        {
             if (begin == end)
             {
                 return;
@@ -107,22 +106,21 @@ struct safe_print_fn
         }
         else if constexpr (is_range<T>::value)
         {
-            return {
-                [&](std::ostream& os) {
-                    os << "[";
-                    const auto b = std::begin(item);
-                    const auto e = std::end(item);
-                    bool first = true;
-                    for (auto it = b; it != e; ++it)
-                    {
-                        if (!first)
-                            os << ", ";
-                        os << (*this)(*it);
-                        first = false;
-                    }
-                    os << "]";
-                }
-            };
+            return { [&](std::ostream& os)
+                     {
+                         os << "[";
+                         const auto b = std::begin(item);
+                         const auto e = std::end(item);
+                         bool first = true;
+                         for (auto it = b; it != e; ++it)
+                         {
+                             if (!first)
+                                 os << ", ";
+                             os << (*this)(*it);
+                             first = false;
+                         }
+                         os << "]";
+                     } };
         }
 
         return { [](std::ostream& os) { os << "???"; } };

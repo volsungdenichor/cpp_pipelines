@@ -33,7 +33,10 @@ struct invoke_fn
         }
         else if constexpr (is_tuple_like<std::decay_t<Arg>>::value)
         {
-            return call(std::forward<Func>(func), std::forward<Arg>(arg), std::make_index_sequence<std::tuple_size_v<std::decay_t<Arg>>>{});
+            return call(
+                std::forward<Func>(func),
+                std::forward<Arg>(arg),
+                std::make_index_sequence<std::tuple_size_v<std::decay_t<Arg>>>{});
         }
         else
         {

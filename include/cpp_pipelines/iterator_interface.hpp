@@ -69,8 +69,7 @@ struct iterator_interface
     constexpr iterator_interface(iterator_interface&&) = default;
 
     template <class... Args, class = std::enable_if_t<std::is_constructible_v<Impl, Args...>>>
-    constexpr iterator_interface(Args&&... args)
-        : impl{ Impl{ std::forward<Args>(args)... } }
+    constexpr iterator_interface(Args&&... args) : impl{ Impl{ std::forward<Args>(args)... } }
     {
     }
 
@@ -132,32 +131,52 @@ struct iterator_interface
         return temp;
     }
 
-    template <class D, class T = Impl, class = std::enable_if_t<std::is_integral_v<D>>, class = std::enable_if_t<has_advance_v<T>>>
+    template <
+        class D,
+        class T = Impl,
+        class = std::enable_if_t<std::is_integral_v<D>>,
+        class = std::enable_if_t<has_advance_v<T>>>
     constexpr friend iterator_interface& operator+=(iterator_interface& it, D offset)
     {
         it.impl.advance(offset);
         return it;
     }
 
-    template <class D, class T = Impl, class = std::enable_if_t<std::is_integral_v<D>>, class = std::enable_if_t<has_advance_v<T>>>
+    template <
+        class D,
+        class T = Impl,
+        class = std::enable_if_t<std::is_integral_v<D>>,
+        class = std::enable_if_t<has_advance_v<T>>>
     constexpr friend iterator_interface operator+(iterator_interface it, D offset)
     {
         return it += offset;
     }
 
-    template <class D, class T = Impl, class = std::enable_if_t<std::is_integral_v<D>>, class = std::enable_if_t<has_advance_v<T>>>
+    template <
+        class D,
+        class T = Impl,
+        class = std::enable_if_t<std::is_integral_v<D>>,
+        class = std::enable_if_t<has_advance_v<T>>>
     constexpr friend iterator_interface& operator-=(iterator_interface& it, D offset)
     {
         return it += -offset;
     }
 
-    template <class D, class T = Impl, class = std::enable_if_t<std::is_integral_v<D>>, class = std::enable_if_t<has_advance_v<T>>>
+    template <
+        class D,
+        class T = Impl,
+        class = std::enable_if_t<std::is_integral_v<D>>,
+        class = std::enable_if_t<has_advance_v<T>>>
     constexpr friend iterator_interface operator-(iterator_interface it, D offset)
     {
         return it -= offset;
     }
 
-    template <class D, class T = Impl, class = std::enable_if_t<std::is_integral_v<D>>, class = std::enable_if_t<has_advance_v<T>>>
+    template <
+        class D,
+        class T = Impl,
+        class = std::enable_if_t<std::is_integral_v<D>>,
+        class = std::enable_if_t<has_advance_v<T>>>
     constexpr decltype(auto) operator[](D offset) const
     {
         return *(*this + offset);
@@ -235,10 +254,7 @@ struct iterator_category_impl
     using type = std::conditional_t<
         has_advance_v<T> && has_distance_to_v<T>,
         std::random_access_iterator_tag,
-        std::conditional_t<
-            has_dec_v<T> || has_advance_v<T>,
-            std::bidirectional_iterator_tag,
-            std::forward_iterator_tag>>;
+        std::conditional_t<has_dec_v<T> || has_advance_v<T>, std::bidirectional_iterator_tag, std::forward_iterator_tag>>;
 };
 
 template <class T>

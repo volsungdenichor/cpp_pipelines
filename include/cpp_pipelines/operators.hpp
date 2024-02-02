@@ -20,15 +20,13 @@ struct binary_operator
     template <class T>
     constexpr inline auto bind_left(T value) const
     {
-        return fn([value = std::move(value)](auto&& item)
-                  { return op(value, std::forward<decltype(item)>(item)); });
+        return fn([value = std::move(value)](auto&& item) { return op(value, std::forward<decltype(item)>(item)); });
     }
 
     template <class T>
     constexpr inline auto bind_right(T value) const
     {
-        return fn([value = std::move(value)](auto&& item)
-                  { return op(std::forward<decltype(item)>(item), value); });
+        return fn([value = std::move(value)](auto&& item) { return op(std::forward<decltype(item)>(item), value); });
     }
 
     template <class T>

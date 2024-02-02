@@ -182,9 +182,7 @@ struct bind_fn
         Func func;
         Args args;
 
-        constexpr impl(Func func, Args args)
-            : func{ std::move(func) }
-            , args{ std::move(args) }
+        constexpr impl(Func func, Args args) : func{ std::move(func) }, args{ std::move(args) }
         {
         }
 

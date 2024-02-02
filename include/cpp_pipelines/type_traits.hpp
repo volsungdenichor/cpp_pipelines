@@ -19,7 +19,8 @@ struct detector_impl<std::void_t<Op<Args...>>, Op, Args...> : std::true_type
 };
 
 template <class Category, class T>
-using iterator_of_category = std::enable_if_t<std::is_base_of_v<Category, typename std::iterator_traits<T>::iterator_category>>;
+using iterator_of_category
+    = std::enable_if_t<std::is_base_of_v<Category, typename std::iterator_traits<T>::iterator_category>>;
 
 template <class T>
 using is_input_iterator_impl = iterator_of_category<std::input_iterator_tag, T>;

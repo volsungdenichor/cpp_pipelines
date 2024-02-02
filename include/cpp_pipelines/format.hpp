@@ -11,8 +11,7 @@ namespace detail
 {
 struct format_error : std::runtime_error
 {
-    format_error(std::string message)
-        : std::runtime_error{ std::move(message) }
+    format_error(std::string message) : std::runtime_error{ std::move(message) }
     {
     }
 };
@@ -29,10 +28,8 @@ struct format_fn
         {
             std::stringstream ss;
 
-            const argument_extractor arg_extractor = [&](std::ostream& os, int index, std::string_view f)
-            {
-                write_args(os, index, f, args...);
-            };
+            const argument_extractor arg_extractor
+                = [&](std::ostream& os, int index, std::string_view f) { write_args(os, index, f, args...); };
 
             do_format(ss, fmt, 0, arg_extractor);
             return ss.str();
@@ -88,17 +85,14 @@ struct format_fn
             const auto index_part = make_string_view(std::begin(fmt), colon);
             const auto fmt_part = make_string_view(colon != std::end(fmt) ? colon + 1 : colon, std::end(fmt));
 
-            const auto actual_index = !index_part.empty()
-                                          ? parse_int(index_part)
-                                          : arg_index;
+            const auto actual_index = !index_part.empty() ? parse_int(index_part) : arg_index;
 
             arg_extractor(os, actual_index, fmt_part);
         }
 
         void do_format(std::ostream& os, std::string_view fmt, int arg_index, const argument_extractor& arg_extractor) const
         {
-            const auto bracket = std::find_if(std::begin(fmt), std::end(fmt), [](char c)
-                                              { return c == '{' || c == '}'; });
+            const auto bracket = std::find_if(std::begin(fmt), std::end(fmt), [](char c) { return c == '{' || c == '}'; });
             if (bracket == std::end(fmt))
             {
                 return format_text(os, fmt);

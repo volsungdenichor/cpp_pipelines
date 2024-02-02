@@ -76,9 +76,7 @@ struct keys_fn
         const Map* map;
         mutable typename Map::const_iterator it;
 
-        constexpr generator(const Map& map)
-            : map{ std::addressof(map) }
-            , it{ this->map->begin() }
+        constexpr generator(const Map& map) : map{ std::addressof(map) }, it{ this->map->begin() }
         {
         }
 
@@ -119,8 +117,7 @@ struct items_fn
     template <class Map>
     constexpr auto operator()(Map& map) const
     {
-        return keys_fn{}(map) |= seq::transform([&](const auto& key)
-                                                { return std::pair{ key, map |= values_at(key) }; });
+        return keys_fn{}(map) |= seq::transform([&](const auto& key) { return std::pair{ key, map |= values_at(key) }; });
     }
 };
 
@@ -136,7 +133,8 @@ struct group_by_as_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            return std::forward<Range>(range) |= seq::transform(collect_results(make_pair)(key, value)) |= seq::to_map_as<Map>;
+            return std::forward<Range>(range) |= seq::transform(collect_results(make_pair)(key, value))
+                   |= seq::to_map_as<Map>;
         }
     };
 

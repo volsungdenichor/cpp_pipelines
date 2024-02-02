@@ -62,7 +62,13 @@ template <class... Args>
 ostream& operator<<(ostream& os, const tuple<Args...>& item)
 {
     os << "(";
-    std::apply([&os](const auto&... args) { auto n = 0u; ((os << args << (++n != sizeof...(args) ? ", " : "")), ...); }, item);
+    std::apply(
+        [&os](const auto&... args)
+        {
+            auto n = 0u;
+            ((os << args << (++n != sizeof...(args) ? ", " : "")), ...);
+        },
+        item);
     os << ")";
     return os;
 }

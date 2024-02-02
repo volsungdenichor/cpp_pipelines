@@ -31,10 +31,7 @@ struct transform_fn
         template <class K, class V>
         constexpr auto operator()(const std::pair<K, V>& pair) const
         {
-            return std::pair{
-                invoke(func, std::get<0>(pair)),
-                invoke(func, std::get<1>(pair))
-            };
+            return std::pair{ invoke(func, std::get<0>(pair)), invoke(func, std::get<1>(pair)) };
         }
 
         template <class Tuple, std::size_t... I>
@@ -94,9 +91,7 @@ struct apply_fn
 
         static constexpr inline std::size_t args_count = std::tuple_size_v<std::decay_t<Args>>;
 
-        constexpr impl(Func func, Args args)
-            : func{ std::move(func) }
-            , args{ std::move(args) }
+        constexpr impl(Func func, Args args) : func{ std::move(func) }, args{ std::move(args) }
         {
         }
 
@@ -137,7 +132,8 @@ template <std::size_t N>
 struct erase_fn
 {
     template <class Tuple, std::size_t... I>
-    constexpr auto call(Tuple&& tuple, std::index_sequence<I...>) const -> std::tuple<std::tuple_element_t<I, std::decay_t<Tuple>>...>
+    constexpr auto call(Tuple&& tuple, std::index_sequence<I...>) const
+        -> std::tuple<std::tuple_element_t<I, std::decay_t<Tuple>>...>
     {
         return { std::get<I>(std::forward<Tuple>(tuple))... };
     }

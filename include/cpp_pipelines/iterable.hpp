@@ -38,8 +38,7 @@ struct iterable_base
             using inner_iter = iterator_t<Range>;
             inner_iter it;
 
-            iterator(inner_iter it)
-                : it{ it }
+            iterator(inner_iter it) : it{ it }
             {
             }
 
@@ -64,8 +63,7 @@ struct iterable_base
             }
         };
 
-        range_wrapper(Range range)
-            : range{ std::move(range) }
+        range_wrapper(Range range) : range{ std::move(range) }
         {
         }
 
@@ -84,23 +82,19 @@ struct iterable_base
     {
         std::unique_ptr<i_iterator<T>> it;
 
-        iter()
-            : it{}
+        iter() : it{}
         {
         }
 
-        iter(std::unique_ptr<i_iterator<T>> it)
-            : it{ std::move(it) }
+        iter(std::unique_ptr<i_iterator<T>> it) : it{ std::move(it) }
         {
         }
 
-        iter(const iter& other)
-            : it{ other.it ? other.it->clone() : nullptr }
+        iter(const iter& other) : it{ other.it ? other.it->clone() : nullptr }
         {
         }
 
-        iter(iter&& other)
-            : it{ std::move(other.it) }
+        iter(iter&& other) : it{ std::move(other.it) }
         {
         }
 
@@ -148,8 +142,7 @@ struct iterable : public view_interface<detail::iterable_base<T>>
     using base_type = view_interface<detail::iterable_base<T>>;
 
     template <class Range>
-    constexpr iterable(Range&& range)
-        : base_type{ std::forward<Range>(range) }
+    constexpr iterable(Range&& range) : base_type{ std::forward<Range>(range) }
     {
     }
 };

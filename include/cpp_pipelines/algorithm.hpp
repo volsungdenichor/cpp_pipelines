@@ -91,8 +91,7 @@ struct return_opt_found
 struct return_both
 {
     template <class Iter>
-    constexpr auto operator()(Iter found, Iter begin, Iter end) const
-        -> std::pair<subrange<Iter>, subrange<Iter>>
+    constexpr auto operator()(Iter found, Iter begin, Iter end) const -> std::pair<subrange<Iter>, subrange<Iter>>
     {
         return { subrange<Iter>{ begin, found }, subrange<Iter>{ found, end } };
     }
@@ -249,9 +248,12 @@ auto accumulate(Range&& range, T init, BinaryFunc func = {}, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::accumulate(std::begin(range), std::end(range), init, [&](T total, auto&& item) {
-        return invoke(func, std::move(total), invoke(proj, std::forward<decltype(item)>(item)));
-    });
+    return std::accumulate(
+        std::begin(range),
+        std::end(range),
+        init,
+        [&](T total, auto&& item)
+        { return invoke(func, std::move(total), invoke(proj, std::forward<decltype(item)>(item))); });
 }
 
 template <class Range, class OutputIter, class BinaryFunc = std::minus<>, class Proj = identity_fn>
@@ -318,7 +320,12 @@ auto count_if(Range&& range, UnaryPred pred, Proj proj = {})
     return std::count_if(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
-template <class Range1, class Range2, class BinaryPred = std::equal_to<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
+template <
+    class Range1,
+    class Range2,
+    class BinaryPred = std::equal_to<>,
+    class Proj1 = identity_fn,
+    class Proj2 = identity_fn>
 auto equal(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
@@ -359,9 +366,10 @@ decltype(auto) find(Range&& range, const T& value, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value))));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::find_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value)))); });
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
@@ -369,9 +377,10 @@ decltype(auto) find_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if(b, e, fn(std::ref(proj), std::ref(pred)));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::find_if(b, e, fn(std::ref(proj), std::ref(pred))); });
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
@@ -379,9 +388,10 @@ decltype(auto) find_if_not(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::find_if_not(b, e, fn(std::ref(proj), std::ref(pred)));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::find_if_not(b, e, fn(std::ref(proj), std::ref(pred))); });
 }
 
 template <
@@ -396,14 +406,18 @@ decltype(auto) find_end(Range1&& range1, Range2&& range2, BinaryPred pred = {}, 
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
     CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
-        return std::find_end(
-            b,
-            e,
-            std::begin(range2),
-            std::end(range2),
-            detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range1),
+        std::end(range1),
+        [&](auto b, auto e)
+        {
+            return std::find_end(
+                b,
+                e,
+                std::begin(range2),
+                std::end(range2),
+                detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
+        });
 }
 
 template <
@@ -418,14 +432,18 @@ decltype(auto) find_first_of(Range1&& range1, Range2&& range2, BinaryPred pred =
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
     CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
-        return std::find_first_of(
-            b,
-            e,
-            std::begin(range2),
-            std::end(range2),
-            detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range1),
+        std::end(range1),
+        [&](auto b, auto e)
+        {
+            return std::find_first_of(
+                b,
+                e,
+                std::begin(range2),
+                std::end(range2),
+                detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
+        });
 }
 
 template <class Range, class UnaryFunc, class Proj = identity_fn>
@@ -520,9 +538,12 @@ decltype(auto) is_heap_until(Range&& range, Compare compare = {}, Proj proj = {}
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_random_access_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::is_heap_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::is_heap_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
+        });
 }
 
 template <class Range, class UnaryPred, class Proj = identity_fn>
@@ -533,7 +554,12 @@ auto is_partitioned(Range&& range, UnaryPred pred, Proj proj = {})
     return std::is_partitioned(std::begin(range), std::end(range), fn(std::ref(proj), std::ref(pred)));
 }
 
-template <class Range1, class Range2, class BinaryPred = std::equal_to<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
+template <
+    class Range1,
+    class Range2,
+    class BinaryPred = std::equal_to<>,
+    class Proj1 = identity_fn,
+    class Proj2 = identity_fn>
 auto is_permutation(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
@@ -559,9 +585,12 @@ decltype(auto) is_sorted_until(Range&& range, Compare compare = {}, Proj proj = 
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::is_sorted_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::is_sorted_until(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
+        });
 }
 
 template <class Range1, class Range2, class Compare = std::less<>, class Proj1 = identity_fn, class Proj2 = identity_fn>
@@ -583,9 +612,10 @@ decltype(auto) lower_bound(Range&& range, const T& value, Compare compare = {}, 
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return detail::lower_bound(b, e, value, std::ref(compare), std::ref(proj));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return detail::lower_bound(b, e, value, std::ref(compare), std::ref(proj)); });
 }
 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
@@ -601,9 +631,12 @@ decltype(auto) max_element(Range&& range, Compare compare = {}, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::max_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::max_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
+        });
 }
 
 template <
@@ -652,9 +685,12 @@ decltype(auto) min_element(Range&& range, Compare compare = {}, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::min_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::min_element(b, e, detail::invoke_binary{ std::ref(compare), std::ref(proj) });
+        });
 }
 
 template <
@@ -729,14 +765,18 @@ decltype(auto) partial_sort_copy(Range1&& range1, Range2&& range2, Compare compa
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_input_range);
     CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_input_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range2), std::end(range2), [&](auto b, auto e) {
-        return std::partial_sort_copy(
-            std::begin(range1),
-            std::end(range1),
-            b,
-            e,
-            detail::invoke_binary{ std::ref(compare), std::ref(proj1), std::ref(proj2) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range2),
+        std::end(range2),
+        [&](auto b, auto e)
+        {
+            return std::partial_sort_copy(
+                std::begin(range1),
+                std::end(range1),
+                b,
+                e,
+                detail::invoke_binary{ std::ref(compare), std::ref(proj1), std::ref(proj2) });
+        });
 }
 
 template <class Range, class OutputIter, class BinaryFunc = std::plus<>, class Proj = identity_fn>
@@ -752,9 +792,10 @@ decltype(auto) partition(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::partition(b, e, fn(std::ref(proj), std::ref(pred)));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::partition(b, e, fn(std::ref(proj), std::ref(pred))); });
 }
 
 template <class Range, class OutputIter1, class OutputIter2, class UnaryPred, class Proj = identity_fn>
@@ -771,9 +812,10 @@ decltype(auto) stable_partition(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_bidirectional_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::stable_partition(b, e, fn(std::ref(proj), std::ref(pred)));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::stable_partition(b, e, fn(std::ref(proj), std::ref(pred))); });
 }
 
 template <class Range, class Compare = std::less<>, class Proj = identity_fn>
@@ -804,9 +846,10 @@ decltype(auto) remove(Range&& range, const T& value, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::remove_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value))));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::remove_if(b, e, fn(std::ref(proj), detail::equal_to(std::ref(value)))); });
 }
 
 template <class Policy = default_return_policy, class Range, class UnaryPred, class Proj = identity_fn>
@@ -814,9 +857,10 @@ decltype(auto) remove_if(Range&& range, UnaryPred pred, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::remove_if(b, e, fn(std::ref(proj), std::ref(pred)));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return std::remove_if(b, e, fn(std::ref(proj), std::ref(pred))); });
 }
 
 template <class Range, class OutputIter, class T, class Proj = identity_fn>
@@ -824,7 +868,8 @@ auto remove_copy(Range&& range, OutputIter output, const T& value, Proj proj = {
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_input_range);
 
-    return std::remove_copy_if(std::begin(range), std::end(range), output, fn(std::ref(proj), detail::equal_to(std::ref(value))));
+    return std::remove_copy_if(
+        std::begin(range), std::end(range), output, fn(std::ref(proj), detail::equal_to(std::ref(value))));
 }
 
 template <class Range, class OutputIter, class UnaryPred, class Proj = identity_fn>
@@ -840,7 +885,8 @@ void raplace(Range&& range, const T1& old_value, const T2& new_value, Proj proj 
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    std::replace_if(std::begin(range), std::end(range), fn(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
+    std::replace_if(
+        std::begin(range), std::end(range), fn(std::ref(proj), detail::equal_to(std::ref(old_value))), new_value);
 }
 
 template <class Range, class UnaryPred, class T, class Proj = identity_fn>
@@ -914,14 +960,18 @@ decltype(auto) search(Range1&& range1, Range2&& range2, BinaryPred pred = {}, Pr
     CPP_PIPELINES_CHECK_CONSTRAINTS(range1, is_forward_range);
     CPP_PIPELINES_CHECK_CONSTRAINTS(range2, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range1), std::end(range1), [&](auto b, auto e) {
-        return std::search(
-            b,
-            e,
-            std::begin(range2),
-            std::end(range2),
-            detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range1),
+        std::end(range1),
+        [&](auto b, auto e)
+        {
+            return std::search(
+                b,
+                e,
+                std::begin(range2),
+                std::end(range2),
+                detail::invoke_binary{ std::ref(pred), std::ref(proj1), std::ref(proj2) });
+        });
 }
 
 template <class Range, class BinaryPred = std::equal_to<>>
@@ -972,9 +1022,12 @@ decltype(auto) search_n(Range&& range, Size size, const T& value, BinaryPred pre
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::search_n(b, e, size, value, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::search_n(b, e, size, value, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
+        });
 }
 
 template <
@@ -1120,19 +1173,22 @@ auto transform(Range1&& range1, Range2&& range2, OutputIter output, BinaryFunc f
 template <class Range, class Output, class T, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_exclusive_scan(Range&& range, Output output, T init, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_exclusive_scan(std::begin(range), std::end(range), output, init, func, fn(std::ref(proj), std::ref(op)));
+    return std::transform_exclusive_scan(
+        std::begin(range), std::end(range), output, init, func, fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Range, class Output, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_inclusive_scan(Range&& range, Output output, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_inclusive_scan(std::begin(range), std::end(range), output, std::ref(func), fn(std::ref(proj), std::ref(op)));
+    return std::transform_inclusive_scan(
+        std::begin(range), std::end(range), output, std::ref(func), fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Range, class T, class BinaryFunc, class UnaryFunc, class Proj = identity_fn>
 auto transform_reduce(Range&& range, T init, BinaryFunc func, UnaryFunc op, Proj proj = {})
 {
-    return std::transform_reduce(std::begin(range), std::end(range), std::move(init), std::ref(func), fn(std::ref(proj), std::ref(op)));
+    return std::transform_reduce(
+        std::begin(range), std::end(range), std::move(init), std::ref(func), fn(std::ref(proj), std::ref(op)));
 }
 
 template <class Policy = default_return_policy, class Range, class BinaryPred = std::equal_to<>, class Proj = identity_fn>
@@ -1140,9 +1196,12 @@ decltype(auto) unique(Range&& range, BinaryPred pred = {}, Proj proj = {})
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return std::unique(b, e, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) {
+            return std::unique(b, e, detail::invoke_binary{ std::ref(pred), std::ref(proj) });
+        });
 }
 
 template <class Range, class OutputIter, class BinaryPred = std::equal_to<>, class Proj = identity_fn>
@@ -1159,9 +1218,10 @@ decltype(auto) upper_bound(Range&& range, const T& value, Compare compare = {}, 
 {
     CPP_PIPELINES_CHECK_CONSTRAINTS(range, is_forward_range);
 
-    return detail::invoke_algorithm<Policy>(std::begin(range), std::end(range), [&](auto b, auto e) {
-        return detail::upper_bound(b, e, value, std::ref(compare), std::ref(proj));
-    });
+    return detail::invoke_algorithm<Policy>(
+        std::begin(range),
+        std::end(range),
+        [&](auto b, auto e) { return detail::upper_bound(b, e, value, std::ref(compare), std::ref(proj)); });
 }
 
 template <class Range, class Dest, class Proj = identity_fn>

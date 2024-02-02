@@ -16,8 +16,7 @@ private:
 public:
     constexpr semiregular() = default;
 
-    constexpr semiregular(Func func)
-        : _func{ std::move(func) }
+    constexpr semiregular(Func func) : _func{ std::move(func) }
     {
     }
 

@@ -8,8 +8,7 @@ template <class T>
 class out
 {
 public:
-    constexpr explicit out(T& item)
-        : _item{ std::addressof(item) }
+    constexpr explicit out(T& item) : _item{ std::addressof(item) }
     {
     }
 

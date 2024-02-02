@@ -29,26 +29,22 @@ struct subrange : public view_interface<detail::subrange_base<Iter>>
 {
     using base_type = view_interface<detail::subrange_base<Iter>>;
 
-    constexpr subrange()
-        : base_type{}
+    constexpr subrange() : base_type{}
     {
     }
 
     template <class It>
-    constexpr subrange(It b, It e)
-        : base_type{ detail::subrange_base<Iter>{ b, e } }
+    constexpr subrange(It b, It e) : base_type{ detail::subrange_base<Iter>{ b, e } }
     {
     }
 
     template <class It>
-    constexpr subrange(std::pair<It, It> pair)
-        : subrange{ pair.first, pair.second }
+    constexpr subrange(std::pair<It, It> pair) : subrange{ pair.first, pair.second }
     {
     }
 
     template <class Range>
-    constexpr subrange(Range&& range)
-        : subrange{ std::begin(range), std::end(range) }
+    constexpr subrange(Range&& range) : subrange{ std::begin(range), std::end(range) }
     {
     }
 };
@@ -57,7 +53,7 @@ template <class Iter>
 subrange(Iter, Iter) -> subrange<Iter>;
 
 template <class Range>
-subrange(Range &&) -> subrange<iterator_t<Range>>;
+subrange(Range&&) -> subrange<iterator_t<Range>>;
 
 template <class Iter>
 subrange(std::pair<Iter, Iter>) -> subrange<Iter>;
