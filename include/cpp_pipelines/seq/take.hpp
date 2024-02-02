@@ -55,7 +55,9 @@ struct take_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = std::conditional_t<is_random_access_range<Range>::value, iterator_t<Range>, iterator_interface<iter>>;
+
+        constexpr iterator begin() const
         {
             if constexpr (is_random_access_range<Range>::value)
             {
@@ -63,11 +65,11 @@ struct take_fn
             }
             else
             {
-                return iterator_interface{ iter{ this, std::begin(range), 0 } };
+                return { this, std::begin(range), 0 };
             }
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
             if constexpr (is_random_access_range<Range>::value)
             {
@@ -75,7 +77,7 @@ struct take_fn
             }
             else
             {
-                return iterator_interface{ iter{ this, std::end(range), n } };
+                return { this, std::end(range), n };
             }
         }
     };

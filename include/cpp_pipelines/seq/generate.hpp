@@ -1,8 +1,8 @@
 #pragma once
 
-#include <limits>
 #include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/views.hpp>
+#include <limits>
 
 namespace cpp_pipelines::seq
 {
@@ -58,14 +58,16 @@ struct generate_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ func } };
+            return { func };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{} };
+            return {};
         }
     };
 

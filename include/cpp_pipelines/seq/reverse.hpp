@@ -77,12 +77,12 @@ struct reverse_fn
 
         constexpr iterator begin() const
         {
-            return { iter{ std::end(range) } };
+            return { std::end(range) };
         }
 
         constexpr iterator end() const
         {
-            return { iter{ std::begin(range) } };
+            return { std::begin(range) };
         }
     };
 

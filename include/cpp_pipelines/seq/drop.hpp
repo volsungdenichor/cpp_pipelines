@@ -22,12 +22,14 @@ struct drop_fn
         {
         }
 
-        constexpr auto begin() const
+        using iterator = iterator_t<Range>;
+
+        constexpr iterator begin() const
         {
             return advance(std::begin(range), n, std::end(range));
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
             return std::end(range);
         }

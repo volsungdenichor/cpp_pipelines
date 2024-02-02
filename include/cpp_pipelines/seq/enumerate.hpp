@@ -1,8 +1,8 @@
 #pragma once
 
-#include <limits>
 #include <cpp_pipelines/pipeline.hpp>
 #include <cpp_pipelines/seq/views.hpp>
+#include <limits>
 
 namespace cpp_pipelines::seq
 {
@@ -76,20 +76,22 @@ struct enumerate_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ 0, std::begin(range) } };
+            return { 0, std::begin(range) };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
             if constexpr (is_random_access_iterator<typename iter::inner_iterator>::value)
             {
-                return iterator_interface{ iter{ std::distance(std::begin(range), std::end(range)), std::end(range) } };
+                return { std::distance(std::begin(range), std::end(range)), std::end(range) };
             }
             else
             {
-                return iterator_interface{ iter{ std::numeric_limits<std::ptrdiff_t>::max(), std::end(range) } };
+                return { std::numeric_limits<std::ptrdiff_t>::max(), std::end(range) };
             }
         }
     };

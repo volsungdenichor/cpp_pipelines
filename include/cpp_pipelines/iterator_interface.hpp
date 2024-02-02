@@ -68,8 +68,9 @@ struct iterator_interface
     constexpr iterator_interface(const iterator_interface&) = default;
     constexpr iterator_interface(iterator_interface&&) = default;
 
-    constexpr iterator_interface(Impl impl)
-        : impl{ std::move(impl) }
+    template <class... Args, class = std::enable_if_t<std::is_constructible_v<Impl, Args...>>>
+    constexpr iterator_interface(Args&&... args)
+        : impl{ Impl{ std::forward<Args>(args)... } }
     {
     }
 

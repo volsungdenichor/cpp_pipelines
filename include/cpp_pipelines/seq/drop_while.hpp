@@ -2,7 +2,6 @@
 
 #include <cpp_pipelines/iter_utils.hpp>
 #include <cpp_pipelines/pipeline.hpp>
-#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/subrange.hpp>
 
 namespace cpp_pipelines::seq
@@ -15,7 +14,7 @@ struct drop_while_fn
     struct view
     {
         Range range;
-        semiregular<Pred> pred;
+        Pred pred;
 
         constexpr view(Range range, Pred pred)
             : range{ std::move(range) }
@@ -23,12 +22,14 @@ struct drop_while_fn
         {
         }
 
-        constexpr auto begin() const
+        using iterator = iterator_t<Range>;
+
+        constexpr iterator begin() const
         {
             return advance_while(std::begin(range), pred, std::end(range));
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
             return std::end(range);
         }

@@ -30,8 +30,8 @@ struct accumulate_fn
         template <class Range>
         constexpr auto operator()(Range&& range) const
         {
-            auto b = std::begin(range);
-            auto e = std::end(range);
+            const auto b = std::begin(range);
+            const auto e = std::end(range);
             if (b == e)
             {
                 throw std::runtime_error{ "seq::accumulate: empty range" };

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <limits>
 #include <cpp_pipelines/seq/transform.hpp>
 #include <cpp_pipelines/seq/views.hpp>
+#include <limits>
 
 namespace cpp_pipelines::seq
 {
@@ -42,14 +42,16 @@ struct iota_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ lo } };
+            return { lo };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{ up } };
+            return { up };
         }
     };
 
@@ -88,7 +90,8 @@ struct linspace_fn
     constexpr auto operator()(T lower, type_identity_t<T> upper, std::ptrdiff_t count) const
     {
         static_assert(std::is_floating_point_v<T>, "linspace: floating point type expected");
-        return iota_fn{}(0, count) |= transform([=](int n) { return lower + n * (upper - lower) / (count - 1); });
+        return iota_fn{}(0, count) |= transform([=](int n)
+                                                { return lower + n * (upper - lower) / (count - 1); });
     }
 };
 

@@ -55,14 +55,16 @@ struct concat_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ this, std::begin(range1), std::begin(range2) } };
+            return { this, std::begin(range1), std::begin(range2) };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{ this, std::end(range1), std::end(range2) } };
+            return { this, std::end(range1), std::end(range2) };
         }
     };
 

@@ -98,14 +98,16 @@ struct cache_latest_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ std::begin(range) } };
+            return iterator{ std::begin(range) };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{ std::end(range) } };
+            return iterator{ std::end(range) };
         }
     };
 

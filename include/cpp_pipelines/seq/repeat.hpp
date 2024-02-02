@@ -43,14 +43,16 @@ struct repeat_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ this, 0 } };
+            return { this, 0 };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{ this, count } };
+            return { this, count };
         }
     };
 

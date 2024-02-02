@@ -57,14 +57,16 @@ struct intersperse_fn
             }
         };
 
-        constexpr auto begin() const
+        using iterator = iterator_interface<iter>;
+
+        constexpr iterator begin() const
         {
-            return iterator_interface{ iter{ this, std::begin(range) } };
+            return { this, std::begin(range) };
         }
 
-        constexpr auto end() const
+        constexpr iterator end() const
         {
-            return iterator_interface{ iter{ this, std::end(range) } };
+            return { this, std::end(range) };
         }
     };
 
