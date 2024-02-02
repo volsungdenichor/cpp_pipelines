@@ -95,6 +95,6 @@ struct reverse_fn
 
 }  // namespace detail
 
-static constexpr inline auto reverse = make_pipeline(detail::reverse_fn{});
+static constexpr inline auto reverse = fn(detail::reverse_fn{});
 
 }  // namespace cpp_pipelines::seq

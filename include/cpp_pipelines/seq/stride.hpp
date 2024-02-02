@@ -77,7 +77,7 @@ struct stride_fn
 
     constexpr auto operator()(std::ptrdiff_t step) const
     {
-        return make_pipeline(impl{ step });
+        return fn(impl{ step });
     }
 };
 

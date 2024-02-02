@@ -115,7 +115,7 @@ struct transform_join_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 

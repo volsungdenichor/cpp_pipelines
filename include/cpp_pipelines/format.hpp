@@ -29,7 +29,8 @@ struct format_fn
         {
             std::stringstream ss;
 
-            const argument_extractor arg_extractor = [&](std::ostream& os, int index, std::string_view f) {
+            const argument_extractor arg_extractor = [&](std::ostream& os, int index, std::string_view f)
+            {
                 write_args(os, index, f, args...);
             };
 
@@ -96,7 +97,8 @@ struct format_fn
 
         void do_format(std::ostream& os, std::string_view fmt, int arg_index, const argument_extractor& arg_extractor) const
         {
-            const auto bracket = std::find_if(std::begin(fmt), std::end(fmt), [](char c) { return c == '{' || c == '}'; });
+            const auto bracket = std::find_if(std::begin(fmt), std::end(fmt), [](char c)
+                                              { return c == '{' || c == '}'; });
             if (bracket == std::end(fmt))
             {
                 return format_text(os, fmt);
@@ -127,7 +129,7 @@ struct format_fn
 
     auto operator()(std::string_view fmt) const
     {
-        return make_pipeline(impl{ fmt });
+        return fn(impl{ fmt });
     }
 };
 

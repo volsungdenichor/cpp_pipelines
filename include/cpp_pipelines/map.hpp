@@ -28,7 +28,7 @@ struct equal_range_fn
     template <class K>
     constexpr auto operator()(K key) const
     {
-        return make_pipeline(impl<K>{ std::move(key) });
+        return fn(impl<K>{ std::move(key) });
     }
 };
 
@@ -119,7 +119,8 @@ struct items_fn
     template <class Map>
     constexpr auto operator()(Map& map) const
     {
-        return keys_fn{}(map) |= seq::transform([&](const auto& key) { return std::pair{ key, map |= values_at(key) }; });
+        return keys_fn{}(map) |= seq::transform([&](const auto& key)
+                                                { return std::pair{ key, map |= values_at(key) }; });
     }
 };
 
@@ -142,7 +143,7 @@ struct group_by_as_fn
     template <class Key, class Value>
     constexpr auto operator()(Key key, Value value) const
     {
-        return make_pipeline(impl<Key, Value>{ std::move(key), std::move(value) });
+        return fn(impl<Key, Value>{ std::move(key), std::move(value) });
     }
 };
 
@@ -151,8 +152,8 @@ constexpr inline auto equal_range = detail::equal_range_fn{};
 constexpr inline auto values_at = detail::values_at_fn{};
 constexpr inline auto at = detail::at_fn{};
 constexpr inline auto maybe_at = detail::maybe_at_fn{};
-constexpr inline auto keys = make_pipeline(detail::keys_fn{});
-constexpr inline auto items = make_pipeline(detail::items_fn{});
+constexpr inline auto keys = fn(detail::keys_fn{});
+constexpr inline auto items = fn(detail::items_fn{});
 
 template <template <class, class> class Map>
 constexpr inline auto group_by_as = detail::group_by_as_fn<Map>{};

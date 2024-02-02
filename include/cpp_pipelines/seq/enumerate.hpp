@@ -105,6 +105,6 @@ struct enumerate_fn
 
 }  // namespace detail
 
-static constexpr inline auto enumerate = make_pipeline(detail::enumerate_fn{});
+static constexpr inline auto enumerate = fn(detail::enumerate_fn{});
 
 }  // namespace cpp_pipelines::seq

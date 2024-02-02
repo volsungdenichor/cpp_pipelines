@@ -5,7 +5,6 @@
 #include <cpp_pipelines/seq/adjacent.hpp>
 #include <cpp_pipelines/seq/adjacent_transform.hpp>
 #include <cpp_pipelines/seq/cache_latest.hpp>
-#include <cpp_pipelines/seq/checks.hpp>
 #include <cpp_pipelines/seq/chunk.hpp>
 #include <cpp_pipelines/seq/concat.hpp>
 #include <cpp_pipelines/seq/copy.hpp>
@@ -25,6 +24,7 @@
 #include <cpp_pipelines/seq/iterate.hpp>
 #include <cpp_pipelines/seq/join.hpp>
 #include <cpp_pipelines/seq/numeric.hpp>
+#include <cpp_pipelines/seq/predicates.hpp>
 #include <cpp_pipelines/seq/repeat.hpp>
 #include <cpp_pipelines/seq/reverse.hpp>
 #include <cpp_pipelines/seq/split.hpp>

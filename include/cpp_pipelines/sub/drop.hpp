@@ -26,7 +26,7 @@ struct drop_fn
 
     constexpr auto operator()(std::ptrdiff_t count) const
     {
-        return make_pipeline(impl{ count });
+        return fn(impl{ count });
     }
 };
 }  // namespace detail

@@ -20,10 +20,10 @@ struct to_fn
 }  // namespace detail
 
 template <template <class> class Container>
-static constexpr inline auto to = make_pipeline(detail::to_fn<Container>{});
+static constexpr inline auto to = fn(detail::to_fn<Container>{});
 
 template <class Container>
-static constexpr inline auto as = make_pipeline(cast<Container>);
+static constexpr inline auto as = fn(cast<Container>);
 
 static constexpr inline auto to_vector = to<std::vector>;
 static constexpr inline auto to_string = as<std::string>;

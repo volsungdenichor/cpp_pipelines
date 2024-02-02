@@ -20,13 +20,15 @@ struct binary_operator
     template <class T>
     constexpr inline auto bind_left(T value) const
     {
-        return make_pipeline([value = std::move(value)](auto&& item) { return op(value, std::forward<decltype(item)>(item)); });
+        return fn([value = std::move(value)](auto&& item)
+                  { return op(value, std::forward<decltype(item)>(item)); });
     }
 
     template <class T>
     constexpr inline auto bind_right(T value) const
     {
-        return make_pipeline([value = std::move(value)](auto&& item) { return op(std::forward<decltype(item)>(item), value); });
+        return fn([value = std::move(value)](auto&& item)
+                  { return op(std::forward<decltype(item)>(item), value); });
     }
 
     template <class T>
@@ -38,8 +40,8 @@ struct binary_operator
 
 }  // namespace detail
 
-constexpr auto negate = make_pipeline(std::negate<>{});
-constexpr auto logical_not = make_pipeline(std::logical_not<>{});
+constexpr auto negate = fn(std::negate<>{});
+constexpr auto logical_not = fn(std::logical_not<>{});
 
 constexpr auto plus = detail::binary_operator<std::plus<>>{};
 constexpr auto minus = detail::binary_operator<std::minus<>>{};

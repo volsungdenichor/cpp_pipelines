@@ -25,7 +25,7 @@ struct copy_fn
     template <class Iter>
     constexpr auto operator()(Iter iter) const
     {
-        return make_pipeline(impl<Iter>{ iter });
+        return fn(impl<Iter>{ iter });
     }
 };
 

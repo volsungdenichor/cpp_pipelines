@@ -34,7 +34,7 @@ struct match_fn
     constexpr auto operator()(Funcs... funcs) const
     {
         auto f = overloaded{ std::move(funcs)... };
-        return make_pipeline(impl<decltype(f)>{ std::move(f) });
+        return fn(impl<decltype(f)>{ std::move(f) });
     }
 };
 

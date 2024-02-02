@@ -44,13 +44,13 @@ struct accumulate_fn
     template <class BinaryFunc, class T>
     constexpr auto operator()(BinaryFunc func, T init) const
     {
-        return make_pipeline(impl<BinaryFunc, T>{ std::move(func), std::move(init) });
+        return fn(impl<BinaryFunc, T>{ std::move(func), std::move(init) });
     }
 
     template <class BinaryFunc>
     constexpr auto operator()(BinaryFunc func) const
     {
-        return make_pipeline(impl<BinaryFunc, void>{ std::move(func) });
+        return fn(impl<BinaryFunc, void>{ std::move(func) });
     }
 };
 }  // namespace detail

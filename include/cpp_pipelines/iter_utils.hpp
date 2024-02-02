@@ -60,7 +60,7 @@ struct iter_find_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return make_pipeline(impl<Pred>{ std::move(pred) });
+        return fn(impl<Pred>{ std::move(pred) });
     }
 };
 
@@ -86,7 +86,7 @@ struct iter_at_fn
 
     constexpr auto operator()(std::ptrdiff_t n) const
     {
-        return make_pipeline(impl{ n });
+        return fn(impl{ n });
     }
 };
 

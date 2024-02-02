@@ -24,7 +24,7 @@ struct to_map_fn
 }  // namespace detail
 
 template <template <class, class> class Map>
-static constexpr inline auto to_map_as = make_pipeline(detail::to_map_fn<Map>{});
+static constexpr inline auto to_map_as = fn(detail::to_map_fn<Map>{});
 
 static constexpr inline auto to_map = to_map_as<std::map>;
 static constexpr inline auto to_multimap = to_map_as<std::multimap>;

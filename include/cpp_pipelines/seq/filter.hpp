@@ -107,7 +107,7 @@ struct filter_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return make_pipeline(impl<Pred>{ std::move(pred) });
+        return fn(impl<Pred>{ std::move(pred) });
     }
 };
 

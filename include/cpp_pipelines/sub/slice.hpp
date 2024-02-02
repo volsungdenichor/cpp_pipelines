@@ -47,7 +47,7 @@ struct slice_fn
 
     constexpr auto operator()(std::optional<std::ptrdiff_t> start, std::optional<std::ptrdiff_t> stop) const
     {
-        return make_pipeline(impl{ start, stop });
+        return fn(impl{ start, stop });
     }
 };
 }  // namespace detail

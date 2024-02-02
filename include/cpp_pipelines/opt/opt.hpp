@@ -80,7 +80,7 @@ struct has_value_fn
     }
 };
 
-static constexpr inline auto has_value = make_pipeline(has_value_fn{});
+static constexpr inline auto has_value = fn(has_value_fn{});
 
 template <class Opt>
 constexpr decltype(auto) get_value(Opt&& opt)
@@ -103,7 +103,7 @@ struct lift_fn
     }
 };
 
-static constexpr inline auto lift = make_pipeline(lift_fn{});
+static constexpr inline auto lift = fn(lift_fn{});
 
 struct filter_fn
 {
@@ -124,7 +124,7 @@ struct filter_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return make_pipeline(impl<Pred>{ std::move(pred) });
+        return fn(impl<Pred>{ std::move(pred) });
     }
 };
 
@@ -157,7 +157,7 @@ struct and_then_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -182,7 +182,7 @@ struct transform_fn
     template <class Func, class Lift = lift_fn>
     constexpr auto operator()(Func func, Lift lift = {}) const
     {
-        return make_pipeline(impl<Func, Lift>{ std::move(func), std::move(lift) });
+        return fn(impl<Func, Lift>{ std::move(func), std::move(lift) });
     }
 };
 
@@ -215,7 +215,7 @@ struct or_else_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -240,7 +240,7 @@ struct inspect_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -261,7 +261,7 @@ struct value_or_fn
     template <class T>
     constexpr auto operator()(T default_value) const
     {
-        return make_pipeline(impl<T>{ std::move(default_value) });
+        return fn(impl<T>{ std::move(default_value) });
     }
 };
 
@@ -282,7 +282,7 @@ struct value_or_else_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -309,7 +309,7 @@ struct value_fn
     {
         if constexpr (std::is_base_of_v<std::exception, Exception>)
         {
-            return make_pipeline(impl<Exception>{ std::move(exception) });
+            return fn(impl<Exception>{ std::move(exception) });
         }
         else if constexpr (std::is_constructible_v<std::string, Exception>)
         {
@@ -364,7 +364,7 @@ struct check_element_fn
     template <class Pred>
     constexpr auto operator()(Pred pred) const
     {
-        return make_pipeline(impl<Pred>{ std::move(pred) });
+        return fn(impl<Pred>{ std::move(pred) });
     }
 };
 
@@ -388,7 +388,7 @@ struct for_each_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -412,7 +412,7 @@ struct accumulate_fn
     template <class BinaryFunc, class Init>
     constexpr auto operator()(BinaryFunc func, Init init) const
     {
-        return make_pipeline(impl<BinaryFunc, Init>{ std::move(func), std::move(init) });
+        return fn(impl<BinaryFunc, Init>{ std::move(func), std::move(init) });
     }
 };
 
@@ -436,7 +436,7 @@ struct match_fn
     template <class OnValue, class Otherwise>
     constexpr auto operator()(OnValue on_value, Otherwise otherwise) const
     {
-        return make_pipeline(impl<OnValue, Otherwise>{ std::move(on_value), std::move(otherwise) });
+        return fn(impl<OnValue, Otherwise>{ std::move(on_value), std::move(otherwise) });
     }
 };
 
@@ -460,7 +460,7 @@ struct zip_transform_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 

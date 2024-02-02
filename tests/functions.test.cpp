@@ -114,13 +114,17 @@ TEST_CASE("tie", "[functions]")
 TEST_CASE("make_tuple", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };
-    REQUIRE(collect_results(make_tuple)(&TestStruct::b, &TestStruct::a)(test_struct) == std::tuple{ test_struct.b, test_struct.a });
+    REQUIRE(
+        collect_results(make_tuple)(&TestStruct::b, &TestStruct::a)(test_struct) ==
+        std::tuple{ test_struct.b, test_struct.a });
 }
 
 TEST_CASE("make_pair", "[functions]")
 {
     const auto test_struct = TestStruct{ 3, 9 };
-    REQUIRE(collect_results(make_pair)(&TestStruct::b, &TestStruct::a)(test_struct) == std::pair{ test_struct.b, test_struct.a });
+    REQUIRE(
+        collect_results(make_pair)(&TestStruct::b, &TestStruct::a)(test_struct) ==
+        std::pair{ test_struct.b, test_struct.a });
 }
 
 TEST_CASE("get_element", "[functions][get_element]")
@@ -159,9 +163,7 @@ TEST_CASE("hash", "[functions]")
 
 TEST_CASE("bind", "[functions]")
 {
-    const auto f = [](int a, std::string b, float c) {
-        return str(a, ",", b, ",", c);
-    };
+    const auto f = [](int a, std::string b, float c) { return str(a, ",", b, ",", c); };
     REQUIRE(bind_front(f)(4, "abc", 2.71) == "4,abc,2.71"s);
     REQUIRE(bind_front(f, 4)("abc", 2.71) == "4,abc,2.71"s);
     REQUIRE(bind_front(f, 4, "abc")(2.71) == "4,abc,2.71"s);

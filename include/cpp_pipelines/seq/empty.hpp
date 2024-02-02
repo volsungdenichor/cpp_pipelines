@@ -25,6 +25,6 @@ struct empty_fn
 
 }  // namespace detail
 
-static constexpr inline auto empty = make_pipeline(detail::empty_fn{});
+static constexpr inline auto empty = fn(detail::empty_fn{});
 
 }  // namespace cpp_pipelines::seq

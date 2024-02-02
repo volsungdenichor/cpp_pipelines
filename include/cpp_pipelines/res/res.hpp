@@ -333,7 +333,7 @@ struct and_then_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 struct transform_fn
@@ -358,7 +358,7 @@ struct transform_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -384,7 +384,7 @@ struct transform_error_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -450,7 +450,7 @@ struct match_fn
     template <class OnValue, class OnError>
     constexpr auto operator()(OnValue on_value, OnError on_error) const
     {
-        return make_pipeline(impl<OnValue, OnError>{ std::move(on_value), std::move(on_error) });
+        return fn(impl<OnValue, OnError>{ std::move(on_value), std::move(on_error) });
     }
 };
 
@@ -475,7 +475,7 @@ struct try_invoke_fn
 
 }  // namespace detail
 
-static constexpr inline auto value = make_pipeline(detail::value_fn{});
+static constexpr inline auto value = fn(detail::value_fn{});
 using opt::value_or;
 using opt::value_or_else;
 using opt::value_or_throw;
@@ -494,9 +494,9 @@ using opt::accumulate;
 static constexpr inline auto transform = detail::transform_fn{};
 static constexpr inline auto transform_error = detail::transform_error_fn{};
 
-static constexpr inline auto error = make_pipeline(detail::error_fn{});
-static constexpr inline auto maybe_value = make_pipeline(detail::maybe_value_fn{});
-static constexpr inline auto maybe_error = make_pipeline(detail::maybe_error_fn{});
+static constexpr inline auto error = fn(detail::error_fn{});
+static constexpr inline auto maybe_value = fn(detail::maybe_value_fn{});
+static constexpr inline auto maybe_error = fn(detail::maybe_error_fn{});
 
 static constexpr inline auto match = detail::match_fn{};
 

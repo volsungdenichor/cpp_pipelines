@@ -47,7 +47,7 @@ struct transform_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };  // namespace transform_fn
 
@@ -80,7 +80,7 @@ struct for_each_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -129,7 +129,7 @@ struct apply_fn
     template <class Func, class... Args>
     constexpr auto operator()(Func func, Args... args) const
     {
-        return make_pipeline(impl{ std::move(func), std::tuple{ std::move(args)... } });
+        return fn(impl{ std::move(func), std::tuple{ std::move(args)... } });
     }
 };
 

@@ -48,8 +48,8 @@ struct maybe_front_fn
     }
 };
 
-static constexpr inline auto front = make_pipeline(front_fn{});
-static constexpr inline auto maybe_front = make_pipeline(maybe_front_fn{});
+static constexpr inline auto front = fn(front_fn{});
+static constexpr inline auto maybe_front = fn(maybe_front_fn{});
 
 struct at_fn
 {

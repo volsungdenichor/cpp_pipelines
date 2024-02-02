@@ -27,7 +27,7 @@ private:
 }  // namespace detail
 
 template <std::size_t N>
-static constexpr inline auto adjacent = make_pipeline(detail::adjacent_fn<N>{});
+static constexpr inline auto adjacent = fn(detail::adjacent_fn<N>{});
 static constexpr inline auto pairwise = adjacent<2>;
 
 }  // namespace cpp_pipelines::seq

@@ -25,7 +25,7 @@ struct distance_fn
 
 }  // namespace detail
 
-static constexpr inline auto distance = make_pipeline(detail::distance_fn{});
+static constexpr inline auto distance = fn(detail::distance_fn{});
 static constexpr inline auto size = distance;
 
 }  // namespace cpp_pipelines::seq

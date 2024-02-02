@@ -97,7 +97,7 @@ struct split_fn
     template <class Policy>
     constexpr auto operator()(Policy policy) const
     {
-        return make_pipeline(impl<Policy>{ std::move(policy) });
+        return fn(impl<Policy>{ std::move(policy) });
     }
 };
 

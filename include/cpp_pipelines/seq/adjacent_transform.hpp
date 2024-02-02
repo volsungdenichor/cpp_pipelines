@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cpp_pipelines/semiregular.hpp>
 #include <cpp_pipelines/seq/drop.hpp>
 #include <cpp_pipelines/seq/zip_transform.hpp>
 
@@ -14,7 +13,7 @@ struct adjacent_transform_fn
     template <class Func>
     struct impl
     {
-        semiregular<Func> func;
+        Func func;
 
         constexpr impl(Func func)
             : func{ std::move(func) }
@@ -38,7 +37,7 @@ struct adjacent_transform_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 

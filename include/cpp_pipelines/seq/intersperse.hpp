@@ -85,7 +85,7 @@ struct intersperse_fn
     template <class T>
     constexpr auto operator()(T delimiter) const
     {
-        return make_pipeline(impl<T>{ std::move(delimiter) });
+        return fn(impl<T>{ std::move(delimiter) });
     }
 };
 

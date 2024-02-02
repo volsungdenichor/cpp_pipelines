@@ -48,7 +48,7 @@ struct drop_fn
 
     constexpr auto operator()(std::ptrdiff_t n) const
     {
-        return make_pipeline(impl{ n });
+        return fn(impl{ n });
     }
 };
 

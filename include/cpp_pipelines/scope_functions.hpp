@@ -24,7 +24,7 @@ struct inspect_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -46,7 +46,7 @@ struct apply_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -68,7 +68,7 @@ struct with_fn
     template <class Func>
     constexpr auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 
@@ -95,7 +95,7 @@ struct do_all_fn
     template <class... Funcs>
     constexpr auto operator()(Funcs... funcs) const
     {
-        return make_pipeline(impl<Funcs...>{ std::tuple{ std::move(funcs)... } });
+        return fn(impl<Funcs...>{ std::tuple{ std::move(funcs)... } });
     }
 };
 

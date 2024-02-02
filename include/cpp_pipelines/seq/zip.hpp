@@ -27,6 +27,6 @@ struct zip_fn
 
 }  // namespace detail
 
-static constexpr inline auto zip = make_pipeline(detail::zip_fn{});
+static constexpr inline auto zip = fn(detail::zip_fn{});
 
 }  // namespace cpp_pipelines::seq

@@ -77,13 +77,12 @@ private:
 
 }  // namespace detail
 
-static constexpr inline auto make_pipeline = detail::make_pipeline_fn{};
-static constexpr inline auto fn = make_pipeline;
+static constexpr inline auto fn = detail::make_pipeline_fn{};
 
 template <class... L, class... R>
 constexpr auto operator|=(pipeline_t<L...> lhs, pipeline_t<R...> rhs)
 {
-    return make_pipeline(std::move(lhs), std::move(rhs));
+    return fn(std::move(lhs), std::move(rhs));
 }
 
 template <class T, class... Pipes>

@@ -42,6 +42,6 @@ struct to_optional_ref_fn
 
 }  // namespace detail
 
-static constexpr inline auto to_optional_ref = make_pipeline(detail::to_optional_ref_fn{});
+static constexpr inline auto to_optional_ref = fn(detail::to_optional_ref_fn{});
 
 }  // namespace cpp_pipelines

@@ -64,7 +64,7 @@ struct split_at_fn
     template <class Middle>
     constexpr auto operator()(Middle middle) const
     {
-        return make_pipeline(impl<Middle>{ middle });
+        return fn(impl<Middle>{ middle });
     }
 };
 }  // namespace detail

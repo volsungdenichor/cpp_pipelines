@@ -111,7 +111,7 @@ struct zip_transform_fn
     template <class Func>
     constexpr inline auto operator()(Func func) const
     {
-        return make_pipeline(impl<Func>{ std::move(func) });
+        return fn(impl<Func>{ std::move(func) });
     }
 };
 

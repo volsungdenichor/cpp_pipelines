@@ -89,6 +89,6 @@ struct iterate_fn
 
 }  // namespace detail
 
-static constexpr inline auto iterate = make_pipeline(detail::iterate_fn{});
+static constexpr inline auto iterate = fn(detail::iterate_fn{});
 
 }  // namespace cpp_pipelines::seq

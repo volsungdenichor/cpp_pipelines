@@ -120,6 +120,6 @@ struct cache_latest_fn
 
 }  // namespace detail
 
-static constexpr inline auto cache_latest = make_pipeline(detail::cache_latest_fn{});
+static constexpr inline auto cache_latest = fn(detail::cache_latest_fn{});
 
 }  // namespace cpp_pipelines::seq
